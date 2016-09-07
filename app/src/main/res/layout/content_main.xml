@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.github.leonardpieper.ceciVPlan.MainActivity"
+    tools:showIn="@layout/app_bar_main">
+
+    <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/mTextView"-->
+        <!--android:text="Hello World!" />-->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!--<android.support.v7.widget.CardView-->
+                <!--xmlns:card_view="http://schemas.android.com/apk/res-auto"-->
+                <!--android:id="@+id/cv"-->
+                <!--android:layout_height="50dp"-->
+                <!--android:layout_width="match_parent"-->
+                <!--card_view:cardCornerRadius="1dp"-->
+                <!--card_view:cardUseCompatPadding="true"-->
+                <!--card_view:cardElevation="2dp">-->
+
+                <!--<RelativeLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content">-->
+
+                    <!--<Button-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:layout_alignParentLeft="true"-->
+                        <!--android:text="Neue Stunde"/>-->
+                    <!--<Button-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:layout_alignParentRight="true"-->
+                        <!--android:text="Neue Aufgabe"/>-->
+                <!--</RelativeLayout>-->
+            <!--</android.support.v7.widget.CardView>-->
+            <android.support.v7.widget.CardView
+                xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cvT"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                card_view:cardCornerRadius="1dp"
+                card_view:cardUseCompatPadding="true"
+                card_view:cardElevation="2dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/vPlanTodayTitle"
+                        android:textSize="20sp"
+                        android:text="Vertretungen Heute"
+                        android:layout_marginBottom="5dp"/>
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/vPlanTodayTitle"
+                        android:id="@+id/vPlanToday"
+                        android:stretchColumns="*"
+                        android:text="Vertretungen Heute">
+                        <ProgressBar
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:indeterminate="true"/>
+                        <TextView
+                            android:text="Entweder bist du nicht angemeldet, oder deine Internetverbindung ist langsam.\nEs wird versucht den Vertretungsplan zu laden.."/>
+                    </TableLayout>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+            <android.support.v7.widget.CardView
+                xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cvTm"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                card_view:cardCornerRadius="1dp"
+                card_view:cardUseCompatPadding="true"
+                card_view:cardElevation="2dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/vPlanTomorrowTitle"
+                        android:textSize="20sp"
+                        android:text="Vertretungen Morgen"
+                        android:layout_marginBottom="5dp"/>
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/vPlanTomorrow"
+                        android:layout_below="@+id/vPlanTomorrowTitle"
+                        android:stretchColumns="*"
+                        android:text="Vertretungen morgen">
+
+                        <ProgressBar
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:indeterminate="true"/>
+                    </TableLayout>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
+    </ScrollView>
+
+
+</RelativeLayout>
