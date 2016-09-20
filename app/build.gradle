@@ -8,7 +8,7 @@ android {
         applicationId "com.github.leonardpieper.ceciVPlan"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 22
+        versionCode 24
         versionName "2.0"
     }
     buildTypes {

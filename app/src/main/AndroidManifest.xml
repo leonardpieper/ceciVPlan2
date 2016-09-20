@@ -3,6 +3,7 @@
     package="com.github.leonardpieper.ceciVPlan">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
 
     <application
         android:allowBackup="true"
@@ -33,7 +34,10 @@
             android:value="@integer/google_play_services_version" />
 
         <activity android:name=".SettingsActivity" />
-        <activity android:name=".SignUpActivity"></activity>
+        <activity android:name=".SignUpActivity" />
+
+        <receiver android:name=".AlarmReceiver"/>
+        <service android:name=".NotifyService"/>
     </application>
 
 </manifest>

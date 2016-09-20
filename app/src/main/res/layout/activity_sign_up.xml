@@ -13,15 +13,15 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/imageView2"
-            android:adjustViewBounds="true"
-            android:layout_marginLeft="-24dp"
-            android:layout_marginTop="-16dp"
-            android:layout_marginRight="-16dp"
-            android:src="@drawable/header_signup" />
+        <!--<ImageView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/imageView2"-->
+            <!--android:adjustViewBounds="true"-->
+            <!--android:layout_marginLeft="-24dp"-->
+            <!--android:layout_marginTop="-16dp"-->
+            <!--android:layout_marginRight="-16dp"-->
+            <!--android:src="@drawable/header_signup" />-->
         <!--<TextView-->
             <!--android:layout_width="wrap_content"-->
             <!--android:layout_height="wrap_content"-->
@@ -31,9 +31,9 @@
             <!--android:textSize="20sp"-->
             <!--android:textColor="@color/white"/>-->
     </RelativeLayout>
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:orientation="vertical">
@@ -51,23 +51,44 @@
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
             android:hint="E-Mail-Adresse"
-            android:id="@+id/editText" />
+            android:layout_below="@+id/textView2"
+            android:id="@+id/editTextpersonalEmail" />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:hint="Passwort"
-            android:id="@+id/editText2" />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:text="Weiter "
-                android:textColor="@color/colorAccent"
-                android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"
-                style="?android:attr/borderlessButtonStyle"/>
-    </LinearLayout>
+            android:layout_below="@+id/editTextpersonalEmail"
+            android:id="@+id/editText2Pwd" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:hint="Passwort wiederholen"
+            android:layout_below="@id/editText2Pwd"
+            android:id="@+id/editTextPwdRepeat" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:id="@+id/btnSignUpNext"
+            android:text="Weiter "
+            android:textColor="@color/colorAccent"
+            android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"
+            android:layout_below="@+id/editTextPwdRepeat"
+            style="?android:attr/borderlessButtonStyle"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:id="@+id/btnLoginNext"
+            android:layout_alignParentBottom="true"
+            android:text="Ich habe bereits einen Account"
+            android:textColor="@color/colorAccent"
+            style="?android:attr/borderlessButtonStyle"/>
+    </RelativeLayout>
+
 
 
 
