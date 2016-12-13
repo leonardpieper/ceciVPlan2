@@ -10,10 +10,16 @@
             android:id="@+id/nav_vplan"
             android:icon="@drawable/ic_school_black_24dp"
             android:title="Vertretungsplan" />
-        <!--<item-->
-            <!--android:id="@+id/nav_slideshow"-->
-            <!--android:icon="@drawable/ic_menu_slideshow"-->
-            <!--android:title="Slideshow" />-->
+        <item
+            android:id="@+id/nav_kurse"
+            android:icon="@drawable/ic_school_black_24dp"
+            android:title="Kurse"
+            android:visible="true"/>
+        <item
+            android:id="@+id/nav_klausuren"
+            android:icon="@drawable/ic_class_black_24dp"
+            android:title="Klausuren"
+            android:visible="false"/>
         <!--<item-->
             <!--android:id="@+id/nav_manage"-->
             <!--android:icon="@drawable/ic_menu_manage"-->
@@ -27,9 +33,14 @@
                 android:icon="@drawable/ic_settings_black_24dp"
                 android:title="Einstellungen" />
             <item
+                android:id="@+id/nav_devSettings"
+                android:icon="@drawable/ic_settings_black_24dp"
+                android:title="Dev Einstellungen" />
+            <item
                 android:id="@+id/nav_signup"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Signup" />
+                android:title="Signup"
+                android:visible="false"/>
         </menu>
     </item>
 

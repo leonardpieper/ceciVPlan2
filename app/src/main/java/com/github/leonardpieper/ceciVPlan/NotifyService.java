@@ -60,30 +60,48 @@ public class NotifyService extends Service {
         NotificationManager notificationManager = (NotificationManager) getApplicationContext()
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Intent notifyIntent = new Intent(getApplicationContext(), MainActivity.class);
-        notifyIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, id, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if(data.size()!=0){
+            Intent notifyIntent = new Intent(getApplicationContext(), MainActivity.class);
+            notifyIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent contentIntent = PendingIntent.getActivity(this, id, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
-        NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext());
+            NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext());
 
-        notification.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setContentIntent(contentIntent)
-                .setSmallIcon(R.mipmap.ic_launcher_alpha)
-                .setContentText(String.valueOf(changedHours) + " geänderte Stunden heute")
-                .setContentTitle("Heutige Vertretungen")
-                .setColor(getResources().getColor(R.color.colorAccent));
+            if(data.size()<=1){
+                //Eine Vertretung wird als Nachricht angezeigt
+                notification.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                        .setContentIntent(contentIntent)
+                        .setSmallIcon(R.mipmap.ic_launcher_alpha)
+                        .setContentTitle("Heutige Vertretungen")
+                        .setContentText(data.get(0))
+                        .setColor(getResources().getColor(R.color.colorAccent));
+            }else{
+                //Wenn mehr als eine Vertretung ist wird sie in Gruppen angezeigt
+                notification.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                        .setContentIntent(contentIntent)
+                        .setSmallIcon(R.mipmap.ic_launcher_alpha)
+                        .setContentText(String.valueOf(changedHours) + " geänderte Stunden heute")
+                        .setContentTitle("Heutige Vertretungen")
+                        .setColor(getResources().getColor(R.color.colorAccent));
 
-        inboxStyle.setBigContentTitle("Heutige Vertretungen");
+                inboxStyle.setBigContentTitle("Heutige Vertretungen");
 
-        for(String s : data){
-            inboxStyle.addLine(s);
+                for(String s : data){
+                    inboxStyle.addLine(s);
+                }
+
+                notification.setStyle(inboxStyle);
+            }
+
+
+            notification.setAutoCancel(true);
+
+            notificationManager.notify(id, notification.build());
         }
 
-        notification.setStyle(inboxStyle);
 
-        notificationManager.notify(id, notification.build());
     }
 
     private void notificationsToday(){

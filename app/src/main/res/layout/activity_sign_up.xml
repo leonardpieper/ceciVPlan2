@@ -40,7 +40,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Melde dich an, um die App optimal nutzen zu können."
+            android:text="Erstelle einen Account um die App optimal nutzen zu können."
             android:textSize="18dp"
             android:id="@+id/textView2"
             android:layout_gravity="center_vertical"
@@ -52,22 +52,22 @@
             android:inputType="textEmailAddress"
             android:hint="E-Mail-Adresse"
             android:layout_below="@+id/textView2"
-            android:id="@+id/editTextpersonalEmail" />
+            android:id="@+id/personalEmail" />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:hint="Passwort"
-            android:layout_below="@+id/editTextpersonalEmail"
-            android:id="@+id/editText2Pwd" />
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:hint="Passwort wiederholen"
-            android:layout_below="@id/editText2Pwd"
-            android:id="@+id/editTextPwdRepeat" />
+            android:hint="Eigenes Passwort"
+            android:layout_below="@+id/personalEmail"
+            android:id="@+id/signPwd" />
+        <!--<EditText-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:inputType="textPassword"-->
+            <!--android:hint="Passwort wiederholen"-->
+            <!--android:layout_below="@id/editText2Pwd"-->
+            <!--android:id="@+id/editTextPwdRepeat" />-->
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -76,13 +76,22 @@
             android:text="Weiter "
             android:textColor="@color/colorAccent"
             android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"
-            android:layout_below="@+id/editTextPwdRepeat"
+            android:layout_below="@+id/signPwd"
+            style="?android:attr/borderlessButtonStyle"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/signPwd"
+            android:id="@+id/signBtnNoSign"
+            android:text="Abbrechen"
+            android:textColor="@color/colorAccent"
             style="?android:attr/borderlessButtonStyle"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:id="@+id/btnLoginNext"
+            android:id="@+id/btnLogin"
             android:layout_alignParentBottom="true"
             android:text="Ich habe bereits einen Account"
             android:textColor="@color/colorAccent"

@@ -22,8 +22,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
+//import com.google.android.gms.appindexing.Action;
+//import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -186,14 +186,14 @@ public class VPlanActivity extends AppCompatActivity
         });
         crawler.execute("");
         if(mAuth.getCurrentUser()!=null){
-            conditionRef = mRootRef.child("users/"+mAuth.getCurrentUser().getUid());
+            conditionRef = mRootRef.child("vPlan");
             getFBData();
         }else{
             mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
                 @Override
                 public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                     if(firebaseAuth.getCurrentUser()!=null) {
-                        conditionRef = mRootRef.child("users/"+mAuth.getCurrentUser().getUid());
+                        conditionRef = mRootRef.child("vPlan");
                         getFBData();
                     }
                 }
@@ -509,12 +509,9 @@ public class VPlanActivity extends AppCompatActivity
         FirebaseDatabase mData = FirebaseDatabase.getInstance();
 
         if(mAuth.getCurrentUser()!=null){
-            DatabaseReference mRef = mData.getReference("users/" + mAuth.getCurrentUser().getUid() + "/"+ jahrgang);
+            DatabaseReference mRef = mData.getReference("vPlan/" + jahrgang);
             mRef.setValue(data);
         }
-
-
-
     }
 
     @Override

@@ -1,38 +1,29 @@
 package com.github.leonardpieper.ceciVPlan;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.assist.AssistContent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -40,8 +31,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.FirebaseInstanceIdService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Calendar;
 
@@ -108,7 +100,7 @@ public class MainActivity extends AppCompatActivity
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null){
-                    DatabaseReference conditionRef = mRootRef.child("users").child(user.getUid());
+                    DatabaseReference conditionRef = mRootRef.child("vPlan");
 
                     String stufe = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("jahrgang", "EF");
                     final DatabaseReference stufenRef = conditionRef.child(stufe);
@@ -281,19 +273,44 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if(id == R.id.nav_dashboard){
-
+        switch(id){
+            case R.id.nav_dashboard:
+                break;
+            case R.id.nav_vplan:
+                Intent vIntent = new Intent(this, VPlanActivity.class);
+                startActivity(vIntent);
+                break;
+            case R.id.nav_kurse:
+                Intent kuIntent = new Intent(this, KurseActivity.class);
+                startActivity(kuIntent);
+                break;
+            case R.id.nav_klausuren:
+                Intent kIntent = new Intent(this, KlausurenActivity.class);
+                startActivity(kIntent);
+                break;
+            case R.id.nav_settings:
+                Intent sIntent = new Intent(this, SettingsActivity.class);
+                startActivity(sIntent);
+                break;
+            case R.id.nav_devSettings:
+                Intent devIntent = new Intent(this, DevActivity.class);
+                startActivity(devIntent);
+                break;
+            case R.id.nav_signup:
+                Intent signIntent = new Intent(this, SignUpActivity.class);
+                startActivity(signIntent);
+                break;
         }
-        else if (id == R.id.nav_vplan) {
-            Intent intent = new Intent(this, VPlanActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_signup){
-            Intent intent = new Intent(this, SignUpActivity.class);
-            startActivity(intent);
-        }
+//        if(id == R.id.nav_dashboard){
+//
+//        }
+//        else if (id == R.id.nav_vplan) {
+//            Intent intent = new Intent(this, VPlanActivity.class);
+//            startActivity(intent);
+//        } else if (id == R.id.nav_settings) {
+//            Intent intent = new Intent(this, SettingsActivity.class);
+//            startActivity(intent);
+//        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -386,6 +403,12 @@ public class MainActivity extends AppCompatActivity
 
         } else if (currentVersionCode > savedVersionCode) {
             // TODO This is an upgrade
+            if(!mAuth.getCurrentUser().isAnonymous()){
+                if(mAuth.getCurrentUser().getEmail().contains("ceci@example.com")){
+                    Intent signAIntent = new Intent(this, SignUpAnonymActivity.class);
+                    startActivity(signAIntent);
+                }
+            }
         }
         // Update the shared preferences with the current version code
         prefs.edit().putInt(PREF_VERSION_CODE_KEY, currentVersionCode).commit();

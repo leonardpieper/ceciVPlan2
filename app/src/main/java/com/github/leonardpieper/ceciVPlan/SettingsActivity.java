@@ -1,6 +1,7 @@
 package com.github.leonardpieper.ceciVPlan;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -27,9 +28,11 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView tvLoggedInUser;
     private EditText etUname;
     private EditText etPwd;
+
     private Button btnJahrgangslct;
     private Button btnLogin;
     private Button btnLogout;
+    private Button btnSignUp;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -44,9 +47,11 @@ public class SettingsActivity extends AppCompatActivity {
         tvLoggedInUser = (TextView)findViewById(R.id.tvLogInUser);
         etUname = (EditText)findViewById(R.id.etUname);
         etPwd = (EditText)findViewById(R.id.etPwd);
+
         btnLogin = (Button)findViewById(R.id.btnSpinnerJahrgang);
         btnLogin = (Button)findViewById(R.id.btnLogin);
         btnLogout = (Button)findViewById(R.id.btnLogout);
+        btnSignUp = (Button)findViewById(R.id.btnSignUpNew);
 
         btnJahrgangslct = (Button)findViewById(R.id.btnSpinnerJahrgang);
 
@@ -81,10 +86,10 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String uname = etUname.getText().toString();
-                String email = uname + "@example.com";
+//                String email = uname + "@example.com";
                 String pwd  =etPwd.getText().toString();
 
-                mAuth.signInWithEmailAndPassword(email, pwd).addOnCompleteListener(SettingsActivity.this, new OnCompleteListener<AuthResult>() {
+                mAuth.signInWithEmailAndPassword(uname, pwd).addOnCompleteListener(SettingsActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
@@ -108,21 +113,38 @@ public class SettingsActivity extends AppCompatActivity {
                 isfbLoggedOut();
             }
         });
+
+        btnSignUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent signAIntent = new Intent(SettingsActivity.this, SignUpActivity.class);
+                startActivity(signAIntent);
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isfbLoggedIn();
     }
 
     public void isfbLoggedIn(){
         FirebaseUser user = mAuth.getCurrentUser();
         if(user != null){
-            String uName = user.getEmail().replace("@example.com", "");
-            tvLoggedInUser.setText("Hallo " + uName);
+            if(!user.isAnonymous()) {
+                String uName = user.getEmail().replace("@example.com", "");
+                tvLoggedInUser.setText("Hallo " + uName);
 
-            tvLoggedInUser.setVisibility(View.VISIBLE);
-            btnLogout.setVisibility(View.VISIBLE);
+                tvLoggedInUser.setVisibility(View.VISIBLE);
+                btnLogout.setVisibility(View.VISIBLE);
 
-            etUname.setVisibility(View.GONE);
-            etPwd.setVisibility(View.GONE);
-            btnJahrgangslct.setVisibility(View.GONE);
-            btnLogin.setVisibility(View.GONE);
+                etUname.setVisibility(View.GONE);
+                etPwd.setVisibility(View.GONE);
+                btnJahrgangslct.setVisibility(View.GONE);
+                btnLogin.setVisibility(View.GONE);
+                btnSignUp.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -139,6 +161,7 @@ public class SettingsActivity extends AppCompatActivity {
             etPwd.setVisibility(View.VISIBLE);
             btnJahrgangslct.setVisibility(View.VISIBLE);
             btnLogin.setVisibility(View.VISIBLE);
+            btnSignUp.setVisibility(View.VISIBLE);
         }
     }
 
