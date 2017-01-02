@@ -289,18 +289,34 @@ public class VPlanActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if(id == R.id.nav_dashboard){
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
-        else if (id == R.id.nav_vplan) {
-//            Intent intent = new Intent(this, VPlanActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            startActivity(intent);
-        } else if (id == R.id.nav_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
+        switch(id){
+            case R.id.nav_dashboard:
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                break;
+            case R.id.nav_vplan:
+                break;
+            case R.id.nav_kurse:
+                Intent kuIntent = new Intent(this, KurseActivity.class);
+                startActivity(kuIntent);
+                break;
+            case R.id.nav_klausuren:
+                Intent kIntent = new Intent(this, KlausurenActivity.class);
+                startActivity(kIntent);
+                break;
+            case R.id.nav_settings:
+                Intent sIntent = new Intent(this, SettingsActivity.class);
+                startActivity(sIntent);
+                break;
+            case R.id.nav_devSettings:
+                Intent devIntent = new Intent(this, DevActivity.class);
+                startActivity(devIntent);
+                break;
+            case R.id.nav_signup:
+                Intent signIntent = new Intent(this, SignUpActivity.class);
+                startActivity(signIntent);
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

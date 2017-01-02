@@ -2,6 +2,7 @@ package com.github.leonardpieper.ceciVPlan;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
@@ -15,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -25,11 +27,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class KurseActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseAuth mAuth;
     private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+
+    private String[] kurseIcons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,8 +129,21 @@ public class KurseActivity extends AppCompatActivity
         TextView tv = new TextView(this);
         tv.setText(title);
 
-
         cv.setLayoutParams(cvParams);
+
+        kurseIcons = getResources().getStringArray(R.array.kursIcons);
+        for(String kursIcon:kurseIcons){
+            Matcher m = Pattern.compile("\\b"+kursIcon+"\\s").matcher(title);
+            if(m.find()){
+//                ImageView iv = new ImageView(this);
+//                iv.setBackgroundResource(R.drawable.ic_deutsch_book);
+//                iv.setScaleType(ImageView.ScaleType.FIT_START);
+//                cv.addView(iv);
+            }
+        }
+
+
+
         cv.addView(tv);
 
         return cv;
@@ -147,14 +167,17 @@ public class KurseActivity extends AppCompatActivity
 
         switch(id){
             case R.id.nav_dashboard:
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
                 break;
             case R.id.nav_vplan:
                 Intent vIntent = new Intent(this, VPlanActivity.class);
                 startActivity(vIntent);
                 break;
             case R.id.nav_kurse:
-                Intent kuIntent = new Intent(this, VPlanActivity.class);
-                startActivity(kuIntent);
+//                Intent kuIntent = new Intent(this, VPlanActivity.class);
+//                startActivity(kuIntent);
                 break;
             case R.id.nav_klausuren:
                 Intent kIntent = new Intent(this, KlausurenActivity.class);

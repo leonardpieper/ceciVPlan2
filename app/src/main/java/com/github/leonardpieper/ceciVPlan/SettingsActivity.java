@@ -89,17 +89,19 @@ public class SettingsActivity extends AppCompatActivity {
 //                String email = uname + "@example.com";
                 String pwd  =etPwd.getText().toString();
 
-                mAuth.signInWithEmailAndPassword(uname, pwd).addOnCompleteListener(SettingsActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(SettingsActivity.this, "Anmeldung erfolgreich", Toast.LENGTH_LONG).show();
-                            isfbLoggedIn();
-                        }else{
-                            Toast.makeText(SettingsActivity.this, "Anmeldung fehlgeschlagen", Toast.LENGTH_LONG).show();
+                if(!uname.isEmpty()&&!pwd.isEmpty()){
+                    mAuth.signInWithEmailAndPassword(uname, pwd).addOnCompleteListener(SettingsActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                Toast.makeText(SettingsActivity.this, "Anmeldung erfolgreich", Toast.LENGTH_LONG).show();
+                                isfbLoggedIn();
+                            }else{
+                                Toast.makeText(SettingsActivity.this, "Anmeldung fehlgeschlagen", Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }
-                });
+                    });
+                }
 
 
             }
