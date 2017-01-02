@@ -8,7 +8,7 @@
             android:title="Dashboard" />
         <item
             android:id="@+id/nav_vplan"
-            android:icon="@drawable/ic_school_black_24dp"
+            android:icon="@drawable/vertretungsplan_black"
             android:title="Vertretungsplan" />
         <item
             android:id="@+id/nav_kurse"

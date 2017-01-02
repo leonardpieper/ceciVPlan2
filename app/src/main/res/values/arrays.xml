@@ -11,4 +11,12 @@
             EF
         </item>
     </string-array>
+    <string-array name="kursIcons">
+        <item>
+            D
+        </item>
+        <item>
+            Bi
+        </item>
+    </string-array>
 </resources>

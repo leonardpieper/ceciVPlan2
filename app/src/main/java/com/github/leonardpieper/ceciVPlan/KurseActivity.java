@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.CardView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -74,16 +76,17 @@ public class KurseActivity extends AppCompatActivity
                     for(DataSnapshot childSnapshot: dataSnapshot.getChildren()){
                         TextView tv = new TextView(KurseActivity.this);
                         final String title = childSnapshot.child("name").getValue(String.class);
-                        tv.setText(childSnapshot.child("name").getValue(String.class));
-                        tv.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(KurseActivity.this, KursActivity.class);
-                                intent.putExtra("name", title);
-                                startActivity(intent);
-                            }
-                        });
-                        llroot.addView(tv);
+//                        tv.setText(childSnapshot.child("name").getValue(String.class));
+//                        tv.setOnClickListener(new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View v) {
+//                                Intent intent = new Intent(KurseActivity.this, KursActivity.class);
+//                                intent.putExtra("name", title);
+//                                startActivity(intent);
+//                            }
+//                        });
+                        CardView cv = createKursCard(title);
+                        llroot.addView(cv);
                     }
                 }
 
@@ -93,6 +96,37 @@ public class KurseActivity extends AppCompatActivity
                 }
             });
         }
+    }
+
+    private CardView createKursCard(final String title){
+        CardView cv = new CardView(this);
+        cv.setRadius(1);
+        cv.setContentPadding(15, 15, 15, 15);
+        cv.setCardElevation(5);
+        cv.setMinimumHeight(250);
+        cv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(KurseActivity.this, KursActivity.class);
+                intent.putExtra("name", title);
+                startActivity(intent);
+            }
+        });
+
+        LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        cvParams.setMargins(0,1,0,1);
+
+        TextView tv = new TextView(this);
+        tv.setText(title);
+
+
+        cv.setLayoutParams(cvParams);
+        cv.addView(tv);
+
+        return cv;
     }
 
     @Override

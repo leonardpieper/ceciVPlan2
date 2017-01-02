@@ -32,12 +32,14 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.RectF;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
@@ -45,11 +47,15 @@ import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.io.*;
@@ -57,7 +63,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,7 +79,9 @@ public class KursActivity extends AppCompatActivity
     GoogleAccountCredential mCredential;
 
     private DatabaseReference mDatabase;
+
     private Intent intent;
+    private String kursName;
 
     private LinearLayout lLayoutl;
     private Button dlBtn;
@@ -107,14 +117,72 @@ public class KursActivity extends AppCompatActivity
         lLayoutl = (LinearLayout) findViewById(R.id.downloadsRl);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        kursName = intent.getStringExtra("name");
 
 
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
 
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.kurs_fabSend);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendKursMessage();
+            }
+        });
+
+
+
+        getKursMessage(kursName);
+
         getResultsFromApi();
     }
+
+    private void getKursMessage(String name) {
+        final LinearLayout llMessages = (LinearLayout) findViewById(R.id.kurs_llMessage);
+        DatabaseReference mKursRef = mDatabase
+                .child("Kurse")
+                .child(name)
+                .child("messages");
+        mKursRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                llMessages.removeAllViews();
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    TextView tvMessage = new TextView(KursActivity.this);
+                    String sender = childSnapshot.child("sender").getValue(String.class);
+                    String message = childSnapshot.child("message").getValue(String.class);
+                    tvMessage.setText(sender + " " + message);
+                    llMessages.addView(tvMessage);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void sendKursMessage() {
+        EditText etMessage = (EditText)findViewById(R.id.kurs_message);
+        String message = etMessage.getText().toString();
+        DatabaseReference mKursRef = mDatabase
+                .child("Kurse")
+                .child(kursName)
+                .child("messages");
+
+        String key = mKursRef.push().getKey();
+        Map<String, Object> newMessage = new HashMap<>();
+        newMessage.put(key + "/sender/", "g@g.co");
+        newMessage.put(key + "/message/", message);
+
+        mKursRef.updateChildren(newMessage);
+        etMessage.setText("");
+    }
+
 
 
     /**
