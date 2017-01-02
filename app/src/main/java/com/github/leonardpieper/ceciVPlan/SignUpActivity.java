@@ -62,10 +62,15 @@ public class SignUpActivity extends AppCompatActivity {
                         migrateAnonToPwd();
                         SignUpActivity.this.finish();
                     } else {
-                        signUp();
+                        if(!email.getText().toString().isEmpty()&&!pwd.getText().toString().isEmpty()){
+                            signUp();
+                        }
+
                     }
                 }else {
-                    signUp();
+                    if(!email.getText().toString().isEmpty()&&!pwd.getText().toString().isEmpty()){
+                        signUp();
+                    }
                 }
 
             }
