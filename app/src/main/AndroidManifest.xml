@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -53,7 +54,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".KursActivity" />
         <activity android:name=".SignUpAnonymActivity" />
-        <activity android:name=".DevActivity"></activity>
+        <activity android:name=".DevActivity" />
+        <activity android:name=".Kurs2Activity"></activity>
     </application>
 
 </manifest>

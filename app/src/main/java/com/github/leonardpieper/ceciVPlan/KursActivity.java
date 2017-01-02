@@ -7,21 +7,23 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 
-import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 
-import com.google.api.services.drive.model.*;
+import com.google.api.services.drive.model.File;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import android.Manifest;
 import android.accounts.AccountManager;
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -29,31 +31,31 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
-import android.text.method.ScrollingMovementMethod;
-import android.view.View;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -62,12 +64,21 @@ import java.util.regex.Pattern;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class KursActivity extends Activity
+import static android.widget.LinearLayout.*;
+
+public class KursActivity extends AppCompatActivity
         implements EasyPermissions.PermissionCallbacks {
     GoogleAccountCredential mCredential;
-    private TextView mOutputText;
-    private Button mCallApiButton;
-    private ImageView mOutputImage;
+
+    private DatabaseReference mDatabase;
+    private Intent intent;
+
+    private LinearLayout lLayoutl;
+    private Button dlBtn;
+    private LinearLayout thumbnailRow;
+    private int previousRowID = 0;
+    private int thumbnailCount = 5000;
+
     ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
@@ -77,64 +88,33 @@ public class KursActivity extends Activity
 
     private static final String BUTTON_TEXT = "Call Drive API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
-    private static final String[] SCOPES = { DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_METADATA };
+    private static final String[] SCOPES = {DriveScopes.DRIVE};
 
     /**
      * Create the main activity.
+     *
      * @param savedInstanceState previously saved instance data.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LinearLayout activityLayout = new LinearLayout(this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        activityLayout.setLayoutParams(lp);
-        activityLayout.setOrientation(LinearLayout.VERTICAL);
-        activityLayout.setPadding(16, 16, 16, 16);
 
-        ViewGroup.LayoutParams tlp = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+        setContentView(R.layout.activity_kurs);
 
-        mCallApiButton = new Button(this);
-        mCallApiButton.setText(BUTTON_TEXT);
-        mCallApiButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallApiButton.setEnabled(false);
-                mOutputText.setText("");
-                getResultsFromApi();
-                mCallApiButton.setEnabled(true);
-            }
-        });
-        activityLayout.addView(mCallApiButton);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        intent = getIntent();
 
-        mOutputText = new TextView(this);
-        mOutputText.setLayoutParams(tlp);
-        mOutputText.setPadding(16, 16, 16, 16);
-        mOutputText.setVerticalScrollBarEnabled(true);
-        mOutputText.setMovementMethod(new ScrollingMovementMethod());
-        mOutputText.setText(
-                "Click the \'" + BUTTON_TEXT +"\' button to test the API.");
-        activityLayout.addView(mOutputText);
+        lLayoutl = (LinearLayout) findViewById(R.id.downloadsRl);
 
-        mOutputImage = new ImageView(this);
-        mOutputImage.setLayoutParams(tlp);
-        activityLayout.addView(mOutputImage);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage("Calling Drive API ...");
 
-        setContentView(activityLayout);
-
-        // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
-    }
 
+        getResultsFromApi();
+    }
 
 
     /**
@@ -145,14 +125,16 @@ public class KursActivity extends Activity
      * appropriate.
      */
     private void getResultsFromApi() {
-        if (! isGooglePlayServicesAvailable()) {
+        if (!isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
-        } else if (! isDeviceOnline()) {
-            mOutputText.setText("No network connection available.");
+        } else if (!isDeviceOnline()) {
+            //FIXME
+//            mOutputText.setText("No network connection available.");
         } else {
-            new MakeRequestTask(mCredential).execute();
+            getDownloadableMedia(intent.getStringExtra("name"), 5);
+//            new MakeRequestTask(mCredential).execute();
         }
     }
 
@@ -195,22 +177,24 @@ public class KursActivity extends Activity
      * Called when an activity launched here (specifically, AccountPicker
      * and authorization) exits, giving you the requestCode you started it with,
      * the resultCode it returned, and any additional data from it.
+     *
      * @param requestCode code indicating which activity result is incoming.
-     * @param resultCode code indicating the result of the incoming
-     *     activity result.
-     * @param data Intent (containing result data) returned by incoming
-     *     activity result.
+     * @param resultCode  code indicating the result of the incoming
+     *                    activity result.
+     * @param data        Intent (containing result data) returned by incoming
+     *                    activity result.
      */
     @Override
     protected void onActivityResult(
             int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
+        switch (requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
-                    mOutputText.setText(
-                            "This app requires Google Play Services. Please install " +
-                                    "Google Play Services on your device and relaunch this app.");
+                    //FIXME: Error
+//                    mOutputText.setText(
+//                            "This app requires Google Play Services. Please install " +
+//                                    "Google Play Services on your device and relaunch this app.");
                 } else {
                     getResultsFromApi();
                 }
@@ -239,13 +223,73 @@ public class KursActivity extends Activity
         }
     }
 
+    public void getDownloadableMedia(String kurs, int count){
+        Query kursStorageRef = mDatabase.child("Kurse").child(kurs).child("storagePath").orderByChild("uploadTime").limitToFirst(count);
+
+        kursStorageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
+                    String id = childSnapshot.child("id").getValue(String.class);
+                    new MakeRequestTask(mCredential).execute(id);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    public java.io.File getAlbumStorageDir(String albumName) {
+        // Get the directory for the user's public pictures directory.
+        java.io.File file = new java.io.File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), albumName);
+        if (!file.mkdirs()) {
+                Log.e("KursActivity", "Directory not created");
+        }
+        return file;
+    }
+
+    public void setDlBtn(Bitmap driveBitmap) {
+
+//        EasyPermissions.requestPermissions(
+//                this,
+//                "This app needs to access your Google account (via Contacts).",
+//                1009,
+//                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        java.io.File dir = getAlbumStorageDir("ceciplan");
+        System.out.println("Hi");
+
+//        java.io.File root = Environment.getExternalStorageDirectory();
+//
+//        java.io.File dir = new java.io.File(root.getAbsolutePath() + "/ceciplan");
+//        dir.mkdirs();
+
+        java.io.File file = new java.io.File(dir, "Hallo.png");
+
+        try {
+            FileOutputStream fs = new FileOutputStream(file);
+            driveBitmap.compress(Bitmap.CompressFormat.PNG, 100, fs);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
     /**
      * Respond to requests for permissions at runtime for API 23 and above.
-     * @param requestCode The request code passed in
-     *     requestPermissions(android.app.Activity, String, int, String[])
-     * @param permissions The requested permissions. Never null.
+     *
+     * @param requestCode  The request code passed in
+     *                     requestPermissions(android.app.Activity, String, int, String[])
+     * @param permissions  The requested permissions. Never null.
      * @param grantResults The grant results for the corresponding permissions
-     *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     *                     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
      */
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -259,9 +303,10 @@ public class KursActivity extends Activity
     /**
      * Callback for when a permission is granted using the EasyPermissions
      * library.
+     *
      * @param requestCode The request code associated with the requested
-     *         permission
-     * @param list The requested permission list. Never null.
+     *                    permission
+     * @param list        The requested permission list. Never null.
      */
     @Override
     public void onPermissionsGranted(int requestCode, List<String> list) {
@@ -271,9 +316,10 @@ public class KursActivity extends Activity
     /**
      * Callback for when a permission is denied using the EasyPermissions
      * library.
+     *
      * @param requestCode The request code associated with the requested
-     *         permission
-     * @param list The requested permission list. Never null.
+     *                    permission
+     * @param list        The requested permission list. Never null.
      */
     @Override
     public void onPermissionsDenied(int requestCode, List<String> list) {
@@ -282,6 +328,7 @@ public class KursActivity extends Activity
 
     /**
      * Checks whether the device currently has a network connection.
+     *
      * @return true if the device has a network connection, false otherwise.
      */
     private boolean isDeviceOnline() {
@@ -293,8 +340,9 @@ public class KursActivity extends Activity
 
     /**
      * Check that Google Play services APK is installed and up to date.
+     *
      * @return true if Google Play Services is available and up to
-     *     date on this device; false otherwise.
+     * date on this device; false otherwise.
      */
     private boolean isGooglePlayServicesAvailable() {
         GoogleApiAvailability apiAvailability =
@@ -322,8 +370,9 @@ public class KursActivity extends Activity
     /**
      * Display an error dialog showing that Google Play Services is missing
      * or out of date.
+     *
      * @param connectionStatusCode code describing the presence (or lack of)
-     *     Google Play Services on this device.
+     *                             Google Play Services on this device.
      */
     void showGooglePlayServicesAvailabilityErrorDialog(
             final int connectionStatusCode) {
@@ -339,8 +388,10 @@ public class KursActivity extends Activity
      * An asynchronous task that handles the Drive API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
      */
-    private class MakeRequestTask extends AsyncTask<Void, Void, List<String>> {
+    private class MakeRequestTask extends AsyncTask<String, Void, String> {
+        private ImageView mOutputImage;
         private Bitmap bm;
+        private String title;
         private com.google.api.services.drive.Drive mService = null;
         private Exception mLastError = null;
 
@@ -354,20 +405,19 @@ public class KursActivity extends Activity
         }
 
 
-
         /**
          * Background task to call Drive API.
+         *
          * @param params no parameters needed for this task.
          */
         @Override
-        protected List<String> doInBackground(Void... params) {
-            android.os.Debug.waitForDebugger();
+        protected String doInBackground(String... params) {
+//            android.os.Debug.waitForDebugger();
             try {
-                downloadFile(mService, getThumbnailFromId());
+//                downloadFile(mService, getFileFromId());
 
-                List<String> list = new ArrayList<>();
-                list.add("Hi");
-                return list;
+                downloadFile(getFileFromId(params[0]));
+                return "Hi";
 //                return getDataFromApi();
             } catch (Exception e) {
                 mLastError = e;
@@ -376,31 +426,22 @@ public class KursActivity extends Activity
             }
         }
 
-        private File getThumbnailFromId() throws IOException {
-            File file = mService.files().get("0B7ppyvhHCrfgZjhlVURjdG5MSUU").execute();
+        private File getFileFromId(String id) throws IOException {
+            File file = mService.files().get(id).execute();
 
             System.out.println("Title: " + file.getTitle());
-            System.out.println("Dl: " + file.getSelfLink());
-            System.out.println("Description: " + file.getWebContentLink());
+            title = file.getTitle();
+            System.out.println("Dl: " + file.getWebContentLink());
+            System.out.println("Description: " + file.getDescription());
             System.out.println("MIME type: " + file.getMimeType());
+            System.out.println("MIME type: " + file.getThumbnailLink());
             return file;
         }
 
-        /**
-         * Download a file's content.
-         *
-         * @param service Drive API service instance.
-         * @param file Drive File instance.
-         * @return InputStream containing the file's content if successful,
-         *         {@code null} otherwise.
-         */
-        private void downloadFile(Drive service, File file) {
-            if (file.getWebContentLink() != null && file.getWebContentLink().length() > 0) {
+        private void downloadFile(File file) {
+            if (file.getThumbnailLink() != null && file.getThumbnailLink().length() > 0) {
                 try {
-//                    HttpResponse resp =
-//                            service.getRequestFactory().buildGetRequest(new GenericUrl(file.getWebContentLink() + "&acknowledgeAbuse=true"))
-//                                    .execute();
-                    URL u = new URL(file.getWebContentLink());
+                    URL u = new URL(file.getThumbnailLink());
                     HttpURLConnection ucon = (HttpURLConnection) u.openConnection();
                     if (ucon.getResponseCode() > -1) {
                         Pattern p = Pattern.compile("text/html;\\s+charset=([^\\s]+)\\s*");
@@ -409,16 +450,6 @@ public class KursActivity extends Activity
                         String charset = m.matches() ? m.group(1) : "UTF-8";
 
                         InputStream inputStream = ucon.getInputStream();
-//                        Reader r = new InputStreamReader(inputStream, charset);
-//                        StringBuilder buf = new StringBuilder();
-//                        while (true) {
-//                            int ch = r.read();
-//                            if (ch < 0) {
-//                                break;
-//                            }
-//                            buf.append((char) ch);
-//                        }
-//                        System.out.println(buf.toString());
                         bm = BitmapFactory.decodeStream(inputStream);
                     }
                 } catch (UnsupportedEncodingException e) {
@@ -431,357 +462,181 @@ public class KursActivity extends Activity
             }
         }
 
+        public CardView makeCard(String title, Bitmap image){
+            int id = (int)(Math.random()*100);
 
-//        /**
-//         * Fetch a list of up to 10 file names and IDs.
-//         * @return List of Strings describing files, or an empty list if no files
-//         *         found.
-//         * @throws IOException
-//         */
-//        private List<String> getDataFromApi() throws IOException {
-//
-//            List<String> fileInfo = new ArrayList<String>();
-//
-//            List<File> result = new ArrayList<File>();
-//            Drive.Files.List request = mService.files().list();
-//
-//            do {
-//                try {
-//                    FileList files = request.execute();
-//
-//                    result.addAll(files.getItems());
-//                    request.setPageToken(files.getNextPageToken());
-//                } catch (IOException e) {
-//                    System.out.println("An error occurred: " + e);
-//                    request.setPageToken(null);
-//                }
-//            } while (request.getPageToken() != null &&
-//                    request.getPageToken().length() > 0);
-//
-//            // Get a list of up to 10 files.
-////            List<String> fileInfo = new ArrayList<String>();
-////            FileList result = mService.files().list()
-////                    .setFields("nextPageToken, files(id, name)")
-////                    .execute();
-//
-//            List<File> files = result;
-//            if (files != null) {
-//                for (File file : files) {
-//                    fileInfo.add(String.format("%s (%s)\n",
-//                            file.getTitle(), file.getId()));
-//                }
-//            }
-//            return fileInfo;
-//        }
+            CardView cv = new CardView(KursActivity.this);
+            RelativeLayout rl = new RelativeLayout(KursActivity.this);
+
+            DisplayMetrics dm = new DisplayMetrics();
+            KursActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
+            int width = dm.widthPixels ;
+            int halfWidth = new Double(width/2.3).intValue();
+
+            float aspectRatio = image.getWidth() /
+                    (float) image.getHeight();
+
+            RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            rlParams.setMargins(8,8,8,8);
+
+            LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(
+                    halfWidth,
+                    Math.round(halfWidth / aspectRatio)
+            );
 
 
-            @Override
-            protected void onPreExecute() {
-                mOutputText.setText("");
-                mProgress.show();
+            LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
+                    halfWidth,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+            );
+            cvParams.setMargins(8,8,8,8);
+
+            RelativeLayout.LayoutParams rlTvLayout = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            rlTvLayout.addRule(RelativeLayout.BELOW, id);
+            rlTvLayout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+
+            RelativeLayout.LayoutParams rlBtnLayout = new RelativeLayout.LayoutParams(100, 100);
+            rlBtnLayout.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            rlBtnLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+
+            cv.setLayoutParams(cvParams);
+            rl.setLayoutParams(rlParams);
+
+            // Set CardView corner radius
+            cv.setRadius(4);
+            // Set cardView content padding
+            cv.setContentPadding(15, 15, 15, 15);
+            // Set CardView elevation
+            cv.setCardElevation(5);
+
+            ImageView ivImage = new ImageView(KursActivity.this);
+            ivImage.setLayoutParams(imgParams);
+            ivImage.setImageBitmap(image);
+            ivImage.setScaleType(ImageView.ScaleType.FIT_START);
+            ivImage.setId(id);
+
+            TextView tvTitle = new TextView(KursActivity.this);
+            tvTitle.setText(title);
+            tvTitle.setLayoutParams(rlTvLayout);
+
+            Button dlBtn = new Button(KursActivity.this);
+            dlBtn.setLayoutParams(rlBtnLayout);
+            dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
+
+
+
+
+//            ll.setOrientation(VERTICAL);
+            rl.addView(ivImage);
+            rl.addView(tvTitle);
+            rl.addView(dlBtn);
+
+            cv.addView(rl);
+
+            return cv;
+
+        }
+
+
+        @Override
+        protected void onPreExecute() {
+            mOutputImage = new ImageView(KursActivity.this);
+//                mOutputText.setText("");
+//                mProgress.show();
+        }
+
+        @Override
+        protected void onPostExecute(String output) {
+//                mProgress.hide();
+            //FIXME: Fix
+            if (output == null) {
+//                    mOutputText.setText("No results returned.");
+            } else {
+                CardView imageCard = makeCard(title, bm);
+//                mOutputImage.setImageBitmap(bm);
+//                mOutputImage.setScaleType(ImageView.ScaleType.FIT_XY);
+//                mOutputImage.setAdjustViewBounds(true);
+
+
+
+                if(thumbnailCount % 2 ==0){
+                    thumbnailRow = new LinearLayout(KursActivity.this);
+                    LinearLayout.LayoutParams lLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                    thumbnailRow.setLayoutParams(lLParams);
+                    thumbnailRow.setId(thumbnailCount+0);
+
+                    thumbnailRow.addView(imageCard);
+
+
+//                    if(previousRowID !=5000){
+                        lLayoutl.addView(thumbnailRow);
+//                    }else{
+//                    }
+
+                    previousRowID = thumbnailRow.getId();
+                    thumbnailCount++;
+                }else{
+                    thumbnailRow.addView(imageCard);
+                    thumbnailCount++;
+                }
+//                rl.addView(mOutputImage);
             }
 
-            @Override
-            protected void onPostExecute(List<String> output) {
-                mProgress.hide();
-                if (output == null || output.size() == 0) {
-                    mOutputText.setText("No results returned.");
-                } else {
-                    output.add(0, "Data retrieved using the Drive API:");
-                    mOutputText.setText(TextUtils.join("\n", output));
-                    mOutputImage.setImageBitmap(bm);
-                }
-            }
 
-            @Override
-            protected void onCancelled() {
-                mProgress.hide();
-                if (mLastError != null) {
-                    if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
-                        showGooglePlayServicesAvailabilityErrorDialog(
-                                ((GooglePlayServicesAvailabilityIOException) mLastError)
-                                        .getConnectionStatusCode());
-                    } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                        startActivityForResult(
-                                ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                                KursActivity.REQUEST_AUTHORIZATION);
-                    } else {
-                        mOutputText.setText("The following error occurred:\n"
-                                + mLastError.getMessage());
-                    }
+//                setDlBtn(bm);
+        }
+
+        @Override
+        protected void onCancelled() {
+//                mProgress.hide();
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+                    startActivityForResult(
+                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                            KursActivity.REQUEST_AUTHORIZATION);
                 } else {
-                    mOutputText.setText("Request cancelled.");
+                    //FIXME: fix
+//                        mOutputText.setText("The following error occurred:\n"
+//                                + mLastError.getMessage());
                 }
+            } else {
+                //FIXME: fix
+//                    mOutputText.setText("Request cancelled.");
             }
         }
     }
-////
-////import android.content.Context;
-////import android.content.Intent;
-////import android.content.IntentSender;
-////import android.graphics.Bitmap;
-////import android.graphics.BitmapFactory;
-////import android.graphics.drawable.Drawable;
-////import android.net.Uri;
-////import android.os.Environment;
-////import android.support.annotation.NonNull;
-////import android.support.annotation.Nullable;
-////import android.support.design.widget.FloatingActionButton;
-////import android.support.v7.app.AppCompatActivity;
-////import android.os.Bundle;
-////import android.util.Log;
-////import android.view.MenuItem;
-////import android.view.View;
-////import android.widget.EditText;
-////import android.widget.ImageView;
-////import android.widget.LinearLayout;
-////import android.widget.TextView;
-////
-////import com.google.android.gms.appindexing.Action;
-////import com.google.android.gms.appindexing.AppIndex;
-////import com.google.android.gms.common.ConnectionResult;
-////import com.google.android.gms.common.GooglePlayServicesUtil;
-////import com.google.android.gms.common.api.GoogleApiClient;
-////import com.google.android.gms.common.api.ResultCallback;
-////import com.google.android.gms.drive.Drive;
-////import com.google.android.gms.drive.DriveApi;
-////import com.google.android.gms.drive.DriveContents;
-////import com.google.android.gms.drive.DriveFile;
-////import com.google.android.gms.drive.DriveFolder;
-////import com.google.android.gms.drive.DriveId;
-////import com.google.android.gms.drive.query.Filters;
-////import com.google.android.gms.drive.query.Query;
-////import com.google.android.gms.drive.query.SearchableField;
-////import com.google.android.gms.tasks.OnSuccessListener;
-////import com.google.firebase.database.DataSnapshot;
-////import com.google.firebase.database.DatabaseError;
-////import com.google.firebase.database.DatabaseReference;
-////import com.google.firebase.database.FirebaseDatabase;
-////import com.google.firebase.database.ValueEventListener;
-////import com.google.firebase.storage.FileDownloadTask;
-////import com.google.firebase.storage.FirebaseStorage;
-////import com.google.firebase.storage.StorageReference;
-////
-////import java.io.BufferedReader;
-////import java.io.ByteArrayOutputStream;
-////import java.io.File;
-////import java.io.FileOutputStream;
-////import java.io.FileWriter;
-////import java.io.IOException;
-////import java.io.InputStream;
-////import java.io.InputStreamReader;
-////import java.io.OutputStream;
-////import java.net.URI;
-////import java.util.HashMap;
-////import java.util.Map;
-////
-////public class KursActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-////        GoogleApiClient.OnConnectionFailedListener {
-////    private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
-//////    private StorageReference mStoRef = FirebaseStorage.getInstance().getReference();
-////
-////    private static final int REQUEST_CODE_CAPTURE_IMAGE = 1;
-////    private static final int REQUEST_CODE_CREATOR = 2;
-////    private static final int REQUEST_CODE_RESOLUTION = 3;
-////
-////    private static final String TAG = "KursActivity";
-////
-////
-////    private String kursName;
-////    private GoogleApiClient mGoogleApiClient;
-////
-////    @Override
-////    protected void onCreate(Bundle savedInstanceState) {
-////        super.onCreate(savedInstanceState);
-////        setContentView(R.layout.activity_kurs);
-////
-////        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//////        getKursData();
-//////        drive();
-//////        getKursMedia();
-////        mGoogleApiClient.connect();
-////        getKursData();
-////
-////        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.kurs_fabSend);
-////        fab.setOnClickListener(new View.OnClickListener() {
-////            @Override
-////            public void onClick(View v) {
-////                sendKursMessage();
-////            }
-////        });
-////    }
-////
-////    private void getKursData() {
-////        Intent intent = getIntent();
-////
-////        String name = intent.getStringExtra("name");
-////        kursName = name;
-////
-////        setTitle(name);
-////        getKursMessage(name);
-//////        getKursMedia();
-////    }
-////
-////    @Override
-////    protected void onStart() {
-////
-////        super.onStart();
-////    }
-////
-////    private void getKursMessage(String name) {
-////        final LinearLayout llMessages = (LinearLayout) findViewById(R.id.kurs_llMessage);
-////        DatabaseReference mKursRef = mRootRef
-////                .child("Kurse")
-////                .child(name)
-////                .child("messages");
-////        mKursRef.addValueEventListener(new ValueEventListener() {
-////            @Override
-////            public void onDataChange(DataSnapshot dataSnapshot) {
-////                llMessages.removeAllViews();
-////                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-////                    TextView tvMessage = new TextView(KursActivity.this);
-////                    String sender = childSnapshot.child("sender").getValue(String.class);
-////                    String message = childSnapshot.child("message").getValue(String.class);
-////                    tvMessage.setText(sender + " " + message);
-////                    llMessages.addView(tvMessage);
-////                }
-////            }
-////
-////            @Override
-////            public void onCancelled(DatabaseError databaseError) {
-////
-////            }
-////        });
-////    }
-////
-////    private void sendKursMessage() {
-////        EditText etMessage = (EditText)findViewById(R.id.kurs_message);
-////        String message = etMessage.getText().toString();
-////        DatabaseReference mKursRef = mRootRef
-////                .child("Kurse")
-////                .child(kursName)
-////                .child("messages");
-////
-////        String key = mKursRef.push().getKey();
-////        Map<String, Object> newMessage = new HashMap<>();
-////        newMessage.put(key + "/sender/", "g@g.co");
-////        newMessage.put(key + "/message/", message);
-////
-////        mKursRef.updateChildren(newMessage);
-////    }
-////
-////    private void drive(){
-////        mGoogleApiClient = new GoogleApiClient.Builder(this)
-////                .addApi(Drive.API)
-////                .addScope(Drive.SCOPE_FILE)
-////                .addConnectionCallbacks(this)
-////                .addOnConnectionFailedListener(this)
-////                .build();
-//////        mGoogleApiClient.connect();
-////    }
-////
-////    @Override
-////    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-////        System.out.println(requestCode);
-////
-////        switch (requestCode) {
-////            case REQUEST_CODE_CAPTURE_IMAGE:
-////                if (resultCode == RESULT_OK) {
-////                    mGoogleApiClient.connect();
-////                }
-////                break;
-////        }
-////    }
-////
-////    private void getKursMedia() {
-////        Drive.DriveApi.fetchDriveId(mGoogleApiClient, "0B7ppyvhHCrfgN2N5ck81M3hBamM")
-////                .setResultCallback(idCallback);
-////    }
-////
-////    final private ResultCallback<DriveApi.DriveIdResult> idCallback = new ResultCallback<DriveApi.DriveIdResult>() {
-////        @Override
-////        public void onResult(DriveApi.DriveIdResult result) {
-////            new RetrieveDriveFileContentsAsyncTask(
-////                    KursActivity.this).execute(result.getDriveId());
-////        }
-////    };
-////
-////    final private class RetrieveDriveFileContentsAsyncTask
-////            extends ApiClientAsyncTask<DriveId, Boolean, String>{
-////
-////        public RetrieveDriveFileContentsAsyncTask(Context context) {
-////            super(context);
-////        }
-////
-////        @Override
-////        protected String doInBackgroundConnected(DriveId... params) {
-////            String contents = null;
-////            DriveFile file = params[0].asDriveFile();
-////            DriveApi.DriveContentsResult driveContentsResult =
-////                    file.open(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
-////            if (!driveContentsResult.getStatus().isSuccess()) {
-////                return null;
-////            }
-////            DriveContents driveContents = driveContentsResult.getDriveContents();
-////            BufferedReader reader = new BufferedReader(
-////                    new InputStreamReader(driveContents.getInputStream()));
-////            StringBuilder builder = new StringBuilder();
-////            String line;
-////            try {
-////                while ((line = reader.readLine()) != null) {
-////                    builder.append(line);
-////                }
-////                contents = builder.toString();
-////            } catch (IOException e) {
-////                Log.e(TAG, "IOException while reading from the stream", e);
-////            }
-////
-////            driveContents.discard(getGoogleApiClient());
-////            return contents;
-////        }
-////        @Override
-////        protected void onPostExecute(String result) {
-////            super.onPostExecute(result);
-////            if (result == null) {
-////                System.out.println("Error while reading from the file");
-////                return;
-////            }
-////            System.out.println("File contents: " + result);
-////        }
-////    }
-////
-////
-////
-////    @Override
-////    public boolean onOptionsItemSelected(MenuItem item) {
-////        switch (item.getItemId()) {
-////            case android.R.id.home:
-////                this.finish();
-////                break;
-////        }
-////        return super.onOptionsItemSelected(item);
-////    }
-////
-////    @Override
-////    public void onConnected(@Nullable Bundle bundle) {
-////        getKursMedia();
-////    }
-////
-////    @Override
-////    public void onConnectionSuspended(int i) {
-////
-////    }
-////
-////    @Override
-////    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-////        if (connectionResult.hasResolution()) {
-////            try {
-////                connectionResult.startResolutionForResult(this,REQUEST_CODE_RESOLUTION);
-////            } catch (IntentSender.SendIntentException e) {
-////                // Unable to resolve, message user appropriately
-////            }
-////        } else {
-////            GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0).show();
-////        }
-////    }
-////}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // This is called when the Home (Up) button is pressed in the action bar.
+                // Create a simple intent that starts the hierarchical parent activity and
+                // use NavUtils in the Support Package to ensure proper handling of Up.
+                Intent upIntent = new Intent(this, MainActivity.class);
+                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+                    // This activity is not part of the application's task, so create a new task
+                    // with a synthesized back stack.
+                    TaskStackBuilder.from(this)
+                            // If there are ancestor activities, they should be added here.
+                            .addNextIntent(upIntent)
+                            .startActivities();
+                    finish();
+                } else {
+                    // This activity is part of the application's task, so simply
+                    // navigate up to the hierarchical parent activity.
+                    NavUtils.navigateUpTo(this, upIntent);
+                }
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+}
