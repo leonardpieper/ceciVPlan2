@@ -1,11 +1,14 @@
 package com.github.leonardpieper.ceciVPlan;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,9 +19,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -27,6 +32,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +59,7 @@ public class KurseActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                createDialog(1);
             }
         });
 
@@ -147,6 +154,74 @@ public class KurseActivity extends AppCompatActivity
         cv.addView(tv);
 
         return cv;
+    }
+
+    private void createDialog(int type){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater factory = LayoutInflater.from(this);
+        final View textEntryView = factory.inflate(R.layout.dialog_kurse_add, null);
+
+
+        final EditText kursName = (EditText)   textEntryView.findViewById(R.id.dialog_add_abk);
+        final EditText kursSecret = (EditText) textEntryView.findViewById(R.id.dialog_add_pwd);
+        builder.setView(textEntryView);
+        builder.setTitle("Neuen Kurs erstellen");
+        builder.setPositiveButton("Hinzufügen", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                createKurs(kursName.getText().toString(), kursSecret.getText().toString());
+            }
+        });
+        builder.setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.show();
+    }
+
+    private void createKurs(final String name, final String secret){
+        mRootRef.child("Data").child("lehrerRead").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mRootRef.child("Kurse").child(name).child("secret").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.getValue()!=null){
+                            Toast t = Toast.makeText(getApplicationContext(), "Kurs existiert bereits!", Toast.LENGTH_LONG);
+                            t.show();
+                        }else{
+                            if(!name.isEmpty()&&!secret.isEmpty()){
+                                mRootRef.child("Kurse").child(name).child("secret").setValue(secret);
+
+                                HashMap<String, Object> user = new HashMap<String, Object>();
+                                user.put("name", name);
+                                user.put("secret", secret);
+                                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).setValue(user);
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.out.println(databaseError);
+                        if(!databaseError.getMessage().contains("Permission denied")){
+                            Toast t = Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_LONG);
+                            t.show();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast t = Toast.makeText(getApplicationContext(), "Sie dürfen keine Kurse hinzufügen. Sind Sie Lehrer?", Toast.LENGTH_LONG);
+                t.show();
+            }
+        });
     }
 
     @Override
