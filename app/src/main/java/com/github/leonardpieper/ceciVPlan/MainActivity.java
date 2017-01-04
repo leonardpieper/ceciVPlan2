@@ -1,13 +1,10 @@
 package com.github.leonardpieper.ceciVPlan;
 
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.assist.AssistContent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -20,6 +17,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -31,9 +29,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Calendar;
 
@@ -89,6 +84,7 @@ public class MainActivity extends AppCompatActivity
         checkFirstRun();
 
         setDailyAlarm();
+        displayKurse();
 
 //        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
 
@@ -223,6 +219,43 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void displayKurse(){
+        final LinearLayout ll = (LinearLayout) findViewById(R.id.main_kurse_display);
+
+        mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
+                    String kurs = childSnapshot.child("name").getValue(String.class);
+
+                    mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String name = dataSnapshot.getKey();
+
+                            TextView tv = new TextView(MainActivity.this);
+                            tv.setText(name);
+                            tv.setPadding(32,32,32,32);
+                            tv.setTextColor(getResources().getColor(R.color.colorAccent));
+
+                            ll.addView(tv);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -301,16 +334,6 @@ public class MainActivity extends AppCompatActivity
                 startActivity(signIntent);
                 break;
         }
-//        if(id == R.id.nav_dashboard){
-//
-//        }
-//        else if (id == R.id.nav_vplan) {
-//            Intent intent = new Intent(this, VPlanActivity.class);
-//            startActivity(intent);
-//        } else if (id == R.id.nav_settings) {
-//            Intent intent = new Intent(this, SettingsActivity.class);
-//            startActivity(intent);
-//        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

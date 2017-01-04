@@ -53,13 +53,20 @@ public class KurseActivity extends AppCompatActivity
 
         mAuth = FirebaseAuth.getInstance();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+
+        com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
+        kursCreateFab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v) {
                 createDialog(1);
+            }
+        });
+
+        com.github.clans.fab.FloatingActionButton kursJoinFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_join_fab);
+        kursJoinFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createDialog(2);
             }
         });
 
@@ -166,13 +173,27 @@ public class KurseActivity extends AppCompatActivity
         final EditText kursName = (EditText)   textEntryView.findViewById(R.id.dialog_add_abk);
         final EditText kursSecret = (EditText) textEntryView.findViewById(R.id.dialog_add_pwd);
         builder.setView(textEntryView);
-        builder.setTitle("Neuen Kurs erstellen");
-        builder.setPositiveButton("Hinzufügen", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                createKurs(kursName.getText().toString(), kursSecret.getText().toString());
-            }
-        });
+        switch (type){
+            case 1:
+                builder.setTitle("Neuen Kurs erstellen");
+                builder.setPositiveButton("Hinzufügen", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        createKurs(kursName.getText().toString(), kursSecret.getText().toString());
+                    }
+                });
+                break;
+            case 2:
+                builder.setTitle("Kurs beitreten");
+                builder.setPositiveButton("Beitreten", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        joinKurs(kursName.getText().toString(), kursSecret.getText().toString());
+                    }
+                });
+                break;
+        }
+
         builder.setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -222,6 +243,13 @@ public class KurseActivity extends AppCompatActivity
                 t.show();
             }
         });
+    }
+
+    private void joinKurs(final String name, final String secret){
+        HashMap<String, Object> user = new HashMap<String, Object>();
+        user.put("name", name);
+        user.put("secret", secret);
+        mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).setValue(user);
     }
 
     @Override

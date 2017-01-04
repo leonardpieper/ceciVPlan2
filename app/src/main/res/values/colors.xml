@@ -3,12 +3,12 @@
     <!--App main colors-->
     <color name="colorPrimary">#607D8B</color>
     <color name="colorPrimaryDark">#455A64</color>
-    <color name="colorAccent">#009688</color>
+    <color name="colorAccent">#FF9800</color>
 
     <!--More colors for swiperefresh or else-->
     <color name="extraColorPrimary1">#78909C</color>
-    <color name="extraColorAccent1">#26A69A</color>
-    <color name="extraColorAccent2">#00695C</color>
+    <color name="extraColorAccent1">#FFCC80</color>
+    <color name="extraColorAccent2">#F57C00</color>
 
     <color name="white">#FFFFFF</color>
     <color name="background">#E6E6E6</color>
