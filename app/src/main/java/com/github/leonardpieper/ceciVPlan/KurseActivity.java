@@ -8,6 +8,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -120,6 +122,13 @@ public class KurseActivity extends AppCompatActivity
     }
 
     private CardView createKursCard(final String title){
+        DisplayMetrics dm = new DisplayMetrics();
+        KurseActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
+        int width = dm.widthPixels ;
+        int sixthWidth = width/6;
+        int seventhHeight = width/7;
+
+
         CardView cv = new CardView(this);
         cv.setRadius(1);
         cv.setContentPadding(15, 15, 15, 15);
@@ -134,34 +143,93 @@ public class KurseActivity extends AppCompatActivity
             }
         });
 
+
         LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
         cvParams.setMargins(0,1,0,1);
 
+        LinearLayout.LayoutParams llParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+
+        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
+                sixthWidth,
+                seventhHeight
+        );
+        ivParams.setMargins(0,0,35,0);
+
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setLayoutParams(llParams);
+
         TextView tv = new TextView(this);
         tv.setText(title);
+        tv.setGravity(Gravity.CENTER);
 
         cv.setLayoutParams(cvParams);
 
-        kurseIcons = getResources().getStringArray(R.array.kursIcons);
-        for(String kursIcon:kurseIcons){
-            Matcher m = Pattern.compile("\\b"+kursIcon+"\\s").matcher(title);
-            if(m.find()){
-//                ImageView iv = new ImageView(this);
-//                iv.setBackgroundResource(R.drawable.ic_deutsch_book);
-//                iv.setScaleType(ImageView.ScaleType.FIT_START);
-//                cv.addView(iv);
-            }
-        }
+        ImageView iv = new ImageView(KurseActivity.this);
+        iv.setBackgroundResource(getResourceIdByName(title));
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        iv.setAdjustViewBounds(true);
+        iv.setLayoutParams(ivParams);
 
+        linearLayout.addView(iv);
+        linearLayout.addView(tv);
 
-
-        cv.addView(tv);
+        cv.addView(linearLayout);
 
         return cv;
     }
+
+    private int getResourceIdByName(String name){
+        String arr[] = name.split(" ", 2);
+        String fach = arr[0];
+        fach=fach.toLowerCase();
+        switch (fach){
+            case "bi":
+                return R.drawable.ic_biologie_tree;
+            case "ch":
+                return  R.drawable.ic_chemie_poppet;
+            case "d":
+                return R.drawable.ic_deutsch_book;
+            case "e":
+                return R.drawable.ic_englisch_book;
+            case "ek":
+                return R.drawable.ic_erdkunde_landscape;
+            case "el":
+                return R.drawable.ic_ernahrungslehre_dining;
+            case "ew":
+                return R.drawable.ic_erziehungswissenschaften_child;
+            case "f":
+                return R.drawable.ic_franzosisch_book;
+            case "ge":
+                return R.drawable.ic_geschichte_hourglass;
+            case "if":
+                return R.drawable.ic_informatik_computer;
+            case "ku":
+                return R.drawable.ic_kunst_art;
+            case "m":
+                return R.drawable.ic_mathe_calc;
+            case "mu":
+                return R.drawable.ic_musik_note;
+            case "pl":
+                return R.drawable.ic_philosophie_scroll;
+            case "ph":
+                return R.drawable.ic_physik_lightbulb;
+            case "sw":
+                return R.drawable.ic_sozialwissenschaften_group;
+            case "s":
+                return R.drawable.ic_spanisch_book;
+            case "sp":
+                return R.drawable.ic_sport_run;
+            default:
+                return R.drawable.ic_school_black_24dp;
+        }
+    }
+
 
     private void createDialog(int type){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
