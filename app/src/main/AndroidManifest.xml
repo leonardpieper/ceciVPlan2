@@ -24,11 +24,33 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts all URIs that begin with "http://test-e84e5.firebaseapp.com" -->
+                <data
+                    android:host="test-e84e5.firebaseapp.com"
+                    android:pathPrefix="/"
+                    android:scheme="http" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".VPlanActivity"
             android:label="@string/title_activity_vplan"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "http://test-e84e5.firebaseapp.com/vplan" -->
+                <data
+                    android:host="test-e84e5.firebaseapp.com"
+                    android:pathPrefix="/vplan"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -51,7 +73,19 @@
         <activity
             android:name=".KurseActivity"
             android:label="@string/title_activity_kurse"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "http://test-e84e5.firebaseapp.com/kurse" -->
+                <data
+                    android:host="test-e84e5.firebaseapp.com"
+                    android:pathPrefix="/kurse"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
         <activity android:name=".KursActivity" />
         <activity android:name=".SignUpAnonymActivity" />
         <activity android:name=".DevActivity" />

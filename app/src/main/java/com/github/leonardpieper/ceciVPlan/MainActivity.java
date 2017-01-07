@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,7 +17,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -29,6 +34,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.Calendar;
 
@@ -231,14 +237,57 @@ public class MainActivity extends AppCompatActivity
                     mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            String name = dataSnapshot.getKey();
+                            final String name = dataSnapshot.getKey();
+
+                            DisplayMetrics dm = new DisplayMetrics();
+                            MainActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
+                            int width = dm.widthPixels ;
+                            int sixthWidth = width/6;
+                            int seventhHeight = width/7;
+
+                            LinearLayout column = new LinearLayout(MainActivity.this);
+                            LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                            );
+                            LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
+                                    sixthWidth,
+                                    seventhHeight
+                            );
+                            LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                            );
+
+                            column.setLayoutParams(columnParams);
+                            column.setPadding(32,32,32,32);
+                            column.setOrientation(LinearLayout.VERTICAL);
+                            column.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(MainActivity.this, KursActivity.class);
+                                    intent.putExtra("name", name);
+                                    startActivity(intent);
+                                }
+                            });
+
+                            ImageView iv = new ImageView(MainActivity.this);
+                            iv.setBackgroundResource(getResourceIdByName(name));
+                            iv.setScaleType(ImageView.ScaleType.FIT_START);
+                            iv.setAdjustViewBounds(true);
+                            iv.setLayoutParams(ivParams);
 
                             TextView tv = new TextView(MainActivity.this);
                             tv.setText(name);
-                            tv.setPadding(32,32,32,32);
+                            tv.setGravity(Gravity.CENTER);
                             tv.setTextColor(getResources().getColor(R.color.colorAccent));
+                            tv.setLayoutParams(tvParams);
 
-                            ll.addView(tv);
+                            column.addView(iv);
+                            column.addView(tv);
+
+                            ll.addView(column);
+                            ll.setPadding(0,0,0,0);
                         }
 
                         @Override
@@ -254,6 +303,52 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+    }
+
+    private int getResourceIdByName(String name){
+        String arr[] = name.split(" ", 2);
+        String fach = arr[0];
+        fach=fach.toLowerCase();
+        switch (fach){
+            case "bi":
+                return R.drawable.ic_biologie_tree;
+            case "ch":
+                return  R.drawable.ic_chemie_poppet;
+            case "d":
+                return R.drawable.ic_deutsch_book;
+            case "e":
+                return R.drawable.ic_englisch_book;
+            case "ek":
+                return R.drawable.ic_erdkunde_landscape;
+            case "el":
+                return R.drawable.ic_ernahrungslehre_dining;
+            case "ew":
+                return R.drawable.ic_erziehungswissenschaften_child;
+            case "f":
+                return R.drawable.ic_franzosisch_book;
+            case "ge":
+                return R.drawable.ic_geschichte_hourglass;
+            case "if":
+                return R.drawable.ic_informatik_computer;
+            case "ku":
+                return R.drawable.ic_kunst_art;
+            case "m":
+                return R.drawable.ic_mathe_calc;
+            case "mu":
+                return R.drawable.ic_musik_note;
+            case "pl":
+                return R.drawable.ic_philosophie_scroll;
+            case "ph":
+                return R.drawable.ic_physik_lightbulb;
+            case "sw":
+                return R.drawable.ic_sozialwissenschaften_group;
+            case "s":
+                return R.drawable.ic_spanisch_book;
+            case "sp":
+                return R.drawable.ic_sport_run;
+            default:
+                return R.drawable.ic_school_black_24dp;
+        }
     }
 
     @Override
