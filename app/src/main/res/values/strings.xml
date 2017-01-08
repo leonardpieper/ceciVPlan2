@@ -70,4 +70,6 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_klausuren">Klausuren</string>
     <string name="title_activity_kurse">KurseActivity</string>
+
+    <string name="preference_file_key">com.github.leonardpieper.ceciVPlan.PREFERENCE_FILE_KEY</string>
 </resources>

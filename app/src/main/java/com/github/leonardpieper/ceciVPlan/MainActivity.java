@@ -35,8 +35,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Calendar;
+
+import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -92,6 +95,9 @@ public class MainActivity extends AppCompatActivity
         setDailyAlarm();
         displayKurse();
 
+
+        System.out.println(FirebaseInstanceId.getInstance().getToken());
+        FirebaseMessaging.getInstance().subscribeToTopic("D__EFa");
 //        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
 
 
@@ -228,81 +234,82 @@ public class MainActivity extends AppCompatActivity
     private void displayKurse(){
         final LinearLayout ll = (LinearLayout) findViewById(R.id.main_kurse_display);
 
-        mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
-                    String kurs = childSnapshot.child("name").getValue(String.class);
+        if(mAuth.getCurrentUser() != null){
+            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
+                        String kurs = childSnapshot.child("name").getValue(String.class);
 
-                    mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            final String name = dataSnapshot.getKey();
+                        mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                final String name = dataSnapshot.getKey();
 
-                            DisplayMetrics dm = new DisplayMetrics();
-                            MainActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
-                            int width = dm.widthPixels ;
-                            int sixthWidth = width/6;
-                            int seventhHeight = width/7;
 
-                            LinearLayout column = new LinearLayout(MainActivity.this);
-                            LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.MATCH_PARENT
-                            );
-                            LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
-                                    sixthWidth,
-                                    seventhHeight
-                            );
-                            LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.MATCH_PARENT
-                            );
+                                final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
+                                int width = (int) (50 * scale + 0.5f);
+                                int height = (int) (50 * scale + 0.5f);
 
-                            column.setLayoutParams(columnParams);
-                            column.setPadding(32,32,32,32);
-                            column.setOrientation(LinearLayout.VERTICAL);
-                            column.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(MainActivity.this, KursActivity.class);
-                                    intent.putExtra("name", name);
-                                    startActivity(intent);
-                                }
-                            });
+                                LinearLayout column = new LinearLayout(MainActivity.this);
+                                LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
+                                        ViewGroup.LayoutParams.MATCH_PARENT,
+                                        ViewGroup.LayoutParams.MATCH_PARENT
+                                );
+                                LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
+                                        width,
+                                        height
+                                );
+                                LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
+                                        ViewGroup.LayoutParams.MATCH_PARENT,
+                                        ViewGroup.LayoutParams.MATCH_PARENT
+                                );
 
-                            ImageView iv = new ImageView(MainActivity.this);
-                            iv.setBackgroundResource(getResourceIdByName(name));
-                            iv.setScaleType(ImageView.ScaleType.FIT_START);
-                            iv.setAdjustViewBounds(true);
-                            iv.setLayoutParams(ivParams);
+                                column.setLayoutParams(columnParams);
+                                column.setPadding(32,0,32,0);
+                                column.setOrientation(LinearLayout.VERTICAL);
+                                column.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent intent = new Intent(MainActivity.this, KursActivity.class);
+                                        intent.putExtra("name", name);
+                                        startActivity(intent);
+                                    }
+                                });
 
-                            TextView tv = new TextView(MainActivity.this);
-                            tv.setText(name);
-                            tv.setGravity(Gravity.CENTER);
-                            tv.setTextColor(getResources().getColor(R.color.colorAccent));
-                            tv.setLayoutParams(tvParams);
+                                ImageView iv = new ImageView(MainActivity.this);
+                                iv.setBackgroundResource(getResourceIdByName(name));
+                                iv.setScaleType(ImageView.ScaleType.FIT_START);
+                                iv.setAdjustViewBounds(true);
+                                iv.setLayoutParams(ivParams);
 
-                            column.addView(iv);
-                            column.addView(tv);
+                                TextView tv = new TextView(MainActivity.this);
+                                tv.setText(name);
+                                tv.setGravity(Gravity.CENTER);
+                                tv.setTextColor(getResources().getColor(R.color.colorAccent));
+                                tv.setLayoutParams(tvParams);
 
-                            ll.addView(column);
-                            ll.setPadding(0,0,0,0);
-                        }
+                                column.addView(iv);
+                                column.addView(tv);
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                                ll.addView(column);
+                                ll.setPadding(0,0,0,0);
+                            }
 
-                        }
-                    });
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     private int getResourceIdByName(String name){

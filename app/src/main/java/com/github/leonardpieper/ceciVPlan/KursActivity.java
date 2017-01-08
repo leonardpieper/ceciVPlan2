@@ -42,6 +42,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
@@ -50,6 +51,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -83,11 +85,15 @@ public class KursActivity extends AppCompatActivity
     private Intent intent;
     private String kursName;
 
+    private NestedScrollView scrollView;
+
     private LinearLayout lLayoutl;
     private Button dlBtn;
     private LinearLayout thumbnailRow;
     private int previousRowID = 0;
     private int thumbnailCount = 5000;
+
+    private int cancelledTimes = 0;
 
     ProgressDialog mProgress;
 
@@ -119,6 +125,9 @@ public class KursActivity extends AppCompatActivity
         mDatabase = FirebaseDatabase.getInstance().getReference();
         kursName = intent.getStringExtra("name");
 
+        setTitle(kursName);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
 
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
@@ -136,6 +145,8 @@ public class KursActivity extends AppCompatActivity
 
 
         getKursMessage(kursName);
+        scrollView = (NestedScrollView)findViewById(R.id.childScrollKurs);
+
 
         getResultsFromApi();
     }
@@ -157,6 +168,12 @@ public class KursActivity extends AppCompatActivity
                     tvMessage.setText(sender + " " + message);
                     llMessages.addView(tvMessage);
                 }
+                scrollView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        scrollView.fullScroll(FOCUS_DOWN);
+                    }
+                });
             }
 
             @Override
@@ -220,8 +237,9 @@ public class KursActivity extends AppCompatActivity
     private void chooseAccount() {
         if (EasyPermissions.hasPermissions(
                 this, Manifest.permission.GET_ACCOUNTS)) {
-            String accountName = getPreferences(Context.MODE_PRIVATE)
+            String accountName = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
                     .getString(PREF_ACCOUNT_NAME, null);
+
             if (accountName != null) {
                 mCredential.setSelectedAccountName(accountName);
                 getResultsFromApi();
@@ -274,7 +292,7 @@ public class KursActivity extends AppCompatActivity
                             data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
                         SharedPreferences settings =
-                                getPreferences(Context.MODE_PRIVATE);
+                                getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(PREF_ACCOUNT_NAME, accountName);
                         editor.apply();
@@ -668,9 +686,11 @@ public class KursActivity extends AppCompatActivity
                             ((GooglePlayServicesAvailabilityIOException) mLastError)
                                     .getConnectionStatusCode());
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    startActivityForResult(
-                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            KursActivity.REQUEST_AUTHORIZATION);
+                    if(cancelledTimes<1) {
+                        startActivityForResult(
+                                ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                                KursActivity.REQUEST_AUTHORIZATION);
+                    }
                 } else {
                     //FIXME: fix
 //                        mOutputText.setText("The following error occurred:\n"
@@ -680,6 +700,7 @@ public class KursActivity extends AppCompatActivity
                 //FIXME: fix
 //                    mOutputText.setText("Request cancelled.");
             }
+            cancelledTimes++;
         }
     }
     @Override

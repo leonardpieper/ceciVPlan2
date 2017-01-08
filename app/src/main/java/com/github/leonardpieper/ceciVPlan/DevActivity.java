@@ -1,5 +1,6 @@
 package com.github.leonardpieper.ceciVPlan;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +31,15 @@ public class DevActivity extends AppCompatActivity {
 
 
                 prefs.edit().putInt(PREF_VERSION_CODE_KEY, Integer.parseInt(versionET.getText().toString())).commit();
+            }
+        });
+
+        Button webViewBtn = (Button)findViewById(R.id.launchWebMode);
+        webViewBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(DevActivity.this, DevWebViewActivity.class);
+                startActivity(i);
             }
         });
     }

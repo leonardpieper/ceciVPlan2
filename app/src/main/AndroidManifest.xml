@@ -26,6 +26,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts all URIs that begin with "http://test-e84e5.firebaseapp.com" -->
@@ -38,7 +39,7 @@
         <activity
             android:name=".VPlanActivity"
             android:label="@string/title_activity_vplan"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -73,7 +74,7 @@
         <activity
             android:name=".KurseActivity"
             android:label="@string/title_activity_kurse"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -89,6 +90,9 @@
         <activity android:name=".KursActivity" />
         <activity android:name=".SignUpAnonymActivity" />
         <activity android:name=".DevActivity" />
+        <activity
+            android:name=".DevWebViewActivity"
+            android:theme="@android:style/Theme.NoTitleBar"></activity>
     </application>
 
 </manifest>

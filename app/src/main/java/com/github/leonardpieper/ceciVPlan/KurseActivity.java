@@ -52,6 +52,7 @@ public class KurseActivity extends AppCompatActivity
         setContentView(R.layout.activity_kurse);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle("Kurse");
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -122,11 +123,15 @@ public class KurseActivity extends AppCompatActivity
     }
 
     private CardView createKursCard(final String title){
-        DisplayMetrics dm = new DisplayMetrics();
-        KurseActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int width = dm.widthPixels ;
-        int sixthWidth = width/6;
-        int seventhHeight = width/7;
+//        DisplayMetrics dm = new DisplayMetrics();
+//        KurseActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
+//        int width = dm.widthPixels ;
+//        int sixthWidth = width/6;
+//        int seventhHeight = width/7;
+
+        final float scale = KurseActivity.this.getResources().getDisplayMetrics().density;
+        int width = (int) (50 * scale + 0.5f);
+        int height = (int) (50 * scale + 0.5f);
 
 
         CardView cv = new CardView(this);
@@ -156,8 +161,8 @@ public class KurseActivity extends AppCompatActivity
         );
 
         LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
-                sixthWidth,
-                seventhHeight
+                width,
+                height
         );
         ivParams.setMargins(0,0,35,0);
 
