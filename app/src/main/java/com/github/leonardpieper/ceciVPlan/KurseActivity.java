@@ -73,6 +73,21 @@ public class KurseActivity extends AppCompatActivity
             }
         });
 
+        com.github.clans.fab.FloatingActionButton kursLeaveFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_edit_fab);
+        kursLeaveFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LinearLayout kursell = (LinearLayout)findViewById(R.id.kurse_ll);
+                for(int i = 0; i<kursell.getChildCount(); i++){
+//                    View childView = kursell.getChildAt(i);
+                    ViewGroup cvChildViews = (ViewGroup) kursell.getChildAt(i);
+                    ViewGroup llChildViews = (ViewGroup) cvChildViews.getChildAt(0);
+                    View leaveBtn = llChildViews.getChildAt(2);
+                    leaveBtn.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -81,7 +96,25 @@ public class KurseActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        getPermissionStatus();
         getKurse();
+    }
+
+    private void getPermissionStatus(){
+        mRootRef.child("Data").child("lehrerRead").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue(Boolean.class)==true){
+                    com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
+                    kursCreateFab.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void getKurse(){
@@ -175,6 +208,19 @@ public class KurseActivity extends AppCompatActivity
 
         cv.setLayoutParams(cvParams);
 
+        ImageView exiv = new ImageView(KurseActivity.this);
+        exiv.setBackgroundResource(R.drawable.ic_exit_to_app_red_24dp);
+        exiv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        exiv.setAdjustViewBounds(true);
+        exiv.setVisibility(View.GONE);
+        exiv.setTag("leaveBtn");
+        exiv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                leaveKurs(title);
+            }
+        });
+
         ImageView iv = new ImageView(KurseActivity.this);
         iv.setBackgroundResource(getResourceIdByName(title));
         iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -183,10 +229,20 @@ public class KurseActivity extends AppCompatActivity
 
         linearLayout.addView(iv);
         linearLayout.addView(tv);
+        linearLayout.addView(exiv);
 
         cv.addView(linearLayout);
 
         return cv;
+    }
+
+    private void leaveKurs(String name){
+        if(mAuth.getCurrentUser()!=null) {
+            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).removeValue();
+        }else {
+            Toast t = Toast.makeText(KurseActivity.this, "Kein Nutzer angemeldet", Toast.LENGTH_LONG);
+            t.show();
+        }
     }
 
     private int getResourceIdByName(String name){

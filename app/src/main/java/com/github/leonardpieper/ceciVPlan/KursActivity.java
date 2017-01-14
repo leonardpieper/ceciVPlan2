@@ -7,14 +7,20 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
+import com.google.api.client.http.FileContent;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 
+import com.google.api.client.util.IOUtils;
 import com.google.api.services.drive.DriveScopes;
 
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.ParentReference;
+import com.google.api.services.drive.model.Permission;
+import com.google.common.io.Files;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,19 +32,25 @@ import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
@@ -59,12 +71,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +112,7 @@ public class KursActivity extends AppCompatActivity
 
     ProgressDialog mProgress;
 
+    static final int READ_REQUEST_CODE = 42;
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
@@ -139,6 +155,14 @@ public class KursActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 sendKursMessage();
+            }
+        });
+
+        Button uploadBtn = (Button)findViewById(R.id.kursMediaUploadBtn);
+        uploadBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openFileChooser();
             }
         });
 
@@ -198,6 +222,18 @@ public class KursActivity extends AppCompatActivity
 
         mKursRef.updateChildren(newMessage);
         etMessage.setText("");
+    }
+
+    private void openFileChooser(){
+        Intent fileIntent;
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT){
+            fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        }else {
+            fileIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        }
+        fileIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        fileIntent.setType("*/*");
+        startActivityForResult(fileIntent, READ_REQUEST_CODE);
     }
 
 
@@ -306,11 +342,15 @@ public class KursActivity extends AppCompatActivity
                     getResultsFromApi();
                 }
                 break;
+            case READ_REQUEST_CODE:
+                if(resultCode == RESULT_OK){
+                    new MakeRequestUploadTask(mCredential).execute(data);
+                }
         }
     }
 
     public void getDownloadableMedia(String kurs, int count){
-        Query kursStorageRef = mDatabase.child("Kurse").child(kurs).child("storagePath").orderByChild("uploadTime").limitToFirst(count);
+        Query kursStorageRef = mDatabase.child("Kurse").child(kurs).child("storagePath").orderByChild("date").limitToLast(count);
 
         kursStorageRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -318,7 +358,21 @@ public class KursActivity extends AppCompatActivity
 
                 for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
                     String id = childSnapshot.child("id").getValue(String.class);
-                    new MakeRequestTask(mCredential).execute(id);
+                    String name = childSnapshot.child("title").getValue(String.class);
+
+//                    ConnectivityManager cm =
+//                            (ConnectivityManager)KursActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+//                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+//                    boolean isWifi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+//                    boolean isLan = activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET;
+
+//                    if(isWifi||isLan){
+//                        new MakeRequestTask(mCredential).execute(id);
+//                    }else{
+                        getLocalMedia(name, id);
+//                    }
+
+
                 }
             }
 
@@ -330,43 +384,115 @@ public class KursActivity extends AppCompatActivity
 
     }
 
-    public java.io.File getAlbumStorageDir(String albumName) {
-        // Get the directory for the user's public pictures directory.
-        java.io.File file = new java.io.File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), albumName);
-        if (!file.mkdirs()) {
-                Log.e("KursActivity", "Directory not created");
+    private void getLocalMedia(String title, String id){
+
+        String root = Environment.getExternalStorageDirectory().toString();
+        java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
+        java.io.File f = new java.io.File(myDir, title);
+
+        if(f.exists()) {
+            FileInputStream fis = null;
+            BufferedInputStream buf = null;
+
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+
+            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), bmOptions);
+            if(bitmap!=null) {
+                makeCard(title, bitmap);
+            }
+        }else{
+            new MakeRequestTask(mCredential).execute(id);
         }
-        return file;
     }
 
-    public void setDlBtn(Bitmap driveBitmap) {
+    public CardView makeCard(String title, final Bitmap image){
+        int id = (int)(Math.random()*100);
 
-//        EasyPermissions.requestPermissions(
-//                this,
-//                "This app needs to access your Google account (via Contacts).",
-//                1009,
-//                Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        java.io.File dir = getAlbumStorageDir("ceciplan");
-        System.out.println("Hi");
+        CardView cv = new CardView(KursActivity.this);
+        RelativeLayout rl = new RelativeLayout(KursActivity.this);
 
-//        java.io.File root = Environment.getExternalStorageDirectory();
-//
-//        java.io.File dir = new java.io.File(root.getAbsolutePath() + "/ceciplan");
-//        dir.mkdirs();
+        DisplayMetrics dm = new DisplayMetrics();
+        KursActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
+        int width = dm.widthPixels ;
+        int height = dm.heightPixels;
+        int halfWidth = new Double(width/2.3).intValue();
+        int fifthHeight = new Double(height/5).intValue();
 
-        java.io.File file = new java.io.File(dir, "Hallo.png");
+        float aspectRatio = image.getWidth() /
+                (float) image.getHeight();
 
-        try {
-            FileOutputStream fs = new FileOutputStream(file);
-            driveBitmap.compress(Bitmap.CompressFormat.PNG, 100, fs);
+        RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        rlParams.setMargins(8,8,8,8);
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(
+                halfWidth,
+                Math.round(halfWidth / aspectRatio)
+        );
 
+
+        LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
+                fifthHeight,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        cvParams.setMargins(8,8,8,8);
+
+        RelativeLayout.LayoutParams rlTvLayout = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        rlTvLayout.addRule(RelativeLayout.BELOW, id);
+        rlTvLayout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+
+        RelativeLayout.LayoutParams rlBtnLayout = new RelativeLayout.LayoutParams(100, 100);
+        rlBtnLayout.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        rlBtnLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+
+        cv.setLayoutParams(cvParams);
+        rl.setLayoutParams(rlParams);
+
+        // Set CardView corner radius
+        cv.setRadius(4);
+        // Set cardView content padding
+        cv.setContentPadding(15, 15, 15, 15);
+        // Set CardView elevation
+        cv.setCardElevation(5);
+
+        ImageView ivImage = new ImageView(KursActivity.this);
+        ivImage.setLayoutParams(imgParams);
+        ivImage.setImageBitmap(image);
+        ivImage.setScaleType(ImageView.ScaleType.FIT_START);
+        ivImage.setId(id);
+
+        TextView tvTitle = new TextView(KursActivity.this);
+        tvTitle.setText(title);
+        tvTitle.setLayoutParams(rlTvLayout);
+
+//        Button dlBtn = new Button(KursActivity.this);
+//        dlBtn.setLayoutParams(rlBtnLayout);
+//        dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
+//        dlBtn.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dlFile();
+//            }
+//        });
+
+
+
+
+//            ll.setOrientation(VERTICAL);
+        rl.addView(ivImage);
+        rl.addView(tvTitle);
+        rl.addView(dlBtn);
+
+        cv.addView(rl);
+
+        return cv;
 
     }
+
 
     /**
      * Respond to requests for permissions at runtime for API 23 and above.
@@ -477,6 +603,7 @@ public class KursActivity extends AppCompatActivity
     private class MakeRequestTask extends AsyncTask<String, Void, String> {
         private ImageView mOutputImage;
         private Bitmap bm;
+        private byte[]content;
         private String title;
         private com.google.api.services.drive.Drive mService = null;
         private Exception mLastError = null;
@@ -536,6 +663,19 @@ public class KursActivity extends AppCompatActivity
                         String charset = m.matches() ? m.group(1) : "UTF-8";
 
                         InputStream inputStream = ucon.getInputStream();
+
+                       content = new byte[inputStream.available()];
+                        inputStream.read(content);
+
+//                        java.io.File dir = new java.io.File(getCacheDir().getPath()+"/tmp");
+//                        dir.mkdirs();
+//                        java.io.File content = new java.io.File(dir + java.io.File.separator + "download.tmp");
+//                        OutputStream outputStream = new FileOutputStream(content);
+//                        outputStream.write(buffer);
+
+//                        driveFile = content;
+
+
                         bm = BitmapFactory.decodeStream(inputStream);
                     }
                 } catch (UnsupportedEncodingException e) {
@@ -548,7 +688,7 @@ public class KursActivity extends AppCompatActivity
             }
         }
 
-        public CardView makeCard(String title, Bitmap image){
+        public CardView makeCard(String title, final Bitmap image){
             int id = (int)(Math.random()*100);
 
             CardView cv = new CardView(KursActivity.this);
@@ -557,7 +697,9 @@ public class KursActivity extends AppCompatActivity
             DisplayMetrics dm = new DisplayMetrics();
             KursActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
             int width = dm.widthPixels ;
+            int height = dm.heightPixels;
             int halfWidth = new Double(width/2.3).intValue();
+            int fifthHeight = new Double(height/5).intValue();
 
             float aspectRatio = image.getWidth() /
                     (float) image.getHeight();
@@ -575,7 +717,7 @@ public class KursActivity extends AppCompatActivity
 
 
             LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
-                    halfWidth,
+                    fifthHeight,
                     ViewGroup.LayoutParams.MATCH_PARENT
             );
             cvParams.setMargins(8,8,8,8);
@@ -613,6 +755,12 @@ public class KursActivity extends AppCompatActivity
             Button dlBtn = new Button(KursActivity.this);
             dlBtn.setLayoutParams(rlBtnLayout);
             dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
+            dlBtn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dlFile();
+                }
+            });
 
 
 
@@ -628,12 +776,25 @@ public class KursActivity extends AppCompatActivity
 
         }
 
+        private void dlFile(){
+            String root = Environment.getExternalStorageDirectory().toString();
+            java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
+            myDir.mkdirs();
+            java.io.File myFile = new java.io.File(myDir, title);
+
+            try {
+                FileOutputStream fOut = new FileOutputStream(myFile);
+                fOut.write(content);
+                fOut.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         @Override
         protected void onPreExecute() {
             mOutputImage = new ImageView(KursActivity.this);
-//                mOutputText.setText("");
-//                mProgress.show();
         }
 
         @Override
@@ -698,6 +859,155 @@ public class KursActivity extends AppCompatActivity
                 }
             } else {
                 //FIXME: fix
+//                    mOutputText.setText("Request cancelled.");
+            }
+            cancelledTimes++;
+        }
+    }
+
+    /**
+     * An asynchronous task that handles the Drive API call.
+     * Placing the API calls in their own task ensures the UI stays responsive.
+     */
+    private class MakeRequestUploadTask extends AsyncTask<Intent, Void, String> {
+        private com.google.api.services.drive.Drive mService = null;
+        private Exception mLastError = null;
+
+        MakeRequestUploadTask(GoogleAccountCredential credential) {
+            HttpTransport transport = AndroidHttp.newCompatibleTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            mService = new com.google.api.services.drive.Drive.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("Drive API Android Quickstar")
+                    .build();
+        }
+
+
+        /**
+         * Background task to call Drive API.
+         *
+         * @param params no parameters needed for this task.
+         */
+        @Override
+        protected String doInBackground(Intent... params) {
+//            android.os.Debug.waitForDebugger();
+            try {
+                uploadMedia(params[0]);
+                return "Hi";
+            } catch (Exception e) {
+                mLastError = e;
+                cancel(true);
+                return null;
+            }
+        }
+
+        private void uploadMedia(Intent data) throws IOException {
+            Uri uri = null;
+            if(data != null){
+                uri = data.getData();
+
+                getContentResolver().openInputStream(uri);
+
+                InputStream i = getContentResolver().openInputStream(uri);
+                byte[] buffer = new byte[i.available()];
+                i.read(buffer);
+                String mimeType = URLConnection.guessContentTypeFromStream(i);
+                java.io.File filename = new java.io.File(uri.getPath());
+                String name = filename.getName();
+
+
+                java.io.File dir = new java.io.File(getCacheDir().getPath()+"/tmp");
+                dir.mkdirs();
+                java.io.File content = new java.io.File(dir + java.io.File.separator + name);
+                OutputStream outputStream = new FileOutputStream(content);
+                outputStream.write(buffer);
+
+
+                FileContent mediaContent = new FileContent(mimeType, content);
+
+                File body = new File();
+                body.setTitle(name);
+
+                File file = mService.files().insert(body, mediaContent).execute();
+
+                System.out.println(file.getId());
+
+                Permission permission = new Permission();
+                permission.setRole("reader");
+                permission.setType("anyone");
+                permission.setWithLink(true);
+                try {
+                    mService.permissions().insert(file.getId(), permission).execute();
+
+                    long date = Calendar.getInstance().getTimeInMillis();
+
+                    HashMap<String, Object> hm = new HashMap<>();
+                    hm.put("id", file.getId());
+                    hm.put("date", date);
+                    hm.put("title", file.getTitle());
+
+                    mDatabase.child("Kurse").child(kursName).child("storagePath").child(file.getId()).setValue(hm);
+                    mDatabase.child("Kurse").child(kursName).child("timestamp").setValue(date);
+                }catch (IOException e){
+                    System.out.println("An error occurred: " + e);
+                }
+
+
+            }
+        }
+
+        private String readTextFromUri(Uri uri) throws IOException {
+            InputStream inputStream = getContentResolver().openInputStream(uri);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    inputStream));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            inputStream.close();
+            return stringBuilder.toString();
+        }
+
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected void onPostExecute(String output) {
+            //FIXME: Fix
+            if (output == null) {
+                Toast toast = Toast.makeText(KursActivity.this, "Upload abgeschlossen", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+//                mProgress.hide();
+            if (mLastError != null) {
+                if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
+                    showGooglePlayServicesAvailabilityErrorDialog(
+                            ((GooglePlayServicesAvailabilityIOException) mLastError)
+                                    .getConnectionStatusCode());
+                } else if (mLastError instanceof UserRecoverableAuthIOException) {
+                    if(cancelledTimes<1) {
+                        startActivityForResult(
+                                ((UserRecoverableAuthIOException) mLastError).getIntent(),
+                                KursActivity.REQUEST_AUTHORIZATION);
+                    }
+                } else {
+                    Toast toast = Toast.makeText(KursActivity.this, mLastError.getMessage(), Toast.LENGTH_LONG);
+                    toast.show();
+                    //FIXME: fix
+//                        mOutputText.setText("The following error occurred:\n"
+//                                + mLastError.getMessage());
+                }
+            } else {
+                //FIXME: fix
+                Toast toast = Toast.makeText(KursActivity.this, mLastError.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
 //                    mOutputText.setText("Request cancelled.");
             }
             cancelledTimes++;

@@ -92,7 +92,7 @@
         <activity android:name=".DevActivity" />
         <activity
             android:name=".DevWebViewActivity"
-            android:theme="@android:style/Theme.NoTitleBar"></activity>
+            android:theme="@android:style/Theme.NoTitleBar" />
     </application>
 
 </manifest>

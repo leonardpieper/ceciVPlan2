@@ -34,8 +34,11 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -54,8 +57,14 @@ public class SettingsActivity extends AppCompatActivity {
     private Button btnSignUp;
     private Button btnDriveLink;
 
+    private EditText etVPlanU;
+    private EditText etVPlanPwd;
+    private Button btnSetVPlan;
+
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
@@ -83,6 +92,10 @@ public class SettingsActivity extends AppCompatActivity {
         btnDriveLink = (Button)findViewById(R.id.btnDriveLink);
 
         btnJahrgangslct = (Button)findViewById(R.id.btnSpinnerJahrgang);
+
+        etVPlanU = (EditText)findViewById(R.id.set_vplanU);
+        etVPlanPwd = (EditText)findViewById(R.id.set_vplanPwd);
+        btnSetVPlan = (Button)findViewById(R.id.set_btnSetVPlan);
 
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
@@ -163,6 +176,13 @@ public class SettingsActivity extends AppCompatActivity {
                 linkGDrive();
             }
         });
+
+        btnSetVPlan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateVPlanCred();
+            }
+        });
     }
 
     @Override
@@ -206,6 +226,27 @@ public class SettingsActivity extends AppCompatActivity {
 //            btnJahrgangslct.setVisibility(View.VISIBLE);
             btnLogin.setVisibility(View.VISIBLE);
             btnSignUp.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateVPlanCred(){
+        String uname = etVPlanU.getText().toString();
+        String pwd = etVPlanPwd.getText().toString();
+        if(!uname.isEmpty()&&!pwd.isEmpty()){
+            if(mAuth.getCurrentUser()!=null) {
+                HashMap<String, Object> hm = new HashMap<>();
+                hm.put("uname", uname);
+                hm.put("pwd", pwd);
+                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("vPlan").setValue(hm);
+                Toast t = Toast.makeText(SettingsActivity.this, "Daten erfolgreich geändert", Toast.LENGTH_SHORT);
+                t.show();
+            }else {
+                Toast t = Toast.makeText(SettingsActivity.this, "Kein Nutzer angemeldet", Toast.LENGTH_LONG);
+                t.show();
+            }
+        }else {
+            Toast t = Toast.makeText(SettingsActivity.this, "Bitte Benutzernamen und Passwort angeben", Toast.LENGTH_LONG);
+            t.show();
         }
     }
 
