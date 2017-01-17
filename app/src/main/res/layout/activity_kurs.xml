@@ -77,6 +77,12 @@
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:elevation="0dp"
                         android:id="@+id/kursMediaUploadBtn" />
+                    <ProgressBar
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/kursMediaProgress"
+                        android:indeterminate="false"
+                        style="@android:style/Widget.Material.ProgressBar.Horizontal"/>
 
                     <TextView
                         android:text="Powered by Google Drive™ "

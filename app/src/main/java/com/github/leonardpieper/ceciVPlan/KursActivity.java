@@ -31,6 +31,7 @@ import com.google.firebase.database.ValueEventListener;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -68,6 +69,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -158,7 +160,7 @@ public class KursActivity extends AppCompatActivity
             }
         });
 
-        Button uploadBtn = (Button)findViewById(R.id.kursMediaUploadBtn);
+        Button uploadBtn = (Button) findViewById(R.id.kursMediaUploadBtn);
         uploadBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,9 +169,8 @@ public class KursActivity extends AppCompatActivity
         });
 
 
-
         getKursMessage(kursName);
-        scrollView = (NestedScrollView)findViewById(R.id.childScrollKurs);
+        scrollView = (NestedScrollView) findViewById(R.id.childScrollKurs);
 
 
         getResultsFromApi();
@@ -208,7 +209,7 @@ public class KursActivity extends AppCompatActivity
     }
 
     private void sendKursMessage() {
-        EditText etMessage = (EditText)findViewById(R.id.kurs_message);
+        EditText etMessage = (EditText) findViewById(R.id.kurs_message);
         String message = etMessage.getText().toString();
         DatabaseReference mKursRef = mDatabase
                 .child("Kurse")
@@ -224,18 +225,17 @@ public class KursActivity extends AppCompatActivity
         etMessage.setText("");
     }
 
-    private void openFileChooser(){
+    private void openFileChooser() {
         Intent fileIntent;
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        }else {
+        } else {
             fileIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         }
         fileIntent.addCategory(Intent.CATEGORY_OPENABLE);
         fileIntent.setType("*/*");
         startActivityForResult(fileIntent, READ_REQUEST_CODE);
     }
-
 
 
     /**
@@ -343,20 +343,20 @@ public class KursActivity extends AppCompatActivity
                 }
                 break;
             case READ_REQUEST_CODE:
-                if(resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     new MakeRequestUploadTask(mCredential).execute(data);
                 }
         }
     }
 
-    public void getDownloadableMedia(String kurs, int count){
+    public void getDownloadableMedia(String kurs, int count) {
         Query kursStorageRef = mDatabase.child("Kurse").child(kurs).child("storagePath").orderByChild("date").limitToLast(count);
 
         kursStorageRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                     String id = childSnapshot.child("id").getValue(String.class);
                     String name = childSnapshot.child("title").getValue(String.class);
 
@@ -369,7 +369,8 @@ public class KursActivity extends AppCompatActivity
 //                    if(isWifi||isLan){
 //                        new MakeRequestTask(mCredential).execute(id);
 //                    }else{
-                        getLocalMedia(name, id);
+//                        getLocalMedia(name, id);
+                    new MakeRequestTask(mCredential).execute(id);
 //                    }
 
 
@@ -384,39 +385,48 @@ public class KursActivity extends AppCompatActivity
 
     }
 
-    private void getLocalMedia(String title, String id){
+    private void getLocalMedia(String title, String id) {
 
-        String root = Environment.getExternalStorageDirectory().toString();
+
         java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
         java.io.File f = new java.io.File(myDir, title);
 
-        if(f.exists()) {
-            FileInputStream fis = null;
-            BufferedInputStream buf = null;
-
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-
-            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), bmOptions);
-            if(bitmap!=null) {
+        if (f.getPath() != null) {
+            Bitmap bitmap = null;
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(KursActivity.this.getContentResolver(), path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (bitmap != null) {
                 makeCard(title, bitmap);
             }
-        }else{
+//            FileInputStream fis = null;
+//            BufferedInputStream buf = null;
+//
+//            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+//
+//            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), bmOptions);
+//            if(bitmap!=null) {
+//                makeCard(title, bitmap);
+//            }
+        } else {
             new MakeRequestTask(mCredential).execute(id);
         }
     }
 
-    public CardView makeCard(String title, final Bitmap image){
-        int id = (int)(Math.random()*100);
+    public CardView makeCard(String title, final Bitmap image) {
+        int id = (int) (Math.random() * 100);
 
         CardView cv = new CardView(KursActivity.this);
         RelativeLayout rl = new RelativeLayout(KursActivity.this);
 
         DisplayMetrics dm = new DisplayMetrics();
         KursActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int width = dm.widthPixels ;
+        int width = dm.widthPixels;
         int height = dm.heightPixels;
-        int halfWidth = new Double(width/2.3).intValue();
-        int fifthHeight = new Double(height/5).intValue();
+        int halfWidth = new Double(width / 2.3).intValue();
+        int fifthHeight = new Double(height / 5).intValue();
 
         float aspectRatio = image.getWidth() /
                 (float) image.getHeight();
@@ -425,7 +435,7 @@ public class KursActivity extends AppCompatActivity
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
         );
-        rlParams.setMargins(8,8,8,8);
+        rlParams.setMargins(8, 8, 8, 8);
 
         LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(
                 halfWidth,
@@ -437,7 +447,7 @@ public class KursActivity extends AppCompatActivity
                 fifthHeight,
                 ViewGroup.LayoutParams.MATCH_PARENT
         );
-        cvParams.setMargins(8,8,8,8);
+        cvParams.setMargins(8, 8, 8, 8);
 
         RelativeLayout.LayoutParams rlTvLayout = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -478,8 +488,6 @@ public class KursActivity extends AppCompatActivity
 //                dlFile();
 //            }
 //        });
-
-
 
 
 //            ll.setOrientation(VERTICAL);
@@ -603,8 +611,9 @@ public class KursActivity extends AppCompatActivity
     private class MakeRequestTask extends AsyncTask<String, Void, String> {
         private ImageView mOutputImage;
         private Bitmap bm;
-        private byte[]content;
+        private byte[] content;
         private String title;
+        private String dlUrl;
         private com.google.api.services.drive.Drive mService = null;
         private Exception mLastError = null;
 
@@ -627,11 +636,9 @@ public class KursActivity extends AppCompatActivity
         protected String doInBackground(String... params) {
 //            android.os.Debug.waitForDebugger();
             try {
-//                downloadFile(mService, getFileFromId());
 
                 downloadFile(getFileFromId(params[0]));
                 return "Hi";
-//                return getDataFromApi();
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
@@ -644,6 +651,7 @@ public class KursActivity extends AppCompatActivity
 
             System.out.println("Title: " + file.getTitle());
             title = file.getTitle();
+            dlUrl = file.getWebContentLink();
             System.out.println("Dl: " + file.getWebContentLink());
             System.out.println("Description: " + file.getDescription());
             System.out.println("MIME type: " + file.getMimeType());
@@ -664,19 +672,16 @@ public class KursActivity extends AppCompatActivity
 
                         InputStream inputStream = ucon.getInputStream();
 
-                       content = new byte[inputStream.available()];
-                        inputStream.read(content);
+                        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                        int nRead;
+                        byte[] data = new byte[1024];
+                        while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                            buffer.write(data, 0, nRead);
+                        }
+                        buffer.flush();
+                        content = buffer.toByteArray();
 
-//                        java.io.File dir = new java.io.File(getCacheDir().getPath()+"/tmp");
-//                        dir.mkdirs();
-//                        java.io.File content = new java.io.File(dir + java.io.File.separator + "download.tmp");
-//                        OutputStream outputStream = new FileOutputStream(content);
-//                        outputStream.write(buffer);
-
-//                        driveFile = content;
-
-
-                        bm = BitmapFactory.decodeStream(inputStream);
+                        bm = BitmapFactory.decodeByteArray(content, 0, content.length);
                     }
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -688,18 +693,28 @@ public class KursActivity extends AppCompatActivity
             }
         }
 
-        public CardView makeCard(String title, final Bitmap image){
-            int id = (int)(Math.random()*100);
+        public byte[] readFully(InputStream input) throws IOException {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            while ((bytesRead = input.read(buffer)) != -1) {
+                output.write(buffer, 0, bytesRead);
+            }
+            return output.toByteArray();
+        }
+
+        public CardView makeCard(String title, final Bitmap image) {
+            int id = (int) (Math.random() * 100);
 
             CardView cv = new CardView(KursActivity.this);
             RelativeLayout rl = new RelativeLayout(KursActivity.this);
 
             DisplayMetrics dm = new DisplayMetrics();
             KursActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
-            int width = dm.widthPixels ;
+            int width = dm.widthPixels;
             int height = dm.heightPixels;
-            int halfWidth = new Double(width/2.3).intValue();
-            int fifthHeight = new Double(height/5).intValue();
+            int halfWidth = new Double(width / 2.3).intValue();
+            int fifthHeight = new Double(height / 5).intValue();
 
             float aspectRatio = image.getWidth() /
                     (float) image.getHeight();
@@ -708,7 +723,7 @@ public class KursActivity extends AppCompatActivity
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
             );
-            rlParams.setMargins(8,8,8,8);
+            rlParams.setMargins(8, 8, 8, 8);
 
             LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(
                     halfWidth,
@@ -720,7 +735,7 @@ public class KursActivity extends AppCompatActivity
                     fifthHeight,
                     ViewGroup.LayoutParams.MATCH_PARENT
             );
-            cvParams.setMargins(8,8,8,8);
+            cvParams.setMargins(8, 8, 8, 8);
 
             RelativeLayout.LayoutParams rlTvLayout = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -763,8 +778,6 @@ public class KursActivity extends AppCompatActivity
             });
 
 
-
-
 //            ll.setOrientation(VERTICAL);
             rl.addView(ivImage);
             rl.addView(tvTitle);
@@ -776,7 +789,7 @@ public class KursActivity extends AppCompatActivity
 
         }
 
-        private void dlFile(){
+        private void dlFile() {
             String root = Environment.getExternalStorageDirectory().toString();
             java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
             myDir.mkdirs();
@@ -785,10 +798,20 @@ public class KursActivity extends AppCompatActivity
             try {
                 FileOutputStream fOut = new FileOutputStream(myFile);
                 fOut.write(content);
+                fOut.flush();
                 fOut.close();
+
+//                MediaStore.Images.Media.insertImage(getContentResolver(),myFile.getAbsolutePath(),myFile.getName(),myFile.getName());
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+
+//            DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+//            DownloadManager.Request request = new DownloadManager.Request(
+//                    Uri.parse(dlUrl));
+//            request.setDestinationInExternalFilesDir(KursActivity.this, "/cecivplan", title);
+//            long enqueue = dm.enqueue(request);
         }
 
 
@@ -810,24 +833,23 @@ public class KursActivity extends AppCompatActivity
 //                mOutputImage.setAdjustViewBounds(true);
 
 
-
-                if(thumbnailCount % 2 ==0){
+                if (thumbnailCount % 2 == 0) {
                     thumbnailRow = new LinearLayout(KursActivity.this);
                     LinearLayout.LayoutParams lLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
                     thumbnailRow.setLayoutParams(lLParams);
-                    thumbnailRow.setId(thumbnailCount+0);
+                    thumbnailRow.setId(thumbnailCount + 0);
 
                     thumbnailRow.addView(imageCard);
 
 
 //                    if(previousRowID !=5000){
-                        lLayoutl.addView(thumbnailRow);
+                    lLayoutl.addView(thumbnailRow);
 //                    }else{
 //                    }
 
                     previousRowID = thumbnailRow.getId();
                     thumbnailCount++;
-                }else{
+                } else {
                     thumbnailRow.addView(imageCard);
                     thumbnailCount++;
                 }
@@ -847,7 +869,7 @@ public class KursActivity extends AppCompatActivity
                             ((GooglePlayServicesAvailabilityIOException) mLastError)
                                     .getConnectionStatusCode());
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    if(cancelledTimes<1) {
+                    if (cancelledTimes < 1) {
                         startActivityForResult(
                                 ((UserRecoverableAuthIOException) mLastError).getIntent(),
                                 KursActivity.REQUEST_AUTHORIZATION);
@@ -903,7 +925,7 @@ public class KursActivity extends AppCompatActivity
 
         private void uploadMedia(Intent data) throws IOException {
             Uri uri = null;
-            if(data != null){
+            if (data != null) {
                 uri = data.getData();
 
                 getContentResolver().openInputStream(uri);
@@ -916,7 +938,7 @@ public class KursActivity extends AppCompatActivity
                 String name = filename.getName();
 
 
-                java.io.File dir = new java.io.File(getCacheDir().getPath()+"/tmp");
+                java.io.File dir = new java.io.File(getCacheDir().getPath() + "/tmp");
                 dir.mkdirs();
                 java.io.File content = new java.io.File(dir + java.io.File.separator + name);
                 OutputStream outputStream = new FileOutputStream(content);
@@ -948,7 +970,7 @@ public class KursActivity extends AppCompatActivity
 
                     mDatabase.child("Kurse").child(kursName).child("storagePath").child(file.getId()).setValue(hm);
                     mDatabase.child("Kurse").child(kursName).child("timestamp").setValue(date);
-                }catch (IOException e){
+                } catch (IOException e) {
                     System.out.println("An error occurred: " + e);
                 }
 
@@ -972,12 +994,16 @@ public class KursActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
+            ProgressBar progressBar = (ProgressBar) findViewById(R.id.kursMediaProgress);
+            progressBar.setIndeterminate(true);
         }
 
         @Override
         protected void onPostExecute(String output) {
             //FIXME: Fix
-            if (output == null) {
+            if (output != null) {
+                ProgressBar progressBar = (ProgressBar) findViewById(R.id.kursMediaProgress);
+                progressBar.setIndeterminate(false);
                 Toast toast = Toast.makeText(KursActivity.this, "Upload abgeschlossen", Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -992,7 +1018,7 @@ public class KursActivity extends AppCompatActivity
                             ((GooglePlayServicesAvailabilityIOException) mLastError)
                                     .getConnectionStatusCode());
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    if(cancelledTimes<1) {
+                    if (cancelledTimes < 1) {
                         startActivityForResult(
                                 ((UserRecoverableAuthIOException) mLastError).getIntent(),
                                 KursActivity.REQUEST_AUTHORIZATION);
@@ -1013,9 +1039,10 @@ public class KursActivity extends AppCompatActivity
             cancelledTimes++;
         }
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
                 this.finish();
                 break;
