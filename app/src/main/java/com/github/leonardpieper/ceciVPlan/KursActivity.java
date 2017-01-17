@@ -360,21 +360,33 @@ public class KursActivity extends AppCompatActivity
                     String id = childSnapshot.child("id").getValue(String.class);
                     String name = childSnapshot.child("title").getValue(String.class);
 
-//                    ConnectivityManager cm =
-//                            (ConnectivityManager)KursActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-//                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-//                    boolean isWifi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
-//                    boolean isLan = activeNetwork.getType() == ConnectivityManager.TYPE_ETHERNET;
 
-//                    if(isWifi||isLan){
-//                        new MakeRequestTask(mCredential).execute(id);
-//                    }else{
-//                        getLocalMedia(name, id);
-                    new MakeRequestTask(mCredential).execute(id);
-//                    }
+                    CardView imageCard = getLocalMedia(name, id);
+                    if(imageCard != null) {
+
+                        if (thumbnailCount % 2 == 0) {
+                            thumbnailRow = new LinearLayout(KursActivity.this);
+                            LinearLayout.LayoutParams lLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                            thumbnailRow.setLayoutParams(lLParams);
+                            thumbnailRow.setId(thumbnailCount + 0);
+
+                            thumbnailRow.addView(imageCard);
+
+
+                            lLayoutl.addView(thumbnailRow);
+
+                            previousRowID = thumbnailRow.getId();
+                            thumbnailCount++;
+                        } else {
+                            thumbnailRow.addView(imageCard);
+                            thumbnailCount++;
+                        }
+                    }
 
 
                 }
+
+
             }
 
             @Override
@@ -385,34 +397,24 @@ public class KursActivity extends AppCompatActivity
 
     }
 
-    private void getLocalMedia(String title, String id) {
+    private CardView getLocalMedia(String title, String id) {
 
-
+        String root = Environment.getExternalStorageDirectory().toString();
         java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
         java.io.File f = new java.io.File(myDir, title);
 
         if (f.getPath() != null) {
             Bitmap bitmap = null;
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(KursActivity.this.getContentResolver(), path);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+            bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
             if (bitmap != null) {
-                makeCard(title, bitmap);
+                return makeCard(title, bitmap);
             }
-//            FileInputStream fis = null;
-//            BufferedInputStream buf = null;
-//
-//            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-//
-//            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath(), bmOptions);
-//            if(bitmap!=null) {
-//                makeCard(title, bitmap);
-//            }
+
         } else {
             new MakeRequestTask(mCredential).execute(id);
         }
+        return null;
     }
 
     public CardView makeCard(String title, final Bitmap image) {
@@ -479,15 +481,15 @@ public class KursActivity extends AppCompatActivity
         tvTitle.setText(title);
         tvTitle.setLayoutParams(rlTvLayout);
 
-//        Button dlBtn = new Button(KursActivity.this);
-//        dlBtn.setLayoutParams(rlBtnLayout);
-//        dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
-//        dlBtn.setOnClickListener(new OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                dlFile();
-//            }
-//        });
+        Button dlBtn = new Button(KursActivity.this);
+        dlBtn.setLayoutParams(rlBtnLayout);
+        dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
+        dlBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
 
 //            ll.setOrientation(VERTICAL);
