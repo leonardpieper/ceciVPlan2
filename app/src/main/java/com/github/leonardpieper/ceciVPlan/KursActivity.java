@@ -409,6 +409,8 @@ public class KursActivity extends AppCompatActivity
             bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
             if (bitmap != null) {
                 return makeCard(title, bitmap);
+            }else {
+                new MakeRequestTask(mCredential).execute(id);
             }
 
         } else {
@@ -930,7 +932,7 @@ public class KursActivity extends AppCompatActivity
             if (data != null) {
                 uri = data.getData();
 
-                getContentResolver().openInputStream(uri);
+//                getContentResolver().openInputStream(uri);
 
                 InputStream i = getContentResolver().openInputStream(uri);
                 byte[] buffer = new byte[i.available()];
