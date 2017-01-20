@@ -7,3 +7,7 @@
 /build
 /captures
 /backend
+/app/client_secret.json
+/app/client_secret_dev.json
+/app/client_secret_production.json
+/app/google-services.json
