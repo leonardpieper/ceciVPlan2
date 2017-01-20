@@ -26,7 +26,10 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -36,6 +39,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 import java.util.Calendar;
 
@@ -46,6 +51,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
 
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -95,6 +101,8 @@ public class MainActivity extends AppCompatActivity
         setDailyAlarm();
         displayKurse();
 
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+
 
         System.out.println(FirebaseInstanceId.getInstance().getToken());
         FirebaseMessaging.getInstance().subscribeToTopic("D__EFa");
@@ -108,55 +116,57 @@ public class MainActivity extends AppCompatActivity
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null){
-                    DatabaseReference conditionRef = mRootRef.child("vPlan");
+                    if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+                        DatabaseReference conditionRef = mRootRef.child("vPlan");
 
-                    String stufe = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("jahrgang", "EF");
-                    final DatabaseReference stufenRef = conditionRef.child(stufe);
+                        String stufe = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("jahrgang", "EF");
+                        final DatabaseReference stufenRef = conditionRef.child(stufe);
 
-                    Log.d("FirebaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
+                        Log.d("FirebaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
 
-                    stufenRef.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            tlToday.removeAllViews();
-                            tlTomorrow.removeAllViews();
+                        stufenRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                tlToday.removeAllViews();
+                                tlTomorrow.removeAllViews();
 
 
-                            Vertretungsplan vPlan = new Vertretungsplan();
-                            String sToday = "";
-                            String sTomorrow = "";
-                            for(DataSnapshot vPlanSnapshot: dataSnapshot.getChildren()){
-                                String datum = vPlanSnapshot.child("Datum").getValue(String.class);
-                                if(!(datum == null || datum.contains("Datum"))) {
+                                Vertretungsplan vPlan = new Vertretungsplan();
+                                String sToday = "";
+                                String sTomorrow = "";
+                                for (DataSnapshot vPlanSnapshot : dataSnapshot.getChildren()) {
+                                    String datum = vPlanSnapshot.child("Datum").getValue(String.class);
+                                    if (!(datum == null || datum.contains("Datum"))) {
 
-                                    String fach = vPlanSnapshot.child("Fach").getValue(String.class);
-                                    String stunde = vPlanSnapshot.child("Stunde").getValue(String.class);
-                                    String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
-                                    String raum = vPlanSnapshot.child("Raum").getValue(String.class);
-                                    String text = vPlanSnapshot.child("Vertretungs-Text").getValue(String.class);
+                                        String fach = vPlanSnapshot.child("Fach").getValue(String.class);
+                                        String stunde = vPlanSnapshot.child("Stunde").getValue(String.class);
+                                        String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
+                                        String raum = vPlanSnapshot.child("Raum").getValue(String.class);
+                                        String text = vPlanSnapshot.child("Vertretungs-Text").getValue(String.class);
 
-                                    boolean bToday = vPlan.isToday(datum);
-                                    boolean bTomorrow = vPlan.isTomorrow(datum);
+                                        boolean bToday = vPlan.isToday(datum);
+                                        boolean bTomorrow = vPlan.isTomorrow(datum);
 
-                                    if(bToday){
-                                        addTableRow("today", fach, stunde, vertreter, raum, text);
+                                        if (bToday) {
+                                            addTableRow("today", fach, stunde, vertreter, raum, text);
 //                                        sToday = sToday + "\n" + fach + " " + stunde + " " + vertreter + " " + raum + " " + text;
 //                                        vPlanToday.setText(sToday);
-                                    }else if(bTomorrow){
-                                        addTableRow("tomorrow", fach, stunde, vertreter, raum, text);
+                                        } else if (bTomorrow) {
+                                            addTableRow("tomorrow", fach, stunde, vertreter, raum, text);
 //                                        sTomorrow = sTomorrow + "\n" + fach + " " + stunde + " " + vertreter + " " + raum + " " + text;
 //                                        vPlanTomorrow.setText(sTomorrow);
+                                        }
                                     }
+
                                 }
-
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            Log.d("MainActivity", databaseError.getMessage());
-                        }
-                    });
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                Log.d("MainActivity", databaseError.getMessage());
+                            }
+                        });
+                    }
 
                 }else{
                     Log.d("FirebaseAuth", "onAuthStateChanged:signed_out");
@@ -164,7 +174,26 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-//        mTextview = (TextView)findViewById(R.id.mTextView);
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+
+        mFirebaseRemoteConfig.activateFetched();
+        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
+        mFirebaseRemoteConfig.fetch(0)//21600 = 6 Hours in seconds
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+
+                        } else {
+                            Toast.makeText(MainActivity.this, "Fetch Failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
     }
 
     @Override

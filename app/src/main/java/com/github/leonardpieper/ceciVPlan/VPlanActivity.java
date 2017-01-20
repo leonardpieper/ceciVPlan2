@@ -32,6 +32,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,7 +75,7 @@ public class VPlanActivity extends AppCompatActivity
     private TableLayout tableQ2;
 
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
     private DatabaseReference conditionRef;
 
@@ -90,6 +91,7 @@ public class VPlanActivity extends AppCompatActivity
         setTitle("Vertretungsplan");
 
         mAuth = FirebaseAuth.getInstance();
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
@@ -184,34 +186,27 @@ public class VPlanActivity extends AppCompatActivity
 
             }
         });
-        crawler.execute("");
+        if(mFirebaseRemoteConfig.getBoolean("load_vplan_enabled")) {
+            crawler.execute("");
+        }
         if(mAuth.getCurrentUser()!=null){
-            conditionRef = mRootRef.child("vPlan");
-            getFBData();
+            if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+                conditionRef = mRootRef.child("vPlan");
+                getFBData();
+            }
         }else{
             mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
                 @Override
                 public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                     if(firebaseAuth.getCurrentUser()!=null) {
-                        conditionRef = mRootRef.child("vPlan");
-                        getFBData();
+                        if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+                            conditionRef = mRootRef.child("vPlan");
+                            getFBData();
+                        }
                     }
                 }
             });
         }
-
-
-//        mAuthListener = new FirebaseAuth.AuthStateListener() {
-//            @Override
-//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-//                FirebaseUser user = firebaseAuth.getCurrentUser();
-//                if(user != null){
-
-//                }
-//            }
-//        };
-
-//        mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
