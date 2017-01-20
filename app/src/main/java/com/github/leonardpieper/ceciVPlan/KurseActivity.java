@@ -156,12 +156,6 @@ public class KurseActivity extends AppCompatActivity
     }
 
     private CardView createKursCard(final String title){
-//        DisplayMetrics dm = new DisplayMetrics();
-//        KurseActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
-//        int width = dm.widthPixels ;
-//        int sixthWidth = width/6;
-//        int seventhHeight = width/7;
-
         final float scale = KurseActivity.this.getResources().getDisplayMetrics().density;
         int width = (int) (50 * scale + 0.5f);
         int height = (int) (50 * scale + 0.5f);

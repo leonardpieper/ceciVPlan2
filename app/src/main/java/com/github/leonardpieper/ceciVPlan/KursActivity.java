@@ -33,6 +33,7 @@ import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -174,6 +175,7 @@ public class KursActivity extends AppCompatActivity
 
 
         getResultsFromApi();
+
     }
 
     private void getKursMessage(String name) {
@@ -408,7 +410,7 @@ public class KursActivity extends AppCompatActivity
 
             bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
             if (bitmap != null) {
-                return makeCard(title, bitmap);
+                return makeCard(title, bitmap, id);
             }else {
                 new MakeRequestTask(mCredential).execute(id);
             }
@@ -419,7 +421,7 @@ public class KursActivity extends AppCompatActivity
         return null;
     }
 
-    public CardView makeCard(String title, final Bitmap image) {
+    public CardView makeCard(String title, final Bitmap image, final String driveId) {
         int id = (int) (Math.random() * 100);
 
         CardView cv = new CardView(KursActivity.this);
@@ -489,7 +491,7 @@ public class KursActivity extends AppCompatActivity
         dlBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                new MakeDownloadTask(mCredential).execute(driveId);
             }
         });
 
@@ -608,11 +610,52 @@ public class KursActivity extends AppCompatActivity
         dialog.show();
     }
 
+    private class MakeDownloadTask extends AsyncTask<String, Void, Void>{
+
+        private com.google.api.services.drive.Drive mService = null;
+
+        MakeDownloadTask(GoogleAccountCredential credential) {
+            HttpTransport transport = AndroidHttp.newCompatibleTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            mService = new com.google.api.services.drive.Drive.Builder(
+                    transport, jsonFactory, credential)
+                    .setApplicationName("Drive API Android Quickstar")
+                    .build();
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                dlFile(getFileFromId(params[0]));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        private void dlFile(File file){
+            DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(file.getWebContentLink()));
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, java.io.File.separator + "ceciplan" + java.io.File.separator + file.getTitle());
+            long enque = dm.enqueue(request);
+        }
+
+        private File getFileFromId(String id) throws IOException {
+            File file = mService.files().get(id).execute();
+            return file;
+        }
+    }
+
     /**
      * An asynchronous task that handles the Drive API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
      */
     private class MakeRequestTask extends AsyncTask<String, Void, String> {
+        private String driveId;
+        private File driveFile;
+
         private ImageView mOutputImage;
         private Bitmap bm;
         private byte[] content;
@@ -638,11 +681,10 @@ public class KursActivity extends AppCompatActivity
          */
         @Override
         protected String doInBackground(String... params) {
-//            android.os.Debug.waitForDebugger();
             try {
-
-                downloadFile(getFileFromId(params[0]));
-                return "Hi";
+                driveId = params[0];
+                downloadThumbnail(getFileFromId(params[0]));
+                return "Worked";
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
@@ -652,21 +694,22 @@ public class KursActivity extends AppCompatActivity
 
         private File getFileFromId(String id) throws IOException {
             File file = mService.files().get(id).execute();
-
-            System.out.println("Title: " + file.getTitle());
+            driveFile = file;
+//            System.out.println("Title: " + file.getTitle());
             title = file.getTitle();
             dlUrl = file.getWebContentLink();
-            System.out.println("Dl: " + file.getWebContentLink());
-            System.out.println("Description: " + file.getDescription());
-            System.out.println("MIME type: " + file.getMimeType());
-            System.out.println("MIME type: " + file.getThumbnailLink());
+//            System.out.println("Dl: " + file.getWebContentLink());
+//            System.out.println("Description: " + file.getDescription());
+//            System.out.println("MIME type: " + file.getMimeType());
+//            System.out.println("MIME type: " + file.getThumbnailLink());
             return file;
         }
 
-        private void downloadFile(File file) {
+        private void downloadThumbnail(File file) {
+            URL u;
             if (file.getThumbnailLink() != null && file.getThumbnailLink().length() > 0) {
                 try {
-                    URL u = new URL(file.getThumbnailLink());
+                    u = new URL(file.getThumbnailLink());
                     HttpURLConnection ucon = (HttpURLConnection) u.openConnection();
                     if (ucon.getResponseCode() > -1) {
                         Pattern p = Pattern.compile("text/html;\\s+charset=([^\\s]+)\\s*");
@@ -697,15 +740,15 @@ public class KursActivity extends AppCompatActivity
             }
         }
 
-        public byte[] readFully(InputStream input) throws IOException {
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            while ((bytesRead = input.read(buffer)) != -1) {
-                output.write(buffer, 0, bytesRead);
-            }
-            return output.toByteArray();
-        }
+//        public byte[] readFully(InputStream input) throws IOException {
+//            byte[] buffer = new byte[8192];
+//            int bytesRead;
+//            ByteArrayOutputStream output = new ByteArrayOutputStream();
+//            while ((bytesRead = input.read(buffer)) != -1) {
+//                output.write(buffer, 0, bytesRead);
+//            }
+//            return output.toByteArray();
+//        }
 
         public CardView makeCard(String title, final Bitmap image) {
             int id = (int) (Math.random() * 100);
@@ -777,7 +820,7 @@ public class KursActivity extends AppCompatActivity
             dlBtn.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    dlFile();
+                        dlFile();
                 }
             });
 
@@ -793,7 +836,18 @@ public class KursActivity extends AppCompatActivity
 
         }
 
-        private void dlFile() {
+        private void dlFile(){
+            DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(driveFile.getWebContentLink()));
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, java.io.File.separator + "ceciplan" + java.io.File.separator + driveFile.getTitle());
+            long enque = dm.enqueue(request);
+
+
+        }
+
+        private void dlFileThumbnail() {
             String root = Environment.getExternalStorageDirectory().toString();
             java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
             myDir.mkdirs();
@@ -804,18 +858,9 @@ public class KursActivity extends AppCompatActivity
                 fOut.write(content);
                 fOut.flush();
                 fOut.close();
-
-//                MediaStore.Images.Media.insertImage(getContentResolver(),myFile.getAbsolutePath(),myFile.getName(),myFile.getName());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
-//            DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-//            DownloadManager.Request request = new DownloadManager.Request(
-//                    Uri.parse(dlUrl));
-//            request.setDestinationInExternalFilesDir(KursActivity.this, "/cecivplan", title);
-//            long enqueue = dm.enqueue(request);
         }
 
 
@@ -859,6 +904,8 @@ public class KursActivity extends AppCompatActivity
                 }
 //                rl.addView(mOutputImage);
             }
+
+            dlFileThumbnail();
 
 
 //                setDlBtn(bm);
