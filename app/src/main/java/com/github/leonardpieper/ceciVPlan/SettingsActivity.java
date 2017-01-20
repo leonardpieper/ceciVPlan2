@@ -17,6 +17,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -50,6 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView tvLoggedInUser;
     private EditText etUname;
     private EditText etPwd;
+    private String year = "";
 
     private Button btnJahrgangslct;
     private Button btnLogin;
@@ -60,6 +62,7 @@ public class SettingsActivity extends AppCompatActivity {
     private EditText etVPlanU;
     private EditText etVPlanPwd;
     private Button btnSetVPlan;
+    private CardView cvVPlan;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -93,6 +96,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         btnJahrgangslct = (Button)findViewById(R.id.btnSpinnerJahrgang);
 
+        cvVPlan = (CardView)findViewById(R.id.cvVPlanCred);
         etVPlanU = (EditText)findViewById(R.id.set_vplanU);
         etVPlanPwd = (EditText)findViewById(R.id.set_vplanPwd);
         btnSetVPlan = (Button)findViewById(R.id.set_btnSetVPlan);
@@ -120,6 +124,7 @@ public class SettingsActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString("jahrgang", stufen[which]);
                         editor.commit();
+                        year = stufen[which];
 
                         btnJahrgangslct.setText(stufen[which]);
                     }
@@ -135,7 +140,7 @@ public class SettingsActivity extends AppCompatActivity {
 //                String email = uname + "@example.com";
                 String pwd  =etPwd.getText().toString();
 
-                if(!uname.isEmpty()&&!pwd.isEmpty()){
+                if(!uname.isEmpty()&&!pwd.isEmpty()&&year!=""){
                     mAuth.signInWithEmailAndPassword(uname, pwd).addOnCompleteListener(SettingsActivity.this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
@@ -147,6 +152,14 @@ public class SettingsActivity extends AppCompatActivity {
                             }
                         }
                     });
+                }else{
+                    if(uname.isEmpty()){
+                        Toast.makeText(SettingsActivity.this, "Bitte E-Mail eingeben", Toast.LENGTH_SHORT).show();
+                    }else if(pwd.isEmpty()){
+                        Toast.makeText(SettingsActivity.this, "Bitte Passwort eingeben", Toast.LENGTH_SHORT).show();
+                    }else if(year==""){
+                        Toast.makeText(SettingsActivity.this, "Bitte Jahrgangsstufe auswählen", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
 
@@ -200,7 +213,8 @@ public class SettingsActivity extends AppCompatActivity {
 
                 tvLoggedInUser.setVisibility(View.VISIBLE);
                 btnLogout.setVisibility(View.VISIBLE);
-                btnDriveLink.setVisibility(View.VISIBLE);
+//                btnDriveLink.setVisibility(View.VISIBLE);
+                cvVPlan.setVisibility(View.VISIBLE);
 
                 etUname.setVisibility(View.GONE);
                 etPwd.setVisibility(View.GONE);
@@ -220,6 +234,7 @@ public class SettingsActivity extends AppCompatActivity {
             tvLoggedInUser.setVisibility(View.GONE);
             btnLogout.setVisibility(View.GONE);
             btnDriveLink.setVisibility(View.GONE);
+            cvVPlan.setVisibility(View.GONE);
 
             etUname.setVisibility(View.VISIBLE);
             etPwd.setVisibility(View.VISIBLE);

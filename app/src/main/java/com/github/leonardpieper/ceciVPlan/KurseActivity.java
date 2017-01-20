@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -82,7 +83,8 @@ public class KurseActivity extends AppCompatActivity
 //                    View childView = kursell.getChildAt(i);
                     ViewGroup cvChildViews = (ViewGroup) kursell.getChildAt(i);
                     ViewGroup llChildViews = (ViewGroup) cvChildViews.getChildAt(0);
-                    View leaveBtn = llChildViews.getChildAt(2);
+                    ViewGroup rlChildViews = (ViewGroup) llChildViews.getChildAt(2) ;
+                    View leaveBtn = rlChildViews.getChildAt(0);
                     leaveBtn.setVisibility(View.VISIBLE);
                 }
             }
@@ -157,8 +159,11 @@ public class KurseActivity extends AppCompatActivity
 
     private CardView createKursCard(final String title){
         final float scale = KurseActivity.this.getResources().getDisplayMetrics().density;
-        int width = (int) (50 * scale + 0.5f);
-        int height = (int) (50 * scale + 0.5f);
+        int ivWidth = (int) (50 * scale + 0.5f);
+        int ivHeight = (int) (50 * scale + 0.5f);
+        int exivWidth = (int) (35 * scale + 0.5f);
+        int exivHeight = (int) (35 * scale + 0.5f);
+        int height = (int) (75 * scale + 0.5f);
 
 
         CardView cv = new CardView(this);
@@ -178,7 +183,7 @@ public class KurseActivity extends AppCompatActivity
 
         LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                height
         );
         cvParams.setMargins(0,1,0,1);
 
@@ -188,13 +193,28 @@ public class KurseActivity extends AppCompatActivity
         );
 
         LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
-                width,
-                height
+                ivWidth,
+                ivHeight
         );
         ivParams.setMargins(0,0,35,0);
 
+        RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+
+        RelativeLayout.LayoutParams editParams = new RelativeLayout.LayoutParams(
+                exivWidth,
+                exivHeight
+        );
+        editParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.setLayoutParams(llParams);
+
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setLayoutParams(rlParams);
+        relativeLayout.setGravity(Gravity.CENTER_VERTICAL);
 
         TextView tv = new TextView(this);
         tv.setText(title);
@@ -207,6 +227,7 @@ public class KurseActivity extends AppCompatActivity
         exiv.setScaleType(ImageView.ScaleType.FIT_CENTER);
         exiv.setAdjustViewBounds(true);
         exiv.setVisibility(View.GONE);
+        exiv.setLayoutParams(editParams);
         exiv.setTag("leaveBtn");
         exiv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -221,9 +242,12 @@ public class KurseActivity extends AppCompatActivity
         iv.setAdjustViewBounds(true);
         iv.setLayoutParams(ivParams);
 
+        relativeLayout.addView(exiv);
+
         linearLayout.addView(iv);
         linearLayout.addView(tv);
-        linearLayout.addView(exiv);
+        linearLayout.addView(relativeLayout);
+//        linearLayout.addView(exiv);
 
         cv.addView(linearLayout);
 

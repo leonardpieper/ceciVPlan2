@@ -54,9 +54,11 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
@@ -120,6 +122,8 @@ public class KursActivity extends AppCompatActivity
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    static final int REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 1004;
+    static final int REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE_DRIVE = 1005;
 
     private static final String BUTTON_TEXT = "Call Drive API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
@@ -348,6 +352,15 @@ public class KursActivity extends AppCompatActivity
                 if (resultCode == RESULT_OK) {
                     new MakeRequestUploadTask(mCredential).execute(data);
                 }
+                break;
+            case REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE:
+                if(resultCode == RESULT_OK){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(KursActivity.this);
+
+                    builder.setMessage("Bitte nochmal auf \"download klicken\"")
+                            .setTitle("Info");
+                    builder.create();
+                }
         }
     }
 
@@ -491,7 +504,14 @@ public class KursActivity extends AppCompatActivity
         dlBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                new MakeDownloadTask(mCredential).execute(driveId);
+                if(EasyPermissions.hasPermissions(KursActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    new MakeDownloadTask(mCredential).execute(driveId);
+                }else {
+                    EasyPermissions.requestPermissions(KursActivity.this,
+                            "Zum downloaden benötigt die App zugriff auf den Speicher",
+                            REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                }
             }
         });
 
@@ -751,88 +771,101 @@ public class KursActivity extends AppCompatActivity
 //        }
 
         public CardView makeCard(String title, final Bitmap image) {
-            int id = (int) (Math.random() * 100);
+            if(image!=null&&image.getHeight()!=0) {
+                int id = (int) (Math.random() * 100);
 
-            CardView cv = new CardView(KursActivity.this);
-            RelativeLayout rl = new RelativeLayout(KursActivity.this);
+                CardView cv = new CardView(KursActivity.this);
+                RelativeLayout rl = new RelativeLayout(KursActivity.this);
 
-            DisplayMetrics dm = new DisplayMetrics();
-            KursActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
-            int width = dm.widthPixels;
-            int height = dm.heightPixels;
-            int halfWidth = new Double(width / 2.3).intValue();
-            int fifthHeight = new Double(height / 5).intValue();
+                DisplayMetrics dm = new DisplayMetrics();
+                KursActivity.this.getWindow().getWindowManager().getDefaultDisplay().getMetrics(dm);
+                int width = dm.widthPixels;
+                int height = dm.heightPixels;
+                int halfWidth = new Double(width / 2.3).intValue();
+                int fifthHeight = new Double(height / 5).intValue();
 
-            float aspectRatio = image.getWidth() /
-                    (float) image.getHeight();
+                float aspectRatio = image.getWidth() /
+                        (float) image.getHeight();
 
-            RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-            );
-            rlParams.setMargins(8, 8, 8, 8);
+                RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                );
+                rlParams.setMargins(8, 8, 8, 8);
 
-            LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(
-                    halfWidth,
-                    Math.round(halfWidth / aspectRatio)
-            );
-
-
-            LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
-                    fifthHeight,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-            );
-            cvParams.setMargins(8, 8, 8, 8);
-
-            RelativeLayout.LayoutParams rlTvLayout = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            rlTvLayout.addRule(RelativeLayout.BELOW, id);
-            rlTvLayout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-
-            RelativeLayout.LayoutParams rlBtnLayout = new RelativeLayout.LayoutParams(100, 100);
-            rlBtnLayout.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            rlBtnLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(
+                        halfWidth,
+                        Math.round(halfWidth / aspectRatio)
+                );
 
 
-            cv.setLayoutParams(cvParams);
-            rl.setLayoutParams(rlParams);
+                LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
+                        fifthHeight,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                );
+                cvParams.setMargins(8, 8, 8, 8);
 
-            // Set CardView corner radius
-            cv.setRadius(4);
-            // Set cardView content padding
-            cv.setContentPadding(15, 15, 15, 15);
-            // Set CardView elevation
-            cv.setCardElevation(5);
+                RelativeLayout.LayoutParams rlTvLayout = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                rlTvLayout.addRule(RelativeLayout.BELOW, id);
+                rlTvLayout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 
-            ImageView ivImage = new ImageView(KursActivity.this);
-            ivImage.setLayoutParams(imgParams);
-            ivImage.setImageBitmap(image);
-            ivImage.setScaleType(ImageView.ScaleType.FIT_START);
-            ivImage.setId(id);
+                RelativeLayout.LayoutParams rlBtnLayout = new RelativeLayout.LayoutParams(100, 100);
+                rlBtnLayout.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                rlBtnLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
-            TextView tvTitle = new TextView(KursActivity.this);
-            tvTitle.setText(title);
-            tvTitle.setLayoutParams(rlTvLayout);
 
-            Button dlBtn = new Button(KursActivity.this);
-            dlBtn.setLayoutParams(rlBtnLayout);
-            dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
-            dlBtn.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                        dlFile();
-                }
-            });
+                cv.setLayoutParams(cvParams);
+                rl.setLayoutParams(rlParams);
+
+                // Set CardView corner radius
+                cv.setRadius(4);
+                // Set cardView content padding
+                cv.setContentPadding(15, 15, 15, 15);
+                // Set CardView elevation
+                cv.setCardElevation(5);
+
+                ImageView ivImage = new ImageView(KursActivity.this);
+                ivImage.setLayoutParams(imgParams);
+                ivImage.setImageBitmap(image);
+                ivImage.setScaleType(ImageView.ScaleType.FIT_START);
+                ivImage.setId(id);
+
+                TextView tvTitle = new TextView(KursActivity.this);
+                tvTitle.setText(title);
+                tvTitle.setLayoutParams(rlTvLayout);
+
+                Button dlBtn = new Button(KursActivity.this);
+                dlBtn.setLayoutParams(rlBtnLayout);
+                dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
+                dlBtn.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (EasyPermissions.hasPermissions(KursActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                            dlFile();
+                        } else {
+                            EasyPermissions.requestPermissions(KursActivity.this,
+                                    "Zum downloaden benötigt die App zugriff auf den Speicher",
+                                    REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                        }
+
+                    }
+                });
 
 
 //            ll.setOrientation(VERTICAL);
-            rl.addView(ivImage);
-            rl.addView(tvTitle);
-            rl.addView(dlBtn);
+                rl.addView(ivImage);
+                rl.addView(tvTitle);
+                rl.addView(dlBtn);
 
-            cv.addView(rl);
+                cv.addView(rl);
 
-            return cv;
+                return cv;
+            }
+            else{
+                return new CardView(KursActivity.this);
+            }
 
         }
 
@@ -880,6 +913,7 @@ public class KursActivity extends AppCompatActivity
 //                mOutputImage.setImageBitmap(bm);
 //                mOutputImage.setScaleType(ImageView.ScaleType.FIT_XY);
 //                mOutputImage.setAdjustViewBounds(true);
+
 
 
                 if (thumbnailCount % 2 == 0) {
