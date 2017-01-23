@@ -54,6 +54,17 @@
                     android:layout_height="wrap_content"
                     android:indeterminate="true"/>
             </TableLayout>
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:stretchColumns="*"
+                android:id="@+id/vPlanTableLayoutMe"
+                android:visibility="gone">
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"/>
+            </TableLayout>
         </LinearLayout>
     </ScrollView>
 

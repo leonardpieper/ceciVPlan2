@@ -21,6 +21,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.Permission;
 import com.google.common.io.Files;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -101,6 +102,7 @@ public class KursActivity extends AppCompatActivity
     GoogleAccountCredential mCredential;
 
     private DatabaseReference mDatabase;
+    private FirebaseAuth mAuth;
 
     private Intent intent;
     private String kursName;
@@ -146,6 +148,7 @@ public class KursActivity extends AppCompatActivity
         lLayoutl = (LinearLayout) findViewById(R.id.downloadsRl);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
         kursName = intent.getStringExtra("name");
 
         setTitle(kursName);
@@ -195,7 +198,7 @@ public class KursActivity extends AppCompatActivity
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                     TextView tvMessage = new TextView(KursActivity.this);
                     String sender = childSnapshot.child("sender").getValue(String.class);
-                    String message = childSnapshot.child("message").getValue(String.class);
+                    String message = childSnapshot.child("body").getValue(String.class);
                     tvMessage.setText(sender + " " + message);
                     llMessages.addView(tvMessage);
                 }
@@ -224,8 +227,9 @@ public class KursActivity extends AppCompatActivity
 
         String key = mKursRef.push().getKey();
         Map<String, Object> newMessage = new HashMap<>();
-        newMessage.put(key + "/sender/", "g@g.co");
-        newMessage.put(key + "/message/", message);
+        newMessage.put(key + "/sender/", mAuth.getCurrentUser().getEmail());
+        newMessage.put(key + "/uid/", mAuth.getCurrentUser().getUid());
+        newMessage.put(key + "/body/", message);
 
         mKursRef.updateChildren(newMessage);
         etMessage.setText("");

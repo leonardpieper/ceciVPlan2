@@ -8,6 +8,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+
 public class DevActivity extends AppCompatActivity {
 
     @Override
@@ -40,6 +44,22 @@ public class DevActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i = new Intent(DevActivity.this, DevWebViewActivity.class);
                 startActivity(i);
+            }
+        });
+
+        final Button displayNameBtn = (Button)findViewById(R.id.devDisplayNameBtn);
+        displayNameBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText displayEt = (EditText)findViewById(R.id.devDisplayNameEt);
+                String name = displayEt.getText().toString();
+
+                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                        .setDisplayName(name)
+                        .build();
+
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                user.updateProfile(profileUpdates);
             }
         });
     }

@@ -347,13 +347,13 @@ public class MainActivity extends AppCompatActivity
         fach=fach.toLowerCase();
         switch (fach){
             case "bi":
-                return R.drawable.ic_biologie_tree;
+                return R.drawable.ic_biologie_bug;
             case "ch":
                 return  R.drawable.ic_chemie_poppet;
             case "d":
-                return R.drawable.ic_deutsch_book;
+                return R.drawable.ic_deutsch;
             case "e":
-                return R.drawable.ic_englisch_book;
+                return R.drawable.ic_englisch;
             case "ek":
                 return R.drawable.ic_erdkunde_landscape;
             case "el":
@@ -361,9 +361,9 @@ public class MainActivity extends AppCompatActivity
             case "ew":
                 return R.drawable.ic_erziehungswissenschaften_child;
             case "f":
-                return R.drawable.ic_franzosisch_book;
+                return R.drawable.ic_franzosisch;
             case "ge":
-                return R.drawable.ic_geschichte_hourglass;
+                return R.drawable.ic_geschichte_buste;
             case "if":
                 return R.drawable.ic_informatik_computer;
             case "ku":
@@ -379,7 +379,7 @@ public class MainActivity extends AppCompatActivity
             case "sw":
                 return R.drawable.ic_sozialwissenschaften_group;
             case "s":
-                return R.drawable.ic_spanisch_book;
+                return R.drawable.ic_spanisch;
             case "sp":
                 return R.drawable.ic_sport_run;
             default:

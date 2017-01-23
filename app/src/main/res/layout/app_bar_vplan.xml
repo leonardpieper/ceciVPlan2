@@ -45,6 +45,16 @@
         <!--fab:fab_labelStyle="@style/menu_labels_style"-->
         <!--fab:fab_labelsPosition="left">-->
         <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fabMe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="changeToMyVPlan"
+            android:scaleType="matrix"
+            android:src="@drawable/q2"
+            fab:fab_colorNormal="@color/colorAccent"
+            fab:fab_colorPressed="@color/colorAccent"
+            fab:fab_size="mini" />
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/fabQ2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

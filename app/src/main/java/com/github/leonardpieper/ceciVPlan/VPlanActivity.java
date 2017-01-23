@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -73,6 +74,7 @@ public class VPlanActivity extends AppCompatActivity
     private TableLayout tableEF;
     private TableLayout tableQ1;
     private TableLayout tableQ2;
+    private TableLayout tableMe;
 
     private FirebaseAuth mAuth;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
@@ -127,6 +129,7 @@ public class VPlanActivity extends AppCompatActivity
         tableEF = (TableLayout)findViewById(R.id.vPlanTableLayoutEF);
         tableQ1 = (TableLayout)findViewById(R.id.vPlanTableLayoutQ1);
         tableQ2 = (TableLayout)findViewById(R.id.vPlanTableLayoutQ2);
+        tableMe = (TableLayout)findViewById(R.id.vPlanTableLayoutMe);
 
 //        String s = mAuth.getCurrentUser().getUid();
 //        Log.d("", s);
@@ -189,6 +192,7 @@ public class VPlanActivity extends AppCompatActivity
         if(mFirebaseRemoteConfig.getBoolean("load_vplan_enabled")) {
             crawler.execute("");
         }
+
         if(mAuth.getCurrentUser()!=null){
             if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
                 conditionRef = mRootRef.child("vPlan");
@@ -372,6 +376,9 @@ public class VPlanActivity extends AppCompatActivity
             case "Q2":
                 tableQ2.addView(row);
                 break;
+            case "me":
+                tableMe.addView(row);
+                break;
             default:
                 Log.d(TAG, "Stufe ist nicht erkannt!");
         }
@@ -418,6 +425,8 @@ public class VPlanActivity extends AppCompatActivity
             case "Q2":
                 tableQ2.addView(row);
                 break;
+            case "me":
+                tableMe.addView(row);
             default:
                 Log.d(TAG, "Stufe ist nicht erkannt!");
         }
@@ -441,7 +450,120 @@ public class VPlanActivity extends AppCompatActivity
                 tableEF.setVisibility(View.GONE);
                 tableQ1.setVisibility(View.GONE);
                 tableQ2.setVisibility(View.VISIBLE);
+                break;
+            case (R.id.fabMe):
+                tableEF.setVisibility(View.GONE);
+                tableQ1.setVisibility(View.GONE);
+                tableQ2.setVisibility(View.GONE);
+                tableMe.setVisibility(View.VISIBLE);
         }
+    }
+
+    public void changeToMyVPlan(View v){
+        tableEF.setVisibility(View.GONE);
+        tableQ1.setVisibility(View.GONE);
+        tableQ2.setVisibility(View.GONE);
+        tableMe.setVisibility(View.VISIBLE);
+
+        conditionRef = mRootRef.child("vPlan");
+        conditionRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                JSONObject tage = null;
+                try {
+                    tage = new JSONObject("{\"Mo\":[],\"Di\":[],\"Mi\":[],\"Do\":[],\"Fr\":[]}");
+
+
+                    tableEF.removeAllViews();
+                    tableQ1.removeAllViews();
+                    tableQ2.removeAllViews();
+                    tableMe.removeAllViews();
+                    for (DataSnapshot stufenSnapshot : dataSnapshot.getChildren()) {
+                        String stufe = stufenSnapshot.getKey();
+                        for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
+                            String datum = vPlanSnapshot.child("Datum").getValue(String.class);
+
+                            System.out.println(mAuth.getCurrentUser().getDisplayName());
+                            System.out.println(vPlanSnapshot.child("Vertreter").getValue(String.class));
+
+                            String displayName = mAuth.getCurrentUser().getDisplayName();
+
+                            if (displayName.equals(vPlanSnapshot.child("Vertreter").getValue(String.class))) {
+
+                                String date = vPlanSnapshot.child("Tag").getValue(String.class);
+
+                                JSONArray tag = tage.getJSONArray(date);
+
+                                JSONObject data = new JSONObject();
+                                data.put("fach", vPlanSnapshot.child("Fach").getValue(String.class));
+                                data.put("stunde", vPlanSnapshot.child("Stunde").getValue(String.class));
+                                data.put("vertreter", vPlanSnapshot.child("Vertreter").getValue(String.class));
+                                data.put("raum", vPlanSnapshot.child("Raum").getValue(String.class));
+                                data.put("text", vPlanSnapshot.child("Vertretungs-Text").getValue(String.class));
+                                data.put("tag", vPlanSnapshot.child("Tag").getValue(String.class));
+                                data.put("datum", vPlanSnapshot.child("Datum").getValue(String.class));
+
+
+                                tag.put(data);
+                                tage.put(date, tag);
+
+//                            if (!oldDatum.equals(datum) && !(datum == null || datum.contains("Datum"))) {
+//                                String tag = vPlanSnapshot.child("Tag").getValue(String.class);
+//                                addDateTableRow("me", tag, datum);
+//                            }
+//
+                            }
+                        }
+                    }
+
+                    for(int i = 0; i<5; i++) {
+                        JSONArray date = new JSONArray();
+                        switch (i){
+                            case 0:
+                                date = tage.getJSONArray("Mo");
+                                break;
+                            case 1:
+                                date = tage.getJSONArray("Di");
+                                break;
+                            case 2:
+                                date = tage.getJSONArray("Mi");
+                                break;
+                            case 3:
+                                date = tage.getJSONArray("Do");
+                                break;
+                            case 4:
+                                date = tage.getJSONArray("Fr");
+                                break;
+                        }
+
+                        for (int j = 0; j < date.length(); j++) {
+                            JSONObject joData = date.getJSONObject(j);
+
+                            String tag = joData.getString("tag");
+                            String datum = joData.getString("datum");
+
+                            if(j==0){
+                                addDateTableRow("me", tag, datum);
+                            }
+
+                            String fach = joData.getString("fach");
+                            String stunde = joData.getString("stunde");
+                            String vertreter = joData.getString("vertreter");
+                            String raum = joData.getString("raum");
+                            String text = joData.getString("text");
+                            addTableRow("me", fach, stunde, vertreter, raum, text);
+                        }
+                    }
+                }catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public JSONArray dataToJSON(List data){
