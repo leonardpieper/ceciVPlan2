@@ -51,7 +51,9 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView tvLoggedInUser;
     private EditText etUname;
     private EditText etPwd;
+    private EditText etTeacherShortc;
     private String year = "";
+    private Button btnSave;
 
     private Button btnJahrgangslct;
     private Button btnLogin;
@@ -87,6 +89,8 @@ public class SettingsActivity extends AppCompatActivity {
         tvLoggedInUser = (TextView)findViewById(R.id.tvLogInUser);
         etUname = (EditText)findViewById(R.id.etUname);
         etPwd = (EditText)findViewById(R.id.etPwd);
+        etTeacherShortc = (EditText)findViewById(R.id.etLehrerkrzl);
+        btnSave = (Button)findViewById(R.id.btnSave);
 
         btnLogin = (Button)findViewById(R.id.btnSpinnerJahrgang);
         btnLogin = (Button)findViewById(R.id.btnLogin);
@@ -196,6 +200,18 @@ public class SettingsActivity extends AppCompatActivity {
                 updateVPlanCred();
             }
         });
+
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseReference db = mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("abk");
+                db.setValue(etTeacherShortc.getText().toString());
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("lehrer-abk", etTeacherShortc.getText().toString());
+                editor.commit();
+            }
+        });
     }
 
     @Override
@@ -214,6 +230,8 @@ public class SettingsActivity extends AppCompatActivity {
                 tvLoggedInUser.setVisibility(View.VISIBLE);
                 btnLogout.setVisibility(View.VISIBLE);
 //                btnDriveLink.setVisibility(View.VISIBLE);
+                etTeacherShortc.setVisibility(View.VISIBLE);
+                btnSave.setVisibility(View.VISIBLE);
                 cvVPlan.setVisibility(View.VISIBLE);
 
                 etUname.setVisibility(View.GONE);
@@ -234,6 +252,8 @@ public class SettingsActivity extends AppCompatActivity {
             tvLoggedInUser.setVisibility(View.GONE);
             btnLogout.setVisibility(View.GONE);
             btnDriveLink.setVisibility(View.GONE);
+            etTeacherShortc.setVisibility(View.GONE);
+            btnSave.setVisibility(View.GONE);
             cvVPlan.setVisibility(View.GONE);
 
             etUname.setVisibility(View.VISIBLE);

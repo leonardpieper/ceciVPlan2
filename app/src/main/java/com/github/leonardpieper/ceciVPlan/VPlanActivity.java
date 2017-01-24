@@ -1,8 +1,10 @@
 package com.github.leonardpieper.ceciVPlan;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -49,6 +51,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -440,16 +443,19 @@ public class VPlanActivity extends AppCompatActivity
                 tableEF.setVisibility(View.VISIBLE);
                 tableQ1.setVisibility(View.GONE);
                 tableQ2.setVisibility(View.GONE);
+                tableMe.setGravity(View.GONE);
                 break;
             case(R.id.fabQ1):
                 tableEF.setVisibility(View.GONE);
                 tableQ1.setVisibility(View.VISIBLE);
                 tableQ2.setVisibility(View.GONE);
+                tableMe.setGravity(View.GONE);
                 break;
             case(R.id.fabQ2):
                 tableEF.setVisibility(View.GONE);
                 tableQ1.setVisibility(View.GONE);
                 tableQ2.setVisibility(View.VISIBLE);
+                tableMe.setGravity(View.GONE);
                 break;
             case (R.id.fabMe):
                 tableEF.setVisibility(View.GONE);
@@ -465,105 +471,112 @@ public class VPlanActivity extends AppCompatActivity
         tableQ2.setVisibility(View.GONE);
         tableMe.setVisibility(View.VISIBLE);
 
-        conditionRef = mRootRef.child("vPlan");
-        conditionRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                JSONObject tage = null;
-                try {
-                    tage = new JSONObject("{\"Mo\":[],\"Di\":[],\"Mi\":[],\"Do\":[],\"Fr\":[]}");
+        // Get Lehrerabk
+        final String lehrerAbk = PreferenceManager.getDefaultSharedPreferences(VPlanActivity.this).getString("lehrer-abk", "noTeacher");
+        if(!lehrerAbk.isEmpty()) {
+            lehrerAbk.toLowerCase();
+
+            conditionRef = mRootRef.child("vPlan");
+            conditionRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    JSONObject tage = null;
+                    try {
+                        tage = new JSONObject("{\"Mo\":[],\"Di\":[],\"Mi\":[],\"Do\":[],\"Fr\":[]}");
 
 
-                    tableEF.removeAllViews();
-                    tableQ1.removeAllViews();
-                    tableQ2.removeAllViews();
-                    tableMe.removeAllViews();
-                    for (DataSnapshot stufenSnapshot : dataSnapshot.getChildren()) {
-                        String stufe = stufenSnapshot.getKey();
-                        for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
-                            String datum = vPlanSnapshot.child("Datum").getValue(String.class);
+//                        tableEF.removeAllViews();
+//                        tableQ1.removeAllViews();
+//                        tableQ2.removeAllViews();
+                        tableMe.removeAllViews();
+                        for (DataSnapshot stufenSnapshot : dataSnapshot.getChildren()) {
+                            String stufe = stufenSnapshot.getKey();
+                            for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
+                                String datum = vPlanSnapshot.child("Datum").getValue(String.class);
 
-                            System.out.println(mAuth.getCurrentUser().getDisplayName());
-                            System.out.println(vPlanSnapshot.child("Vertreter").getValue(String.class));
+//                                System.out.println(mAuth.getCurrentUser().getDisplayName());
+//                                System.out.println(vPlanSnapshot.child("Vertreter").getValue(String.class));
+                                String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
+                                if(vertreter!=null){
+                                    vertreter = vertreter.toLowerCase();
+                                }
+                                if (vertreter!=null && lehrerAbk.equals(vertreter)) {
 
-                            String displayName = mAuth.getCurrentUser().getDisplayName();
+                                    String date = vPlanSnapshot.child("Tag").getValue(String.class);
 
-                            if (displayName.equals(vPlanSnapshot.child("Vertreter").getValue(String.class))) {
+                                    JSONArray tag = tage.getJSONArray(date);
 
-                                String date = vPlanSnapshot.child("Tag").getValue(String.class);
-
-                                JSONArray tag = tage.getJSONArray(date);
-
-                                JSONObject data = new JSONObject();
-                                data.put("fach", vPlanSnapshot.child("Fach").getValue(String.class));
-                                data.put("stunde", vPlanSnapshot.child("Stunde").getValue(String.class));
-                                data.put("vertreter", vPlanSnapshot.child("Vertreter").getValue(String.class));
-                                data.put("raum", vPlanSnapshot.child("Raum").getValue(String.class));
-                                data.put("text", vPlanSnapshot.child("Vertretungs-Text").getValue(String.class));
-                                data.put("tag", vPlanSnapshot.child("Tag").getValue(String.class));
-                                data.put("datum", vPlanSnapshot.child("Datum").getValue(String.class));
+                                    JSONObject data = new JSONObject();
+                                    data.put("fach", vPlanSnapshot.child("Fach").getValue(String.class));
+                                    data.put("stunde", vPlanSnapshot.child("Stunde").getValue(String.class));
+                                    data.put("vertreter", vPlanSnapshot.child("Vertreter").getValue(String.class));
+                                    data.put("raum", vPlanSnapshot.child("Raum").getValue(String.class));
+                                    data.put("text", vPlanSnapshot.child("Vertretungs-Text").getValue(String.class));
+                                    data.put("tag", vPlanSnapshot.child("Tag").getValue(String.class));
+                                    data.put("datum", vPlanSnapshot.child("Datum").getValue(String.class));
 
 
-                                tag.put(data);
-                                tage.put(date, tag);
+                                    tag.put(data);
+                                    tage.put(date, tag);
 
 //                            if (!oldDatum.equals(datum) && !(datum == null || datum.contains("Datum"))) {
 //                                String tag = vPlanSnapshot.child("Tag").getValue(String.class);
 //                                addDateTableRow("me", tag, datum);
 //                            }
 //
+                                }
                             }
                         }
-                    }
 
-                    for(int i = 0; i<5; i++) {
-                        JSONArray date = new JSONArray();
-                        switch (i){
-                            case 0:
-                                date = tage.getJSONArray("Mo");
-                                break;
-                            case 1:
-                                date = tage.getJSONArray("Di");
-                                break;
-                            case 2:
-                                date = tage.getJSONArray("Mi");
-                                break;
-                            case 3:
-                                date = tage.getJSONArray("Do");
-                                break;
-                            case 4:
-                                date = tage.getJSONArray("Fr");
-                                break;
-                        }
-
-                        for (int j = 0; j < date.length(); j++) {
-                            JSONObject joData = date.getJSONObject(j);
-
-                            String tag = joData.getString("tag");
-                            String datum = joData.getString("datum");
-
-                            if(j==0){
-                                addDateTableRow("me", tag, datum);
+                        for (int i = 0; i < 5; i++) {
+                            JSONArray date = new JSONArray();
+                            switch (i) {
+                                case 0:
+                                    date = tage.getJSONArray("Mo");
+                                    break;
+                                case 1:
+                                    date = tage.getJSONArray("Di");
+                                    break;
+                                case 2:
+                                    date = tage.getJSONArray("Mi");
+                                    break;
+                                case 3:
+                                    date = tage.getJSONArray("Do");
+                                    break;
+                                case 4:
+                                    date = tage.getJSONArray("Fr");
+                                    break;
                             }
 
-                            String fach = joData.getString("fach");
-                            String stunde = joData.getString("stunde");
-                            String vertreter = joData.getString("vertreter");
-                            String raum = joData.getString("raum");
-                            String text = joData.getString("text");
-                            addTableRow("me", fach, stunde, vertreter, raum, text);
+                            for (int j = 0; j < date.length(); j++) {
+                                JSONObject joData = date.getJSONObject(j);
+
+                                String tag = joData.getString("tag");
+                                String datum = joData.getString("datum");
+
+                                if (j == 0) {
+                                    addDateTableRow("me", tag, datum);
+                                }
+
+                                String fach = joData.getString("fach");
+                                String stunde = joData.getString("stunde");
+                                String vertreter = joData.getString("vertreter");
+                                String raum = joData.getString("raum");
+                                String text = joData.getString("text");
+                                addTableRow("me", fach, stunde, vertreter, raum, text);
+                            }
                         }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }catch (JSONException e) {
-                    e.printStackTrace();
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     public JSONArray dataToJSON(List data){

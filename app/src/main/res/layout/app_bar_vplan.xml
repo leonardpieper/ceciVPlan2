@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:onClick="changeToMyVPlan"
             android:scaleType="matrix"
-            android:src="@drawable/q2"
+            android:src="@drawable/ic_person_white_24dp"
             fab:fab_colorNormal="@color/colorAccent"
             fab:fab_colorPressed="@color/colorAccent"
             fab:fab_size="mini" />
