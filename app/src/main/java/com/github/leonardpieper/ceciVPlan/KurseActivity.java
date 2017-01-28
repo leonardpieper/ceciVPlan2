@@ -35,6 +35,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -122,38 +126,58 @@ public class KurseActivity extends AppCompatActivity
     private void getKurse(){
         final LinearLayout llroot = (LinearLayout)findViewById(R.id.kurse_ll);
 
-        if(mAuth.getCurrentUser()!=null){
-            DatabaseReference kurseRef = mRootRef
-                    .child("Users")
-                    .child(mAuth.getCurrentUser().getUid())
-                    .child("Kurse");
+        final KursCache kursCache = new KursCache(KurseActivity.this);
 
-            kurseRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    llroot.removeAllViews();
-                    for(DataSnapshot childSnapshot: dataSnapshot.getChildren()){
-                        TextView tv = new TextView(KurseActivity.this);
-                        final String title = childSnapshot.child("name").getValue(String.class);
-//                        tv.setText(childSnapshot.child("name").getValue(String.class));
-//                        tv.setOnClickListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View v) {
-//                                Intent intent = new Intent(KurseActivity.this, KursActivity.class);
-//                                intent.putExtra("name", title);
-//                                startActivity(intent);
-//                            }
-//                        });
-                        CardView cv = createKursCard(title);
-                        llroot.addView(cv);
+        long cachedTime = kursCache.getCacheTime();
+        long currMill = System.currentTimeMillis();
+
+        if(cachedTime == -1 || cachedTime > currMill + 604800000) {
+
+
+            if (mAuth.getCurrentUser() != null) {
+                DatabaseReference kurseRef = mRootRef
+                        .child("Users")
+                        .child(mAuth.getCurrentUser().getUid())
+                        .child("Kurse");
+
+                kurseRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        kursCache.newCache();
+                        llroot.removeAllViews();
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            TextView tv = new TextView(KurseActivity.this);
+                            final String title = childSnapshot.child("name").getValue(String.class);
+
+                            kursCache.addCache(title);
+
+                            CardView cv = createKursCard(title);
+                            llroot.addView(cv);
+                        }
                     }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }else{
+            JSONObject root = kursCache.getCache();
+            JSONArray kurse = null;
+
+            try {
+                kurse = root.getJSONArray("kurse");
+                for(int i = 0; i<kurse.length(); i++){
+                    String title = kurse.getString(i);
+
+                    CardView cv = createKursCard(title);
+                    llroot.addView(cv);
                 }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 

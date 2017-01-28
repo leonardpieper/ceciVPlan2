@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -41,6 +42,10 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Calendar;
 
@@ -261,84 +266,123 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void displayKurse(){
+        final KursCache kursCache = new KursCache(MainActivity.this);
         final LinearLayout ll = (LinearLayout) findViewById(R.id.main_kurse_display);
 
-        if(mAuth.getCurrentUser() != null){
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
-                        String kurs = childSnapshot.child("name").getValue(String.class);
+        long cachedTime = kursCache.getCacheTime();
+        long currMill = System.currentTimeMillis();
 
-                        mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                final String name = dataSnapshot.getKey();
+        if(cachedTime == -1 || cachedTime > currMill + 604800000) {
 
+            if (mAuth.getCurrentUser() != null) {
+                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        kursCache.newCache();
 
-                                final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
-                                int width = (int) (50 * scale + 0.5f);
-                                int height = (int) (50 * scale + 0.5f);
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            final String kurs = childSnapshot.child("name").getValue(String.class);
 
-                                LinearLayout column = new LinearLayout(MainActivity.this);
-                                LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        ViewGroup.LayoutParams.MATCH_PARENT
-                                );
-                                LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
-                                        width,
-                                        height
-                                );
-                                LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        ViewGroup.LayoutParams.MATCH_PARENT
-                                );
+                            kursCache.addCache(kurs);
 
-                                column.setLayoutParams(columnParams);
-                                column.setPadding(32,0,32,0);
-                                column.setOrientation(LinearLayout.VERTICAL);
-                                column.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        Intent intent = new Intent(MainActivity.this, KursActivity.class);
-                                        intent.putExtra("name", name);
-                                        startActivity(intent);
-                                    }
-                                });
+                            LinearLayout column = makeKursIcon(kurs);
+                            ll.addView(column);
+                            ll.setPadding(0, 0, 0, 0);
 
-                                ImageView iv = new ImageView(MainActivity.this);
-                                iv.setBackgroundResource(getResourceIdByName(name));
-                                iv.setScaleType(ImageView.ScaleType.FIT_START);
-                                iv.setAdjustViewBounds(true);
-                                iv.setLayoutParams(ivParams);
+//                        mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                TextView tv = new TextView(MainActivity.this);
-                                tv.setText(name);
-                                tv.setGravity(Gravity.CENTER);
-                                tv.setTextColor(getResources().getColor(R.color.colorAccent));
-                                tv.setLayoutParams(tvParams);
+                        }
 
-                                column.addView(iv);
-                                column.addView(tv);
-
-                                ll.addView(column);
-                                ll.setPadding(0,0,0,0);
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
+//                            @Override
+//                            public void onCancelled(DatabaseError databaseError) {
+//
+//                            }
+//                        });
+//                    }
                     }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }else {
+
+            JSONObject root = kursCache.getCache();
+            JSONArray kurse = null;
+
+            try {
+                kurse = root.getJSONArray("kurse");
+                for(int i = 0; i<kurse.length(); i++){
+                    String title = kurse.getString(i);
+
+                    LinearLayout column = makeKursIcon(title);
+                    ll.addView(column);
+                    ll.setPadding(0, 0, 0, 0);
                 }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-                }
-            });
+
+
         }
+    }
+
+    private LinearLayout makeKursIcon(final String title){
+
+
+        final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
+        int width = (int) (50 * scale + 0.5f);
+        int height = (int) (50 * scale + 0.5f);
+
+        LinearLayout column = new LinearLayout(MainActivity.this);
+        LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
+                width,
+                height
+        );
+        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+
+        column.setLayoutParams(columnParams);
+        column.setPadding(32, 0, 32, 0);
+        column.setOrientation(LinearLayout.VERTICAL);
+        column.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, KursActivity.class);
+                intent.putExtra("name", title);
+                startActivity(intent);
+            }
+        });
+
+        ImageView iv = new ImageView(MainActivity.this);
+        iv.setBackgroundResource(getResourceIdByName(title));
+        iv.setScaleType(ImageView.ScaleType.FIT_START);
+        iv.setAdjustViewBounds(true);
+        iv.setLayoutParams(ivParams);
+
+        TextView tv = new TextView(MainActivity.this);
+        tv.setText(title);
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextColor(getResources().getColor(R.color.colorAccent));
+        tv.setLayoutParams(tvParams);
+
+        column.addView(iv);
+        column.addView(tv);
+
+        return column;
+
     }
 
     private int getResourceIdByName(String name){
@@ -557,10 +601,12 @@ public class MainActivity extends AppCompatActivity
 
         } else if (currentVersionCode > savedVersionCode) {
             // TODO This is an upgrade
-            if(!mAuth.getCurrentUser().isAnonymous()){
-                if(mAuth.getCurrentUser().getEmail().contains("ceci@example.com")){
-                    Intent signAIntent = new Intent(this, SignUpAnonymActivity.class);
-                    startActivity(signAIntent);
+            if(mAuth.getCurrentUser()!=null){
+                if(!mAuth.getCurrentUser().isAnonymous()){
+                    if(mAuth.getCurrentUser().getEmail().contains("ceci@example.com")){
+                        Intent signAIntent = new Intent(this, SignUpAnonymActivity.class);
+                        startActivity(signAIntent);
+                    }
                 }
             }
         }
