@@ -77,14 +77,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         setTitle("Dashboard");
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -100,6 +92,7 @@ public class MainActivity extends AppCompatActivity
         tlTomorrow = (TableLayout)findViewById(R.id.vPlanTomorrow);
 
         mAuth = FirebaseAuth.getInstance();
+
 
         checkFirstRun();
 
@@ -272,7 +265,7 @@ public class MainActivity extends AppCompatActivity
         long cachedTime = kursCache.getCacheTime();
         long currMill = System.currentTimeMillis();
 
-        if(cachedTime == -1 || cachedTime > currMill + 604800000) {
+        if(cachedTime == -1 || cachedTime + 604800000 < currMill) {
 
             if (mAuth.getCurrentUser() != null) {
                 mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {

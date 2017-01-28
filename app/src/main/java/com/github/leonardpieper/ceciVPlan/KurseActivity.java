@@ -131,7 +131,7 @@ public class KurseActivity extends AppCompatActivity
         long cachedTime = kursCache.getCacheTime();
         long currMill = System.currentTimeMillis();
 
-        if(cachedTime == -1 || cachedTime > currMill + 604800000) {
+        if(cachedTime == -1 || cachedTime + 604800000 < currMill ) {
 
 
             if (mAuth.getCurrentUser() != null) {
