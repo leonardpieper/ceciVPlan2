@@ -281,6 +281,9 @@ public class KurseActivity extends AppCompatActivity
     private void leaveKurs(String name){
         if(mAuth.getCurrentUser()!=null) {
             mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).removeValue();
+
+            KursCache kursCache = new KursCache(KurseActivity.this);
+            kursCache.removeFromCache(name);
         }else {
             Toast t = Toast.makeText(KurseActivity.this, "Kein Nutzer angemeldet", Toast.LENGTH_LONG);
             t.show();
@@ -392,6 +395,9 @@ public class KurseActivity extends AppCompatActivity
                                 user.put("name", name);
                                 user.put("secret", secret);
                                 mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).setValue(user);
+
+                                KursCache kursCache = new KursCache(KurseActivity.this);
+                                kursCache.addCache(name);
                             }
 
                         }
@@ -421,6 +427,9 @@ public class KurseActivity extends AppCompatActivity
         user.put("name", name);
         user.put("secret", secret);
         mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).setValue(user);
+
+        KursCache kursCache = new KursCache(KurseActivity.this);
+        kursCache.addCache(name);
     }
 
     @Override

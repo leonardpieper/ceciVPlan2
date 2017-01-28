@@ -73,6 +73,54 @@ public class KursCache extends Application{
         }
     }
 
+    public void removeFromCache(String kurs){
+        FileInputStream inputStream;
+        FileOutputStream outputStream;
+        StringBuffer strContent = new StringBuffer("");
+
+        try {
+            inputStream = new FileInputStream(cacheFile);
+
+            int content;
+            while ((content = inputStream.read())!=-1){
+                strContent.append((char)content);
+            }
+
+            JSONObject root = new JSONObject(strContent.toString());
+
+
+            if(root.has("kurse")){
+                JSONArray kurse = root.getJSONArray("kurse");
+                for(int i = 0; i<kurse.length(); i++){
+                    if(kurse.getString(i).equals(kurs)) {
+                        kurse = removeJsonObjectAtJsonArrayIndex(kurse, i);
+                    }
+                }
+                root.put("kurse", kurse);
+            }
+
+            outputStream = new FileOutputStream(cacheFile);
+            outputStream.write(root.toString().getBytes());
+            outputStream.close();
+
+
+        }  catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static JSONArray removeJsonObjectAtJsonArrayIndex(JSONArray source, int index) throws JSONException {
+        if (index < 0 || index > source.length() - 1) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        final JSONArray copy = new JSONArray();
+        for (int i = 0, count = source.length(); i < count; i++) {
+            if (i != index) copy.put(source.get(i));
+        }
+        return copy;
+    }
+
     public JSONObject getCache(){
         FileInputStream inputStream;
         StringBuffer strContent = new StringBuffer("");
