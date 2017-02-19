@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 //import com.google.android.gms.appindexing.Action;
 //import com.google.android.gms.appindexing.AppIndex;
+import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -58,12 +59,6 @@ import java.util.regex.Pattern;
 public class VPlanActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-//    /**
-//     * ATTENTION: This was auto-generated to implement the App Indexing API.
-//     * See https://g.co/AppIndexing/AndroidStudio for more information.
-//     */
-//    private GoogleApiClient client;
-
     private static final String TAG = "VPlanActivity";
 
     private TableLayout tableLayout;
@@ -72,6 +67,7 @@ public class VPlanActivity extends AppCompatActivity
     private com.github.clans.fab.FloatingActionButton fabEF;
     private com.github.clans.fab.FloatingActionButton fabQ1;
     private com.github.clans.fab.FloatingActionButton fabQ2;
+    private com.github.clans.fab.FloatingActionButton fabMe;
 
     private LinearLayout tablePlaceholder;
     private TableLayout tableEF;
@@ -98,19 +94,16 @@ public class VPlanActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-
         fabyear = (com.github.clans.fab.FloatingActionMenu)findViewById(R.id.fab_year);
         fabEF = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabEF);
         fabQ1 = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabQ1);
         fabQ2 = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabQ2);
+        fabMe = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabMe);
+
+        LocalUser localUser = new LocalUser(VPlanActivity.this);
+        if(localUser.getTeacherStatus()){
+            fabMe.setVisibility(View.VISIBLE);
+        }
 
 
 
@@ -124,9 +117,6 @@ public class VPlanActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-//        // ATTENTION: This was auto-generated to implement the App Indexing API.
-//        // See https://g.co/AppIndexing/AndroidStudio for more information.
-//        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
 //        tableLayout = (TableLayout)findViewById(R.id.vPlanTableLayout);
         tableEF = (TableLayout)findViewById(R.id.vPlanTableLayoutEF);
@@ -258,7 +248,7 @@ public class VPlanActivity extends AppCompatActivity
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.d(TAG, "Cancelled");
             }
         });
     }

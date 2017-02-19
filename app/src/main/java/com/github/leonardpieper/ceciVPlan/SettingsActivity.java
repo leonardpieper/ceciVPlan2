@@ -18,13 +18,16 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,6 +35,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.drive.DriveScopes;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -51,12 +55,15 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView tvLoggedInUser;
     private EditText etUname;
     private EditText etPwd;
+
+    private CardView cvTeacher;
     private EditText etTeacherShortc;
     private String year = "";
     private Button btnSave;
 
     private Button btnJahrgangslct;
     private Button btnLogin;
+    private Button btnAdvanced;
     private Button btnLogout;
     private Button btnSignUp;
     private Button btnDriveLink;
@@ -89,11 +96,15 @@ public class SettingsActivity extends AppCompatActivity {
         tvLoggedInUser = (TextView)findViewById(R.id.tvLogInUser);
         etUname = (EditText)findViewById(R.id.etUname);
         etPwd = (EditText)findViewById(R.id.etPwd);
+
+
         etTeacherShortc = (EditText)findViewById(R.id.etLehrerkrzl);
         btnSave = (Button)findViewById(R.id.btnSave);
+        cvTeacher = (CardView)findViewById(R.id.cvTeacher);
 
         btnLogin = (Button)findViewById(R.id.btnSpinnerJahrgang);
         btnLogin = (Button)findViewById(R.id.btnLogin);
+        btnAdvanced = (Button)findViewById(R.id.btnAdvanced);
         btnLogout = (Button)findViewById(R.id.btnLogout);
         btnSignUp = (Button)findViewById(R.id.btnSignUpNew);
         btnDriveLink = (Button)findViewById(R.id.btnDriveLink);
@@ -127,8 +138,11 @@ public class SettingsActivity extends AppCompatActivity {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString("jahrgang", stufen[which]);
+                        editor.putInt("jahrgangNumber", convertJahrgang(stufen[which]));
                         editor.commit();
                         year = stufen[which];
+
+                        FirebaseAnalytics.getInstance(SettingsActivity.this).setUserProperty("jahrgangsstufe", String.valueOf(convertJahrgang(stufen[which])));
 
                         btnJahrgangslct.setText(stufen[which]);
                     }
@@ -170,12 +184,54 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        btnAdvanced.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+
+                LayoutInflater factory = LayoutInflater.from(SettingsActivity.this);
+                final View optionsView = factory.inflate(R.layout.dialog_advanced_login, null);
+
+                final Switch teacherSwitch = (Switch) optionsView.findViewById(R.id.swtchTeacher);
+                final EditText etTeacherPwd = (EditText) optionsView.findViewById(R.id.etTeacherPwd);
+
+                builder.setView(optionsView)
+                        .setTitle("Lehrer-Optionen")
+                        // Add action buttons
+                        .setPositiveButton("Speichern", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                LocalUser localUser = new LocalUser(SettingsActivity.this);
+                                localUser.setTeacherStatus(teacherSwitch.isChecked());
+                                localUser.setTeacherName(etTeacherPwd.getText().toString());
+
+                                if(etTeacherPwd.getText().toString().length()>0) {
+                                    if (mAuth.getCurrentUser() != null) {
+                                        DatabaseReference leherPwdRef = mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("lehrerPwd");
+                                        leherPwdRef.setValue(etTeacherPwd.getText().toString());
+                                    }
+                                }
+                            }
+                        })
+                        .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                            }
+                        });
+                builder.show();
+            }
+        });
+
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mAuth.signOut();
                 Snackbar.make(v, "Abgemeldet", Snackbar.LENGTH_LONG).show();
                 isfbLoggedOut();
+
+                LocalUser localUser = new LocalUser(SettingsActivity.this);
+                localUser.resetAll();
             }
         });
 
@@ -209,6 +265,7 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("lehrer-abk", etTeacherShortc.getText().toString());
+                editor.putBoolean("isTeacher", true);
                 editor.commit();
             }
         });
@@ -225,13 +282,14 @@ public class SettingsActivity extends AppCompatActivity {
         if(user != null){
             if(!user.isAnonymous()) {
                 String uName = user.getEmail().replace("@example.com", "");
-                tvLoggedInUser.setText("Hallo " + uName);
+                tvLoggedInUser.setText("Hallo, " + uName);
 
                 tvLoggedInUser.setVisibility(View.VISIBLE);
                 btnLogout.setVisibility(View.VISIBLE);
+                btnAdvanced.setVisibility(View.VISIBLE);
 //                btnDriveLink.setVisibility(View.VISIBLE);
-                etTeacherShortc.setVisibility(View.VISIBLE);
-                btnSave.setVisibility(View.VISIBLE);
+//                etTeacherShortc.setVisibility(View.VISIBLE);
+//                btnSave.setVisibility(View.VISIBLE);
                 cvVPlan.setVisibility(View.VISIBLE);
 
                 etUname.setVisibility(View.GONE);
@@ -239,6 +297,11 @@ public class SettingsActivity extends AppCompatActivity {
 //                btnJahrgangslct.setVisibility(View.GONE);
                 btnLogin.setVisibility(View.GONE);
                 btnSignUp.setVisibility(View.GONE);
+
+                LocalUser localUser = new LocalUser(SettingsActivity.this);
+                if(localUser.getTeacherStatus()){
+                    cvTeacher.setVisibility(View.VISIBLE);
+                }
             }
         }
     }
@@ -252,8 +315,10 @@ public class SettingsActivity extends AppCompatActivity {
             tvLoggedInUser.setVisibility(View.GONE);
             btnLogout.setVisibility(View.GONE);
             btnDriveLink.setVisibility(View.GONE);
-            etTeacherShortc.setVisibility(View.GONE);
-            btnSave.setVisibility(View.GONE);
+            btnAdvanced.setVisibility(View.GONE);
+//            etTeacherShortc.setVisibility(View.GONE);
+//            btnSave.setVisibility(View.GONE);
+            cvTeacher.setVisibility(View.GONE);
             cvVPlan.setVisibility(View.GONE);
 
             etUname.setVisibility(View.VISIBLE);
@@ -461,5 +526,18 @@ public class SettingsActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private int convertJahrgang(String jahrgang){
+        switch (jahrgang.toLowerCase()){
+            case "q2":
+                return 12;
+            case "q1":
+                return 11;
+            case "ef":
+                return 10;
+            default:
+                return Integer.parseInt(jahrgang);
+        }
     }
 }
