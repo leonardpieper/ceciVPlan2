@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 //import com.google.android.gms.appindexing.Action;
 //import com.google.android.gms.appindexing.AppIndex;
+import com.github.leonardpieper.ceciVPlan.tools.EasterEgg;
 import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
@@ -82,6 +83,8 @@ public class VPlanActivity extends AppCompatActivity
 
     private String oldDatum = "99.99";
     private String currentStufe = "EF";
+
+    private int easterEggCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -440,6 +443,13 @@ public class VPlanActivity extends AppCompatActivity
                 tableQ1.setVisibility(View.VISIBLE);
                 tableQ2.setVisibility(View.GONE);
                 tableMe.setGravity(View.GONE);
+
+                easterEggCounter++;
+                if(easterEggCounter>=10){
+                    EasterEgg easterEgg = new EasterEgg(VPlanActivity.this);
+                    easterEgg.createEasterEgg();
+                    easterEggCounter = 0;
+                }
                 break;
             case(R.id.fabQ2):
                 tableEF.setVisibility(View.GONE);
