@@ -18,6 +18,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +39,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -49,6 +51,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class SettingsActivity extends AppCompatActivity {
+    private static final String TAG = "SettingsActivity";
 
     GoogleAccountCredential mCredential;
 
@@ -166,7 +169,29 @@ public class SettingsActivity extends AppCompatActivity {
                                 Toast.makeText(SettingsActivity.this, "Anmeldung erfolgreich", Toast.LENGTH_LONG).show();
                                 isfbLoggedIn();
                             }else{
-                                Toast.makeText(SettingsActivity.this, "Anmeldung fehlgeschlagen", Toast.LENGTH_LONG).show();
+                                FirebaseAuthException e = (FirebaseAuthException) task.getException();
+                                switch (e.getErrorCode()) {
+                                    case "ERROR_USER_NOT_FOUND":
+                                        etUname.setError("Benutzer nicht gefunden");
+                                        etUname.requestFocus();
+                                        break;
+                                    case "ERROR_INVALID_EMAIL":
+                                        etUname.setError("Ungültige E-Mail Adresse");
+                                        etUname.requestFocus();
+                                        break;
+                                    case "ERROR_WRONG_PASSWORD":
+                                        etPwd.setError("Falsches Passwort");
+                                        etPwd.requestFocus();
+                                        break;
+                                    case "ERROR_USER_DISABLED":
+                                        etUname.setError("Benutzerkonto deaktiviert");
+                                        etUname.requestFocus();
+                                        break;
+                                    default:
+                                        Log.d(TAG, e.getErrorCode());
+
+                                }
+//                                Toast.makeText(SettingsActivity.this, "Anmeldung fehlgeschlagen", Toast.LENGTH_LONG).show();
                             }
                         }
                     });

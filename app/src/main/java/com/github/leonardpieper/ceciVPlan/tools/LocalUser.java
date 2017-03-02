@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.github.leonardpieper.ceciVPlan.KursCache;
 import com.github.leonardpieper.ceciVPlan.SettingsActivity;
 
 /**
@@ -74,6 +75,9 @@ public class LocalUser {
         editor.remove("lehrer-abk");
         editor.remove("jahrgangNumber");
         editor.commit();
+
+        KursCache cache = new KursCache(mContext);
+        cache.newCache();
     }
 
 

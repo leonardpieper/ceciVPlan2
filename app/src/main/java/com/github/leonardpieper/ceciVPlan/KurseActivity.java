@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -107,20 +108,12 @@ public class KurseActivity extends AppCompatActivity
     }
 
     private void getPermissionStatus(){
-        mRootRef.child("Data").child("lehrerRead").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue(Boolean.class)==true){
-                    com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
-                    kursCreateFab.setVisibility(View.VISIBLE);
-                }
-            }
+        LocalUser user = new LocalUser(this);
+        if(user.getTeacherStatus()==true) {
+            com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
+            kursCreateFab.setVisibility(View.VISIBLE);
+        }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void getKurse(){

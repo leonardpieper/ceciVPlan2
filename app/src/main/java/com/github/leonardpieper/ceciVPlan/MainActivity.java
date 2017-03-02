@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    private CardView cvKurse;
+
     private TableLayout tlToday;
     private TableLayout tlTomorrow;
     private TextView tvErr;
@@ -92,6 +94,8 @@ public class MainActivity extends AppCompatActivity
         tlToday = (TableLayout)findViewById(R.id.vPlanToday);
         tlTomorrow = (TableLayout)findViewById(R.id.vPlanTomorrow);
         tvErr = (TextView)findViewById(R.id.tvErr_Main);
+
+        cvKurse = (CardView)findViewById(R.id.cv_Kurse);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -277,6 +281,10 @@ public class MainActivity extends AppCompatActivity
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         kursCache.newCache();
 
+                        if(dataSnapshot.getValue()!=null) {
+                            cvKurse.setVisibility(View.VISIBLE);
+                        }
+
                         for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                             final String kurs = childSnapshot.child("name").getValue(String.class);
 
@@ -313,6 +321,9 @@ public class MainActivity extends AppCompatActivity
 
             try {
                 kurse = root.getJSONArray("kurse");
+                if(kurse!=null) {
+                    cvKurse.setVisibility(View.VISIBLE);
+                }
                 for(int i = 0; i<kurse.length(); i++){
                     String title = kurse.getString(i);
 
