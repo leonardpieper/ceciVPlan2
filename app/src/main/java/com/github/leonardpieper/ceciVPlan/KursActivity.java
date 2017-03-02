@@ -9,18 +9,14 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 
-import com.google.api.client.util.IOUtils;
 import com.google.api.services.drive.DriveScopes;
 
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.Permission;
-import com.google.common.io.Files;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,16 +30,12 @@ import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.RectF;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -51,21 +43,14 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.NavUtils;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -75,7 +60,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -282,7 +266,8 @@ public class KursActivity extends AppCompatActivity
     @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
     private void chooseAccount() {
         if (EasyPermissions.hasPermissions(
-                this, Manifest.permission.GET_ACCOUNTS)) {
+                this, Manifest.permission.GET_ACCOUNTS) && EasyPermissions.hasPermissions(
+                this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             String accountName = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
                     .getString(PREF_ACCOUNT_NAME, null);
 
@@ -299,9 +284,9 @@ public class KursActivity extends AppCompatActivity
             // Request the GET_ACCOUNTS permission via a user dialog
             EasyPermissions.requestPermissions(
                     this,
-                    "This app needs to access your Google account (via Contacts).",
+                    "Diese App benötigt zugriff auf deinen Google account (via Contacts) und auf deine SD-Karte.",
                     REQUEST_PERMISSION_GET_ACCOUNTS,
-                    Manifest.permission.GET_ACCOUNTS);
+                    new String[]{Manifest.permission.GET_ACCOUNTS, Manifest.permission.WRITE_EXTERNAL_STORAGE});
         }
     }
 
@@ -438,8 +423,12 @@ public class KursActivity extends AppCompatActivity
         return null;
     }
 
-    public CardView makeCard(String title, final Bitmap image, final String driveId) {
+    public CardView makeCard(String title, Bitmap image, final String driveId) {
         int id = (int) (Math.random() * 100);
+
+        if(image==null){
+            image = BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_school_black_24dp );
+        }
 
         CardView cv = new CardView(KursActivity.this);
         RelativeLayout rl = new RelativeLayout(KursActivity.this);
@@ -504,7 +493,7 @@ public class KursActivity extends AppCompatActivity
 
         Button dlBtn = new Button(KursActivity.this);
         dlBtn.setLayoutParams(rlBtnLayout);
-        dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
+        dlBtn.setBackgroundResource(R.drawable.ic_file_download_orange_24dp);
         dlBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -764,19 +753,13 @@ public class KursActivity extends AppCompatActivity
             }
         }
 
-//        public byte[] readFully(InputStream input) throws IOException {
-//            byte[] buffer = new byte[8192];
-//            int bytesRead;
-//            ByteArrayOutputStream output = new ByteArrayOutputStream();
-//            while ((bytesRead = input.read(buffer)) != -1) {
-//                output.write(buffer, 0, bytesRead);
-//            }
-//            return output.toByteArray();
-//        }
-
-        public CardView makeCard(String title, final Bitmap image) {
-            if(image!=null&&image.getHeight()!=0) {
+        public CardView makeCard(String title, Bitmap image) {
+//            if(image!=null&&image.getHeight()!=0) {
                 int id = (int) (Math.random() * 100);
+
+                if(image==null||image.getWidth()<=0){
+                    image = BitmapFactory.decodeResource(KursActivity.this.getResources(), R.drawable.ic_layers_clear_black_24dp );
+                }
 
                 CardView cv = new CardView(KursActivity.this);
                 RelativeLayout rl = new RelativeLayout(KursActivity.this);
@@ -841,7 +824,7 @@ public class KursActivity extends AppCompatActivity
 
                 Button dlBtn = new Button(KursActivity.this);
                 dlBtn.setLayoutParams(rlBtnLayout);
-                dlBtn.setBackgroundResource(R.drawable.ic_file_download_white_24dp);
+                dlBtn.setBackgroundResource(R.drawable.ic_file_download_orange_24dp);
                 dlBtn.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -866,10 +849,9 @@ public class KursActivity extends AppCompatActivity
                 cv.addView(rl);
 
                 return cv;
-            }
-            else{
-                return new CardView(KursActivity.this);
-            }
+//            }else{
+//                return new CardView(KursActivity.this);
+//            }
 
         }
 
@@ -885,18 +867,20 @@ public class KursActivity extends AppCompatActivity
         }
 
         private void dlFileThumbnail() {
-            String root = Environment.getExternalStorageDirectory().toString();
-            java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
-            myDir.mkdirs();
-            java.io.File myFile = new java.io.File(myDir, title);
+            if(content!=null) {
+                String root = Environment.getExternalStorageDirectory().toString();
+                java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
+                myDir.mkdirs();
+                java.io.File myFile = new java.io.File(myDir, title);
 
-            try {
-                FileOutputStream fOut = new FileOutputStream(myFile);
-                fOut.write(content);
-                fOut.flush();
-                fOut.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                try {
+                    FileOutputStream fOut = new FileOutputStream(myFile);
+                    fOut.write(content);
+                    fOut.flush();
+                    fOut.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -914,9 +898,6 @@ public class KursActivity extends AppCompatActivity
 //                    mOutputText.setText("No results returned.");
             } else {
                 CardView imageCard = makeCard(title, bm);
-//                mOutputImage.setImageBitmap(bm);
-//                mOutputImage.setScaleType(ImageView.ScaleType.FIT_XY);
-//                mOutputImage.setAdjustViewBounds(true);
 
 
 

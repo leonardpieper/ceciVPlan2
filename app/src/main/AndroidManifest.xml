@@ -52,7 +52,6 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
-
         <activity android:name=".SettingsActivity" />
         <activity android:name=".SignUpActivity" />
 
@@ -86,8 +85,7 @@
         <activity
             android:name=".DevWebViewActivity"
             android:theme="@android:style/Theme.NoTitleBar" />
-
-
+        <activity android:name=".LoginActivity"></activity>
     </application>
 
 </manifest>

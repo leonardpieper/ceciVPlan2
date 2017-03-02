@@ -85,7 +85,9 @@
                             android:layout_height="wrap_content"
                             android:indeterminate="true"/>
                         <TextView
-                            android:text="Entweder bist du nicht angemeldet, oder deine Internetverbindung ist langsam.\nEs wird versucht den Vertretungsplan zu laden.."/>
+                            android:id="@+id/tvErr_Main"
+                            android:textAlignment="center"
+                            android:visibility="gone"/>
                     </TableLayout>
                 </RelativeLayout>
             </android.support.v7.widget.CardView>

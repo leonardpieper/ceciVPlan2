@@ -14,6 +14,7 @@ public class LocalUser {
     private Context mContext;
 
     private int jahrgang;
+    private String jahrgangText;
 
     private boolean isTeacher;
     private String teacherName;
@@ -27,6 +28,21 @@ public class LocalUser {
         jahrgang = preferences.getInt("jahrgangNumber", 99);
     }
 
+    public void setJahrgangText(String jahrgangText){
+        this.jahrgangText = jahrgangText;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("jahrgang", jahrgangText);
+        editor.commit();
+    }
+
+    public void setJahrgang(int jahrgang){
+        this.jahrgang = jahrgang;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("jahrgangNumber", jahrgang);
+        editor.commit();
+    }
     public int getJahrgang(){return jahrgang;}
 
     public void setTeacherStatus(boolean isTeacher){

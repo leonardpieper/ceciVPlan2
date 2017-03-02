@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity
 
     private TableLayout tlToday;
     private TableLayout tlTomorrow;
+    private TextView tvErr;
 
 
     DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity
 //        final TextView vPlanTomorrow = (TextView)findViewById(R.id.vPlanTomorrow);
         tlToday = (TableLayout)findViewById(R.id.vPlanToday);
         tlTomorrow = (TableLayout)findViewById(R.id.vPlanTomorrow);
+        tvErr = (TextView)findViewById(R.id.tvErr_Main);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -168,6 +170,8 @@ public class MainActivity extends AppCompatActivity
 
                 }else{
                     Log.d("FirebaseAuth", "onAuthStateChanged:signed_out");
+                    tvErr.setText("Du bist nicht angemeldet!");
+                    tvErr.setVisibility(View.VISIBLE);
                 }
             }
         };
@@ -179,7 +183,7 @@ public class MainActivity extends AppCompatActivity
         mFirebaseRemoteConfig.activateFetched();
         mFirebaseRemoteConfig.setConfigSettings(configSettings);
         mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
-        mFirebaseRemoteConfig.fetch(0)//21600 = 6 Hours in seconds
+        mFirebaseRemoteConfig.fetch(21600)//21600 = 6 Hours in seconds
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -590,7 +594,9 @@ public class MainActivity extends AppCompatActivity
 
             return;
         } else if (savedVersionCode == DOESNT_EXIST) {
-            // TODO This is a new install
+            Intent signIntent = new Intent(this, SignUpActivity.class);
+            signIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(signIntent);
 
         } else if (currentVersionCode > savedVersionCode) {
             // TODO This is an upgrade

@@ -1,6 +1,7 @@
 package com.github.leonardpieper.ceciVPlan;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,11 +25,13 @@ import com.google.firebase.database.FirebaseDatabase;
 public class SignUpActivity extends AppCompatActivity {
 
     private static final String TAG = "SignUpActivity";
+    private final int LOGIN_REQUEST_CODE = 6001;
 
     private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
 
     private Button nexButton;
     private Button cancelBtn;
+    private Button btnSignLogin;
 
     private Button ceciLoginBtn;
 
@@ -52,6 +55,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         nexButton = (Button)findViewById(R.id.btnSignUpNext);
         cancelBtn = (Button)findViewById(R.id.signBtnNoSign);
+        btnSignLogin = (Button)findViewById(R.id.btnSignLogin);
 
         nexButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,6 +101,15 @@ public class SignUpActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
+        btnSignLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent signIntent = new Intent(SignUpActivity.this, LoginActivity.class);
+                signIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivityForResult(signIntent, LOGIN_REQUEST_CODE);
+            }
+        });
+
     }
 
     private void migrateAnonToPwd(){
@@ -166,7 +179,20 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-//    public void onCreateSchoolChooser(){
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode){
+            case LOGIN_REQUEST_CODE:
+                if(resultCode == RESULT_OK) {
+                    this.finish();
+                    break;
+                }
+        }
+    }
+
+    //    public void onCreateSchoolChooser(){
 //        slctCeciTv = (TextView)findViewById(R.id.tvSlctCeci);
 //        slctHGTv = (TextView)findViewById(R.id.tvSlctHG);
 //        slctCeciTv.setOnClickListener(new View.OnClickListener() {
