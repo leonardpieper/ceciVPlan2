@@ -3,11 +3,13 @@ package com.github.leonardpieper.ceciVPlan;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -228,6 +230,7 @@ public class VPlanActivity extends AppCompatActivity
                 tableQ2.removeAllViews();
                 for(DataSnapshot stufenSnapshot: dataSnapshot.getChildren()) {
                     String stufe = stufenSnapshot.getKey();
+                    oldDatum = "99.99";
                     for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
                         String datum = vPlanSnapshot.child("Datum").getValue(String.class);
 
@@ -350,11 +353,21 @@ public class VPlanActivity extends AppCompatActivity
         room.setLayoutParams(trparams);
         extra.setLayoutParams(trparams);
 
-        lesson.setText(fach);
-        time.setText(stunde);
-        tutor.setText(lehrer);
-        room.setText(raum);
-        extra.setText(text);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            lesson.setText(Html.fromHtml(fach, Html.FROM_HTML_MODE_COMPACT));
+            time.setText(Html.fromHtml(stunde, Html.FROM_HTML_MODE_COMPACT));
+            tutor.setText(Html.fromHtml(lehrer, Html.FROM_HTML_MODE_COMPACT));
+            room.setText(Html.fromHtml(raum, Html.FROM_HTML_MODE_COMPACT));
+            extra.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
+        }else {
+            lesson.setText(Html.fromHtml(fach));
+            time.setText(Html.fromHtml(stunde));
+            tutor.setText(Html.fromHtml(lehrer));
+            room.setText(Html.fromHtml(raum));
+            extra.setText(Html.fromHtml(text));
+        }
+
 
         row.addView(lesson);
         row.addView(time);
