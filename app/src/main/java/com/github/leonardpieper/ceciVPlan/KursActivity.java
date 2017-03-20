@@ -90,6 +90,7 @@ public class KursActivity extends AppCompatActivity
 
     private Intent intent;
     private String kursName;
+    private String kursNameRef;
 
     private NestedScrollView scrollView;
 
@@ -134,6 +135,7 @@ public class KursActivity extends AppCompatActivity
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         kursName = intent.getStringExtra("name");
+        kursNameRef = kursName.replace(".", "%2E");
 
         setTitle(kursName);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -161,7 +163,7 @@ public class KursActivity extends AppCompatActivity
         });
 
 
-        getKursMessage(kursName);
+        getKursMessage(kursNameRef);
         scrollView = (NestedScrollView) findViewById(R.id.childScrollKurs);
 
 
@@ -206,7 +208,7 @@ public class KursActivity extends AppCompatActivity
         String message = etMessage.getText().toString();
         DatabaseReference mKursRef = mDatabase
                 .child("Kurse")
-                .child(kursName)
+                .child(kursNameRef)
                 .child("messages");
 
         String key = mKursRef.push().getKey();
@@ -248,7 +250,7 @@ public class KursActivity extends AppCompatActivity
             //FIXME
 //            mOutputText.setText("No network connection available.");
         } else {
-            getDownloadableMedia(intent.getStringExtra("name"), 5);
+            getDownloadableMedia(kursNameRef, 5);
 //            new MakeRequestTask(mCredential).execute();
         }
     }
@@ -1038,8 +1040,8 @@ public class KursActivity extends AppCompatActivity
                     hm.put("date", date);
                     hm.put("title", file.getTitle());
 
-                    mDatabase.child("Kurse").child(kursName).child("storagePath").child(file.getId()).setValue(hm);
-                    mDatabase.child("Kurse").child(kursName).child("timestamp").setValue(date);
+                    mDatabase.child("Kurse").child(kursNameRef).child("storagePath").child(file.getId()).setValue(hm);
+                    mDatabase.child("Kurse").child(kursNameRef).child("timestamp").setValue(date);
                 } catch (IOException e) {
                     System.out.println("An error occurred: " + e);
                 }

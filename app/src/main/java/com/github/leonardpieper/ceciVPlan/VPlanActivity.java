@@ -354,7 +354,7 @@ public class VPlanActivity extends AppCompatActivity
         extra.setLayoutParams(trparams);
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
             lesson.setText(Html.fromHtml(fach, Html.FROM_HTML_MODE_COMPACT));
             time.setText(Html.fromHtml(stunde, Html.FROM_HTML_MODE_COMPACT));
             tutor.setText(Html.fromHtml(lehrer, Html.FROM_HTML_MODE_COMPACT));

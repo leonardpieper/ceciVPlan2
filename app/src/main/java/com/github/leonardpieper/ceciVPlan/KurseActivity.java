@@ -144,7 +144,8 @@ public class KurseActivity extends AppCompatActivity
 
                             kursCache.addCache(title);
 
-                            CardView cv = createKursCard(title);
+                            String displayName = title.replace("%2E", ".");
+                            CardView cv = createKursCard(displayName);
                             llroot.addView(cv);
                         }
                     }
@@ -273,7 +274,8 @@ public class KurseActivity extends AppCompatActivity
 
     private void leaveKurs(String name){
         if(mAuth.getCurrentUser()!=null) {
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).removeValue();
+            final String refName = name.replace(".", "%2E");
+            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).removeValue();
 
             KursCache kursCache = new KursCache(KurseActivity.this);
             kursCache.removeFromCache(name);
@@ -374,7 +376,8 @@ public class KurseActivity extends AppCompatActivity
         mRootRef.child("Data").child("lehrerRead").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mRootRef.child("Kurse").child(name).child("secret").addListenerForSingleValueEvent(new ValueEventListener() {
+                final String refName = name.replace(".", "%2E");
+                mRootRef.child("Kurse").child(refName).child("secret").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if(dataSnapshot.getValue()!=null){
@@ -382,12 +385,13 @@ public class KurseActivity extends AppCompatActivity
                             t.show();
                         }else{
                             if(!name.isEmpty()&&!secret.isEmpty()){
-                                mRootRef.child("Kurse").child(name).child("secret").setValue(secret);
+
+                                mRootRef.child("Kurse").child(refName).child("secret").setValue(secret);
 
                                 HashMap<String, Object> user = new HashMap<String, Object>();
                                 user.put("name", name);
                                 user.put("secret", secret);
-                                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).setValue(user);
+                                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
 
                                 KursCache kursCache = new KursCache(KurseActivity.this);
                                 kursCache.addCache(name);
@@ -419,7 +423,9 @@ public class KurseActivity extends AppCompatActivity
         HashMap<String, Object> user = new HashMap<String, Object>();
         user.put("name", name);
         user.put("secret", secret);
-        mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).setValue(user);
+
+        String refName = name.replace(".", "%2E");
+        mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
 
         KursCache kursCache = new KursCache(KurseActivity.this);
         kursCache.addCache(name);
