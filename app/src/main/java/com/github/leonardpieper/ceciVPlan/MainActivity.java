@@ -180,6 +180,22 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+
+//        mAuth.signInWithEmailAndPassword("g@g.co", "123456");
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
                 .setDeveloperModeEnabled(BuildConfig.DEBUG)
                 .build();
@@ -199,17 +215,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 });
-
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-
-//        mAuth.signInWithEmailAndPassword("g@g.co", "123456");
-    }
-
 
     public void addTableRow(String tag, String fach, String stunde, String lehrer, String raum, String text) {
         TableRow row = new TableRow(this);
@@ -281,10 +287,13 @@ public class MainActivity extends AppCompatActivity
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         kursCache.newCache();
 
-                        if(dataSnapshot.getValue()!=null) {
+                        if(dataSnapshot.getValue()==null) {
+                            cvKurse.setVisibility(View.VISIBLE);
+                            TextView tvNoKurse = (TextView)findViewById(R.id.noKurse);
+                            tvNoKurse.setVisibility(View.VISIBLE);
+                        }else {
                             cvKurse.setVisibility(View.VISIBLE);
                         }
-
                         for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                             final String kurs = childSnapshot.child("name").getValue(String.class);
 
@@ -321,7 +330,11 @@ public class MainActivity extends AppCompatActivity
 
             try {
                 kurse = root.getJSONArray("kurse");
-                if(kurse!=null) {
+                if(kurse==null || kurse.length()==0) {
+                    cvKurse.setVisibility(View.VISIBLE);
+                    TextView tvNoKurse = (TextView)findViewById(R.id.noKurse);
+                    tvNoKurse.setVisibility(View.VISIBLE);
+                }else {
                     cvKurse.setVisibility(View.VISIBLE);
                 }
                 for(int i = 0; i<kurse.length(); i++){
@@ -511,6 +524,10 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_devSettings:
                 Intent devIntent = new Intent(this, DevActivity.class);
                 startActivity(devIntent);
+                break;
+            case R.id.nav_about:
+                Intent aboutIntent = new Intent(this, AboutActivity.class);
+                startActivity(aboutIntent);
                 break;
             case R.id.nav_signup:
                 Intent signIntent = new Intent(this, SignUpActivity.class);

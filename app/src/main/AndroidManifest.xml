@@ -85,7 +85,8 @@
         <activity
             android:name=".DevWebViewActivity"
             android:theme="@android:style/Theme.NoTitleBar" />
-        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".AboutActivity"></activity>
     </application>
 
 </manifest>
