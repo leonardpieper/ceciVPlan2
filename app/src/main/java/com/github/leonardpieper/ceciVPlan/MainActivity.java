@@ -31,8 +31,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.api.client.googleapis.util.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -108,8 +110,8 @@ public class MainActivity extends AppCompatActivity
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
 
-        System.out.println(FirebaseInstanceId.getInstance().getToken());
-        FirebaseMessaging.getInstance().subscribeToTopic("D__EFa");
+//        System.out.println(FirebaseInstanceId.getInstance().getToken());
+//        FirebaseMessaging.getInstance().subscribeToTopic("D__EFa");
 //        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
 
 
@@ -189,6 +191,8 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
 
+//        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
+
 //        mAuth.signInWithEmailAndPassword("g@g.co", "123456");
     }
 
@@ -197,7 +201,6 @@ public class MainActivity extends AppCompatActivity
         super.onPostResume();
 
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setDeveloperModeEnabled(BuildConfig.DEBUG)
                 .build();
 
         mFirebaseRemoteConfig.activateFetched();
@@ -628,14 +631,26 @@ public class MainActivity extends AppCompatActivity
 
         } else if (currentVersionCode > savedVersionCode) {
             // TODO This is an upgrade
-            if(mAuth.getCurrentUser()!=null){
-                if(!mAuth.getCurrentUser().isAnonymous()){
-                    if(mAuth.getCurrentUser().getEmail().contains("ceci@example.com")){
-                        Intent signAIntent = new Intent(this, SignUpAnonymActivity.class);
-                        startActivity(signAIntent);
-                    }
-                }
-            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("Du hast dieses Update erhalten, da du dich für die Beta-Version im Google Play Store angemeldet hast. " +
+                    "Bitte sei im Klaren, dass es während der Beta gehäuft zu Problemen und unerwünschten Verhalten kommen kann. " +
+                    "Um die stabile Version zu installieren verlasse einfach das Betaprogramm.")
+                    .setTitle("Info zum Betaprogramm")
+                    .setPositiveButton("Ich habe verstanden", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+            builder.show();
+//            if(mAuth.getCurrentUser()!=null){
+//                if(!mAuth.getCurrentUser().isAnonymous()){
+//                    if(mAuth.getCurrentUser().getEmail().contains("ceci@example.com")){
+//                        Intent signAIntent = new Intent(this, SignUpAnonymActivity.class);
+//                        startActivity(signAIntent);
+//                    }
+//                }
+//            }
         }
         // Update the shared preferences with the current version code
         prefs.edit().putInt(PREF_VERSION_CODE_KEY, currentVersionCode).commit();

@@ -44,10 +44,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.EventObject;
@@ -310,6 +306,10 @@ public class VPlanActivity extends AppCompatActivity
             case R.id.nav_devSettings:
                 Intent devIntent = new Intent(this, DevActivity.class);
                 startActivity(devIntent);
+                break;
+            case R.id.nav_about:
+                Intent aboutIntent = new Intent(this, AboutActivity.class);
+                startActivity(aboutIntent);
                 break;
             case R.id.nav_signup:
                 Intent signIntent = new Intent(this, SignUpActivity.class);

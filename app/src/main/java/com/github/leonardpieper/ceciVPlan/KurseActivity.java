@@ -467,6 +467,10 @@ public class KurseActivity extends AppCompatActivity
                 Intent kIntent = new Intent(this, KlausurenActivity.class);
                 startActivity(kIntent);
                 break;
+            case R.id.nav_about:
+                Intent aboutIntent = new Intent(this, AboutActivity.class);
+                startActivity(aboutIntent);
+                break;
             case R.id.nav_settings:
                 Intent sIntent = new Intent(this, SettingsActivity.class);
                 startActivity(sIntent);

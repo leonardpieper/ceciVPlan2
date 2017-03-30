@@ -2,6 +2,7 @@ package com.github.leonardpieper.ceciVPlan;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -28,5 +29,15 @@ public class AboutActivity extends AppCompatActivity {
     private void showLicenses(){
         String licenses = GoogleApiAvailability.getInstance().getOpenSourceSoftwareLicenseInfo(AboutActivity.this);
         tvLicenses.setText(licenses);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                this.finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
