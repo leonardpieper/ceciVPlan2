@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -107,6 +108,8 @@ public class MainActivity extends AppCompatActivity
         setDailyAlarm();
         displayKurse();
 
+
+
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
 
@@ -181,6 +184,11 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
+
+        Log.d(TAG, "Hallo");
+        System.out.println(FirebaseInstanceId.getInstance().getToken());
+        Log.d(TAG, FirebaseInstanceId.getInstance().getToken());
+        Log.d(TAG, "Tschüss");
 
 
 
@@ -629,9 +637,8 @@ public class MainActivity extends AppCompatActivity
             signIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(signIntent);
 
-        } else if (currentVersionCode > savedVersionCode) {
-            // TODO This is an upgrade
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        }else if(savedVersionCode==23){
+            final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setMessage("Du hast dieses Update erhalten, da du dich für die Beta-Version im Google Play Store angemeldet hast. " +
                     "Bitte sei im Klaren, dass es während der Beta gehäuft zu Problemen und unerwünschten Verhalten kommen kann. " +
                     "Um die stabile Version zu installieren verlasse einfach das Betaprogramm.")
@@ -643,6 +650,25 @@ public class MainActivity extends AppCompatActivity
                         }
                     });
             builder.show();
+
+        }
+        else if (currentVersionCode > savedVersionCode && savedVersionCode!=23) {
+            // TODO This is an upgrade
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+                    try {
+                        builder1.setMessage("Neuerungen:\n- 2 neue Emojis zu finden")
+                                .setTitle("Update " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                        builder1.show();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
 //            if(mAuth.getCurrentUser()!=null){
 //                if(!mAuth.getCurrentUser().isAnonymous()){
 //                    if(mAuth.getCurrentUser().getEmail().contains("ceci@example.com")){

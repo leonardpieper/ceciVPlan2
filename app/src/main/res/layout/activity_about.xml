@@ -21,6 +21,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_leo4"
                 android:adjustViewBounds="true"
+                android:onClick="aboutEasterEgg"
                 android:scaleType="centerCrop"/>
             <TextView
                 android:layout_width="match_parent"

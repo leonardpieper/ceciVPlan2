@@ -11,3 +11,5 @@
 /app/client_secret_dev.json
 /app/client_secret_production.json
 /app/google-services.json
+/app/google-services_dev.json
+/app/google-services_production.json

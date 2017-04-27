@@ -460,7 +460,11 @@ public class VPlanActivity extends AppCompatActivity
                 easterEggCounter++;
                 if(easterEggCounter>=10){
                     EasterEgg easterEgg = new EasterEgg(VPlanActivity.this);
-                    easterEgg.createEasterEgg();
+                    try {
+                        easterEgg.addEmoji("\uD83D\uDC36", "den Hund");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     easterEggCounter = 0;
                 }
                 break;

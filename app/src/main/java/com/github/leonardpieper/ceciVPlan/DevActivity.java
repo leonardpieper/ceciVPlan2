@@ -11,6 +11,7 @@ import android.widget.EditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class DevActivity extends AppCompatActivity {
 
@@ -54,12 +55,15 @@ public class DevActivity extends AppCompatActivity {
                 EditText displayEt = (EditText)findViewById(R.id.devDisplayNameEt);
                 String name = displayEt.getText().toString();
 
-                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                        .setDisplayName(name)
-                        .build();
-
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                user.updateProfile(profileUpdates);
+//                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+//                        .setDisplayName(name)
+//                        .build();
+//
+//                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//                user.updateProfile(profileUpdates);
+                name = name.replace(" ", "%20");
+                name = name.toLowerCase();
+                FirebaseMessaging.getInstance().subscribeToTopic(name);
             }
         });
     }

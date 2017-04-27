@@ -28,6 +28,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.leonardpieper.ceciVPlan.tools.EasterEgg;
 import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -43,6 +44,8 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import org.json.JSONException;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,6 +88,8 @@ public class SettingsActivity extends AppCompatActivity {
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+
+    private int easterEggCounter;
 
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = {DriveScopes.DRIVE};
@@ -151,6 +156,17 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
                 builder.show();
+
+                easterEggCounter++;
+                if(easterEggCounter>=5){
+                    EasterEgg easterEgg = new EasterEgg(SettingsActivity.this);
+                    try {
+                        easterEgg.addEmoji("\uD83C\uDF6A ", "den Cookie");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    easterEggCounter = 0;
+                }
             }
         });
 
