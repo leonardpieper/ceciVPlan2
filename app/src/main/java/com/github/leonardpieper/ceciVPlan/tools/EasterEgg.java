@@ -100,7 +100,7 @@ public class EasterEgg {
 
     private int getEmojiCoount(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        return preferences.getInt("emojiCount", 1);
+        return preferences.getInt("emojiCount", 0);
     }
 
     private boolean hasEmojiBeenDiscovered(String emojiName){

@@ -8,8 +8,8 @@ android {
         applicationId "com.github.leonardpieper.ceciVPlan"
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 31
-        versionName "17w17a"
+        versionCode 32
+        versionName "17w17b"
     }
     buildTypes {
         release {
