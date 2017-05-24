@@ -185,10 +185,12 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        Log.d(TAG, "Hallo");
-        System.out.println(FirebaseInstanceId.getInstance().getToken());
-        Log.d(TAG, FirebaseInstanceId.getInstance().getToken());
-        Log.d(TAG, "Tschüss");
+
+        //Crashes when no Google Play Services installed
+//        Log.d(TAG, "Hallo");
+//        System.out.println(FirebaseInstanceId.getInstance().getToken());
+//        Log.d(TAG, FirebaseInstanceId.getInstance().getToken());
+//        Log.d(TAG, "Tschüss");
 
 
 
@@ -656,7 +658,7 @@ public class MainActivity extends AppCompatActivity
             // TODO This is an upgrade
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
                     try {
-                        builder1.setMessage("Neuerungen:\n- 2 neue Emojis zu finden")
+                        builder1.setMessage("Neuerungen:\n\n- Im Gegensatz zur Ceci-Hompage werden 99,26% weniger mobiler Daten beansprucht\n\n- Android O wird unterstützt")
                                 .setTitle("Update " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName)
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
