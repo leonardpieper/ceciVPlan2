@@ -7,7 +7,7 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingTop="@dimen/activity_vertical_toolbar_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.github.leonardpieper.ceciVPlan.VPlanActivity"
     tools:showIn="@layout/app_bar_vplan">
@@ -25,7 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:stretchColumns="*"
-                android:id="@+id/vPlanTableLayoutEF"
+                android:id="@+id/vplan_tl_stufe"
                 android:visibility="visible">
                 <ProgressBar
                     android:layout_width="wrap_content"

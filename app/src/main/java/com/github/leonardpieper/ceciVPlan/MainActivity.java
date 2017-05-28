@@ -30,12 +30,14 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.leonardpieper.ceciVPlan.fragments.MainFragment;
+import com.github.leonardpieper.ceciVPlan.fragments.VPlanFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.api.client.googleapis.util.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.crash.FirebaseCrash;
+//import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -71,7 +73,6 @@ public class MainActivity extends AppCompatActivity
 
 
     DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
-//    DatabaseReference conditionRef = mRootRef.child("vPlan");
 
     TextView mTextview;
 
@@ -79,6 +80,14 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MainFragment mainFragment = new MainFragment();
+        this.getFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, mainFragment)
+                .addToBackStack(null)
+                .commit();
+
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Dashboard");
@@ -94,19 +103,19 @@ public class MainActivity extends AppCompatActivity
 
 //        final TextView vPlanToday = (TextView)findViewById(R.id.vPlanToday);
 //        final TextView vPlanTomorrow = (TextView)findViewById(R.id.vPlanTomorrow);
-        tlToday = (TableLayout)findViewById(R.id.vPlanToday);
-        tlTomorrow = (TableLayout)findViewById(R.id.vPlanTomorrow);
-        tvErr = (TextView)findViewById(R.id.tvErr_Main);
-
-        cvKurse = (CardView)findViewById(R.id.cv_Kurse);
-
-        mAuth = FirebaseAuth.getInstance();
-
-
-        checkFirstRun();
-
-        setDailyAlarm();
-        displayKurse();
+//        tlToday = (TableLayout)findViewById(R.id.vPlanToday);
+//        tlTomorrow = (TableLayout)findViewById(R.id.vPlanTomorrow);
+//        tvErr = (TextView)findViewById(R.id.tvErr_Main);
+//
+//        cvKurse = (CardView)findViewById(R.id.cv_Kurse);
+//
+//        mAuth = FirebaseAuth.getInstance();
+//
+//
+//        checkFirstRun();
+//
+//        setDailyAlarm();
+//        displayKurse();
 
 
 
@@ -120,70 +129,70 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user != null){
-                    if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
-                        DatabaseReference conditionRef = mRootRef.child("vPlan");
-
-                        String stufe = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("jahrgang", "EF");
-                        final DatabaseReference stufenRef = conditionRef.child(stufe);
-
-                        Log.d("FirebaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
-
-                        stufenRef.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                tlToday.removeAllViews();
-                                tlTomorrow.removeAllViews();
-
-
-                                Vertretungsplan vPlan = new Vertretungsplan();
-                                String sToday = "";
-                                String sTomorrow = "";
-                                for (DataSnapshot vPlanSnapshot : dataSnapshot.getChildren()) {
-                                    String datum = vPlanSnapshot.child("Datum").getValue(String.class);
-                                    if (!(datum == null || datum.contains("Datum"))) {
-
-                                        String fach = vPlanSnapshot.child("Fach").getValue(String.class);
-                                        String stunde = vPlanSnapshot.child("Stunde").getValue(String.class);
-                                        String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
-                                        String raum = vPlanSnapshot.child("Raum").getValue(String.class);
-                                        String text = vPlanSnapshot.child("Vertretungs-Text").getValue(String.class);
-
-                                        boolean bToday = vPlan.isToday(datum);
-                                        boolean bTomorrow = vPlan.isTomorrow(datum);
-
-                                        if (bToday) {
-                                            addTableRow("today", fach, stunde, vertreter, raum, text);
-//                                        sToday = sToday + "\n" + fach + " " + stunde + " " + vertreter + " " + raum + " " + text;
-//                                        vPlanToday.setText(sToday);
-                                        } else if (bTomorrow) {
-                                            addTableRow("tomorrow", fach, stunde, vertreter, raum, text);
-//                                        sTomorrow = sTomorrow + "\n" + fach + " " + stunde + " " + vertreter + " " + raum + " " + text;
-//                                        vPlanTomorrow.setText(sTomorrow);
-                                        }
-                                    }
-
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                Log.d("MainActivity", databaseError.getMessage());
-                            }
-                        });
-                    }
-
-                }else{
-                    Log.d("FirebaseAuth", "onAuthStateChanged:signed_out");
-                    tvErr.setText("Du bist nicht angemeldet!");
-                    tvErr.setVisibility(View.VISIBLE);
-                }
-            }
-        };
+//        mAuthListener = new FirebaseAuth.AuthStateListener() {
+//            @Override
+//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+//                FirebaseUser user = firebaseAuth.getCurrentUser();
+//                if(user != null){
+//                    if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+//                        DatabaseReference conditionRef = mRootRef.child("vPlan");
+//
+//                        String stufe = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("jahrgang", "EF");
+//                        final DatabaseReference stufenRef = conditionRef.child(stufe);
+//
+//                        Log.d("FirebaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
+//
+//                        stufenRef.addValueEventListener(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(DataSnapshot dataSnapshot) {
+//                                tlToday.removeAllViews();
+//                                tlTomorrow.removeAllViews();
+//
+//
+//                                Vertretungsplan vPlan = new Vertretungsplan();
+//                                String sToday = "";
+//                                String sTomorrow = "";
+//                                for (DataSnapshot vPlanSnapshot : dataSnapshot.getChildren()) {
+//                                    String datum = vPlanSnapshot.child("Datum").getValue(String.class);
+//                                    if (!(datum == null || datum.contains("Datum"))) {
+//
+//                                        String fach = vPlanSnapshot.child("Fach").getValue(String.class);
+//                                        String stunde = vPlanSnapshot.child("Stunde").getValue(String.class);
+//                                        String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
+//                                        String raum = vPlanSnapshot.child("Raum").getValue(String.class);
+//                                        String text = vPlanSnapshot.child("Vertretungs-Text").getValue(String.class);
+//
+//                                        boolean bToday = vPlan.isToday(datum);
+//                                        boolean bTomorrow = vPlan.isTomorrow(datum);
+//
+//                                        if (bToday) {
+//                                            addTableRow("today", fach, stunde, vertreter, raum, text);
+////                                        sToday = sToday + "\n" + fach + " " + stunde + " " + vertreter + " " + raum + " " + text;
+////                                        vPlanToday.setText(sToday);
+//                                        } else if (bTomorrow) {
+//                                            addTableRow("tomorrow", fach, stunde, vertreter, raum, text);
+////                                        sTomorrow = sTomorrow + "\n" + fach + " " + stunde + " " + vertreter + " " + raum + " " + text;
+////                                        vPlanTomorrow.setText(sTomorrow);
+//                                        }
+//                                    }
+//
+//                                }
+//                            }
+//
+//                            @Override
+//                            public void onCancelled(DatabaseError databaseError) {
+//                                Log.d("MainActivity", databaseError.getMessage());
+//                            }
+//                        });
+//                    }
+//
+//                }else{
+//                    Log.d("FirebaseAuth", "onAuthStateChanged:signed_out");
+//                    tvErr.setText("Du bist nicht angemeldet!");
+//                    tvErr.setVisibility(View.VISIBLE);
+//                }
+//            }
+//        };
 
 
         //Crashes when no Google Play Services installed
@@ -199,7 +208,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
+//        mAuth.addAuthStateListener(mAuthListener);
 
 //        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
 
@@ -230,60 +239,60 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-    public void addTableRow(String tag, String fach, String stunde, String lehrer, String raum, String text) {
-        TableRow row = new TableRow(this);
-
-        TextView lesson = new TextView(this);
-        TextView time = new TextView(this);
-        TextView tutor = new TextView(this);
-        TextView room = new TextView(this);
-        TextView extra = new TextView(this);
-
-        lesson.setPadding(5,15,15,15);
-        time.setPadding(5,15,15,15);
-        tutor.setPadding(5,15,15,15);
-        room.setPadding(5,15,15,15);
-        extra.setPadding(5,15,15,15);
-
-        lesson.setBackgroundResource(R.drawable.cell_shape);
-        time.setBackgroundResource(R.drawable.cell_shape);
-        tutor.setBackgroundResource(R.drawable.cell_shape);
-        room.setBackgroundResource(R.drawable.cell_shape);
-        extra.setBackgroundResource(R.drawable.cell_shape);
-
-        TableRow.LayoutParams trparams = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.WRAP_CONTENT);
-
-        lesson.setLayoutParams(trparams);
-        time.setLayoutParams(trparams);
-        tutor.setLayoutParams(trparams);
-        room.setLayoutParams(trparams);
-        extra.setLayoutParams(trparams);
-
-        lesson.setText(fach);
-        time.setText(stunde);
-        tutor.setText(lehrer);
-        room.setText(raum);
-        extra.setText(text);
-
-        row.addView(lesson);
-        row.addView(time);
-        row.addView(tutor);
-        row.addView(room);
-        row.addView(extra);
-
-        switch(tag){
-            case "today":
-                tlToday.addView(row);
-                break;
-            case "tomorrow":
-                tlTomorrow.addView(row);
-                break;
-            default:
-                Log.d(TAG, "Stufe ist nicht erkannt!");
-        }
-    }
+//    public void addTableRow(String tag, String fach, String stunde, String lehrer, String raum, String text) {
+//        TableRow row = new TableRow(this);
+//
+//        TextView lesson = new TextView(this);
+//        TextView time = new TextView(this);
+//        TextView tutor = new TextView(this);
+//        TextView room = new TextView(this);
+//        TextView extra = new TextView(this);
+//
+//        lesson.setPadding(5,15,15,15);
+//        time.setPadding(5,15,15,15);
+//        tutor.setPadding(5,15,15,15);
+//        room.setPadding(5,15,15,15);
+//        extra.setPadding(5,15,15,15);
+//
+//        lesson.setBackgroundResource(R.drawable.cell_shape);
+//        time.setBackgroundResource(R.drawable.cell_shape);
+//        tutor.setBackgroundResource(R.drawable.cell_shape);
+//        room.setBackgroundResource(R.drawable.cell_shape);
+//        extra.setBackgroundResource(R.drawable.cell_shape);
+//
+//        TableRow.LayoutParams trparams = new TableRow.LayoutParams(
+//                TableRow.LayoutParams.MATCH_PARENT,
+//                TableRow.LayoutParams.WRAP_CONTENT);
+//
+//        lesson.setLayoutParams(trparams);
+//        time.setLayoutParams(trparams);
+//        tutor.setLayoutParams(trparams);
+//        room.setLayoutParams(trparams);
+//        extra.setLayoutParams(trparams);
+//
+//        lesson.setText(fach);
+//        time.setText(stunde);
+//        tutor.setText(lehrer);
+//        room.setText(raum);
+//        extra.setText(text);
+//
+//        row.addView(lesson);
+//        row.addView(time);
+//        row.addView(tutor);
+//        row.addView(room);
+//        row.addView(extra);
+//
+//        switch(tag){
+//            case "today":
+//                tlToday.addView(row);
+//                break;
+//            case "tomorrow":
+//                tlTomorrow.addView(row);
+//                break;
+//            default:
+//                Log.d(TAG, "Stufe ist nicht erkannt!");
+//        }
+//    }
 
     private void displayKurse(){
         final KursCache kursCache = new KursCache(MainActivity.this);
@@ -368,8 +377,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private LinearLayout makeKursIcon(final String title){
-
-
         final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
         int width = (int) (50 * scale + 0.5f);
         int height = (int) (50 * scale + 0.5f);
@@ -517,10 +524,18 @@ public class MainActivity extends AppCompatActivity
 
         switch(id){
             case R.id.nav_dashboard:
+                MainFragment mainFragment = new MainFragment();
+                this.getFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentContainer, mainFragment)
+                        .addToBackStack(null)
+                        .commit();
                 break;
             case R.id.nav_vplan:
-                Intent vIntent = new Intent(this, VPlanActivity.class);
-                startActivity(vIntent);
+                VPlanFragment vPlanFragment = new VPlanFragment();
+                this.getFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentContainer, vPlanFragment)
+                        .addToBackStack(null)
+                        .commit();
                 break;
             case R.id.nav_kurse:
                 Intent kuIntent = new Intent(this, KurseActivity.class);

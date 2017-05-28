@@ -8,7 +8,7 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingTop="@dimen/activity_vertical_toolbar_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.github.leonardpieper.ceciVPlan.MainActivity"
     tools:showIn="@layout/app_bar_main">
@@ -86,7 +86,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/vPlanTodayTitle"
-                        android:id="@+id/vPlanToday"
+                        android:id="@+id/main_tl_vPlanToday"
                         android:stretchColumns="*"
                         android:text="Vertretungen Heute">
                         <ProgressBar
@@ -94,7 +94,7 @@
                             android:layout_height="wrap_content"
                             android:indeterminate="true"/>
                         <TextView
-                            android:id="@+id/tvErr_Main"
+                            android:id="@+id/main_tv_errMain"
                             android:textAlignment="center"
                             android:visibility="gone"/>
                     </TableLayout>
@@ -124,7 +124,7 @@
                     <TableLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/vPlanTomorrow"
+                        android:id="@+id/main_tl_vPlanTomorrow"
                         android:layout_below="@+id/vPlanTomorrowTitle"
                         android:stretchColumns="*"
                         android:text="Vertretungen morgen">

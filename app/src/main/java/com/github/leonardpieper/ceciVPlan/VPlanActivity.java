@@ -95,16 +95,16 @@ public class VPlanActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
-        fabyear = (com.github.clans.fab.FloatingActionMenu)findViewById(R.id.fab_year);
-        fabEF = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabEF);
-        fabQ1 = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabQ1);
-        fabQ2 = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabQ2);
-        fabMe = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabMe);
+//        fabyear = (com.github.clans.fab.FloatingActionMenu)findViewById(R.id.fab_year);
+//        fabEF = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabEF);
+//        fabQ1 = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabQ1);
+//        fabQ2 = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabQ2);
+//        fabMe = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabMe);
 
-        LocalUser localUser = new LocalUser(VPlanActivity.this);
-        if(localUser.getTeacherStatus()){
-            fabMe.setVisibility(View.VISIBLE);
-        }
+//        LocalUser localUser = new LocalUser(VPlanActivity.this);
+//        if(localUser.getTeacherStatus()){
+//            fabMe.setVisibility(View.VISIBLE);
+//        }
 
 
 
@@ -120,91 +120,86 @@ public class VPlanActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 //        tableLayout = (TableLayout)findViewById(R.id.vPlanTableLayout);
-        tableEF = (TableLayout)findViewById(R.id.vPlanTableLayoutEF);
-        tableQ1 = (TableLayout)findViewById(R.id.vPlanTableLayoutQ1);
-        tableQ2 = (TableLayout)findViewById(R.id.vPlanTableLayoutQ2);
-        tableMe = (TableLayout)findViewById(R.id.vPlanTableLayoutMe);
+//        tableEF = (TableLayout)findViewById(R.id.vPlanTableLayoutEF);
+//        tableQ1 = (TableLayout)findViewById(R.id.vPlanTableLayoutQ1);
+//        tableQ2 = (TableLayout)findViewById(R.id.vPlanTableLayoutQ2);
+//        tableMe = (TableLayout)findViewById(R.id.vPlanTableLayoutMe);
 
 //        String s = mAuth.getCurrentUser().getUid();
 //        Log.d("", s);
 
-        final VPlanCrawler crawler = new VPlanCrawler();
-        crawler.addEventListener(new CrawlerFinishListener() {
-            @Override
-            public void handleCrawlFinishEvent(EventObject e) {
-                List<String> htmls = crawler.allHtmls;
-//                html = html.replaceAll("\r\n", " ");
-
-//                final Pattern pattern = Pattern.compile("<TD.*>.*\\n(.+?)\\n.*</TD>");
-//                final Matcher matcher = pattern.matcher(html);
-//                while (matcher.find()){
-//                    System.out.println(matcher.group(1));
+//        final VPlanCrawler crawler = new VPlanCrawler();
+//        crawler.addEventListener(new CrawlerFinishListener() {
+//            @Override
+//            public void handleCrawlFinishEvent(EventObject e) {
+//                List<String> htmls = crawler.allHtmls;
+//
+//                String[] stufen = new String[]{"Q2", "Q1", "EF"};
+//                if(!htmls.isEmpty()) {
+//                    for (int j = 0; j < htmls.size(); j++) {
+//                        String html = htmls.get(j);
+//                        String stufe = stufen[j];
+//
+//                        String[] lines = html.split("\\r?\\n");
+//                        List data = new ArrayList();
+//                        for (int i = 0; i < lines.length; i++) {
+//                            if (i > 0) {
+//                                if (lines[i - 1].contains("<TD align=center>") && lines[i + 1].contains("</TD>")) {
+////                            System.out.println(lines[i]);
+//                                    if (lines[i].contains("<B>") || lines[i].contains("</B>")) {
+//                                        lines[i] = lines[i].replace("<B>", "");
+//                                        lines[i] = lines[i].replace("</B>", "");
+//                                    }
+//                                    data.add(lines[i]);
+//                                } else if (lines[i].contains("<TD align=center>") && lines[i].contains("</TD>")) {
+//                                    lines[i] = lines[i].replace("<TD align=center>", "");
+//                                    lines[i] = lines[i].replace("</TD>", "");
+//                                    lines[i] = lines[i].replace("&nbsp;", "");
+//                                    data.add(lines[i]);
+//                                }
+//                            }
+//                        }
+//                        JSONArray jaStufe = dataToJSON(data);
+//                        List l;
+//                        try {
+//                            l = toList(jaStufe);
+//                            uploadFirebase(stufe, l);
+//                            System.out.println(l.toString());
+//                        } catch (JSONException e1) {
+//                            e1.printStackTrace();
+//                        }
+//
+//                        System.out.println(data.toString());
+//                    }
 //                }
-                String[] stufen = new String[]{"Q2", "Q1", "EF"};
-                if(!htmls.isEmpty()) {
-                    for (int j = 0; j < htmls.size(); j++) {
-                        String html = htmls.get(j);
-                        String stufe = stufen[j];
+//
+//
+//
+//            }
+//        });
+//        if(mFirebaseRemoteConfig.getBoolean("load_vplan_enabled")) {
+//            crawler.execute("");
+//        }
 
-                        String[] lines = html.split("\\r?\\n");
-                        List data = new ArrayList();
-                        for (int i = 0; i < lines.length; i++) {
-                            if (i > 0) {
-                                if (lines[i - 1].contains("<TD align=center>") && lines[i + 1].contains("</TD>")) {
-//                            System.out.println(lines[i]);
-                                    if (lines[i].contains("<B>") || lines[i].contains("</B>")) {
-                                        lines[i] = lines[i].replace("<B>", "");
-                                        lines[i] = lines[i].replace("</B>", "");
-                                    }
-                                    data.add(lines[i]);
-                                } else if (lines[i].contains("<TD align=center>") && lines[i].contains("</TD>")) {
-                                    lines[i] = lines[i].replace("<TD align=center>", "");
-                                    lines[i] = lines[i].replace("</TD>", "");
-                                    lines[i] = lines[i].replace("&nbsp;", "");
-                                    data.add(lines[i]);
-                                }
-                            }
-                        }
-                        JSONArray jaStufe = dataToJSON(data);
-                        List l;
-                        try {
-                            l = toList(jaStufe);
-                            uploadFirebase(stufe, l);
-                            System.out.println(l.toString());
-                        } catch (JSONException e1) {
-                            e1.printStackTrace();
-                        }
-
-                        System.out.println(data.toString());
-                    }
-                }
-
-
-
-            }
-        });
-        if(mFirebaseRemoteConfig.getBoolean("load_vplan_enabled")) {
-            crawler.execute("");
-        }
-
-        if(mAuth.getCurrentUser()!=null){
-            if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
-                conditionRef = mRootRef.child("vPlan");
-                getFBData();
-            }
-        }else{
-            mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-                @Override
-                public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                    if(firebaseAuth.getCurrentUser()!=null) {
-                        if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
-                            conditionRef = mRootRef.child("vPlan");
-                            getFBData();
-                        }
-                    }
-                }
-            });
-        }
+//        if(mAuth.getCurrentUser()!=null){
+//            if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+//                conditionRef = mRootRef.child("vPlan");
+//                getFBData();
+//            }
+//        }
+//            else{
+//            mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+//                @Override
+//                public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+//                    if(firebaseAuth.getCurrentUser()!=null) {
+//                        if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+//                            conditionRef = mRootRef.child("vPlan");
+//                            getFBData();
+//                        }
+//                    }
+//                }
+//            });
+//        }
     }
 
     @Override
@@ -217,43 +212,43 @@ public class VPlanActivity extends AppCompatActivity
         }
     }
 
-    public void getFBData(){
-        conditionRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                tableEF.removeAllViews();
-                tableQ1.removeAllViews();
-                tableQ2.removeAllViews();
-                for(DataSnapshot stufenSnapshot: dataSnapshot.getChildren()) {
-                    String stufe = stufenSnapshot.getKey();
-                    oldDatum = "99.99";
-                    for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
-                        String datum = vPlanSnapshot.child("Datum").getValue(String.class);
-
-                        if (!oldDatum.equals(datum) && !(datum == null || datum.contains("Datum"))) {
-                            String tag = vPlanSnapshot.child("Tag").getValue(String.class);
-                            addDateTableRow(stufe, tag, datum);
-                        }
-
-                        if (!(datum == null || datum.contains("Datum"))) {
-                            String fach = vPlanSnapshot.child("Fach").getValue(String.class);
-                            String stunde = vPlanSnapshot.child("Stunde").getValue(String.class);
-                            String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
-                            String raum = vPlanSnapshot.child("Raum").getValue(String.class);
-                            String text = vPlanSnapshot.child("Vertretungs-Text").getValue(String.class);
-
-                            addTableRow(stufe, fach, stunde, vertreter, raum, text);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "Cancelled");
-            }
-        });
-    }
+//    public void getFBData(){
+//        conditionRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                tableEF.removeAllViews();
+//                tableQ1.removeAllViews();
+//                tableQ2.removeAllViews();
+//                for(DataSnapshot stufenSnapshot: dataSnapshot.getChildren()) {
+//                    String stufe = stufenSnapshot.getKey();
+//                    oldDatum = "99.99";
+//                    for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
+//                        String datum = vPlanSnapshot.child("Datum").getValue(String.class);
+//
+//                        if (!oldDatum.equals(datum) && !(datum == null || datum.contains("Datum"))) {
+//                            String tag = vPlanSnapshot.child("Tag").getValue(String.class);
+//                            addDateTableRow(stufe, tag, datum);
+//                        }
+//
+//                        if (!(datum == null || datum.contains("Datum"))) {
+//                            String fach = vPlanSnapshot.child("Fach").getValue(String.class);
+//                            String stunde = vPlanSnapshot.child("Stunde").getValue(String.class);
+//                            String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
+//                            String raum = vPlanSnapshot.child("Raum").getValue(String.class);
+//                            String text = vPlanSnapshot.child("Vertretungs-Text").getValue(String.class);
+//
+//                            addTableRow(stufe, fach, stunde, vertreter, raum, text);
+//                        }
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.d(TAG, "Cancelled");
+//            }
+//        });
+//    }
 
 //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu) {
@@ -322,279 +317,279 @@ public class VPlanActivity extends AppCompatActivity
         return true;
     }
 
-    public void addTableRow(String stufe, String fach, String stunde, String lehrer, String raum, String text) {
-        TableRow row = new TableRow(this);
+//    public void addTableRow(String stufe, String fach, String stunde, String lehrer, String raum, String text) {
+//        TableRow row = new TableRow(this);
+//
+//        TextView lesson = new TextView(this);
+//        TextView time = new TextView(this);
+//        TextView tutor = new TextView(this);
+//        TextView room = new TextView(this);
+//        TextView extra = new TextView(this);
+//
+//        lesson.setPadding(5,15,15,15);
+//        time.setPadding(5,15,15,15);
+//        tutor.setPadding(5,15,15,15);
+//        room.setPadding(5,15,15,15);
+//        extra.setPadding(5,15,15,15);
+//
+//        lesson.setBackgroundResource(R.drawable.cell_shape);
+//        time.setBackgroundResource(R.drawable.cell_shape);
+//        tutor.setBackgroundResource(R.drawable.cell_shape);
+//        room.setBackgroundResource(R.drawable.cell_shape);
+//        extra.setBackgroundResource(R.drawable.cell_shape);
+//
+//        TableRow.LayoutParams trparams = new TableRow.LayoutParams(
+//                TableRow.LayoutParams.MATCH_PARENT,
+//                TableRow.LayoutParams.WRAP_CONTENT);
+//
+//        lesson.setLayoutParams(trparams);
+//        time.setLayoutParams(trparams);
+//        tutor.setLayoutParams(trparams);
+//        room.setLayoutParams(trparams);
+//        extra.setLayoutParams(trparams);
+//
+//
+//        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+//            lesson.setText(Html.fromHtml(fach, Html.FROM_HTML_MODE_COMPACT));
+//            time.setText(Html.fromHtml(stunde, Html.FROM_HTML_MODE_COMPACT));
+//            tutor.setText(Html.fromHtml(lehrer, Html.FROM_HTML_MODE_COMPACT));
+//            room.setText(Html.fromHtml(raum, Html.FROM_HTML_MODE_COMPACT));
+//            extra.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
+//        }else {
+//            lesson.setText(Html.fromHtml(fach));
+//            time.setText(Html.fromHtml(stunde));
+//            tutor.setText(Html.fromHtml(lehrer));
+//            room.setText(Html.fromHtml(raum));
+//            extra.setText(Html.fromHtml(text));
+//        }
+//
+//
+//        row.addView(lesson);
+//        row.addView(time);
+//        row.addView(tutor);
+//        row.addView(room);
+//        row.addView(extra);
+//
+//        switch(stufe){
+//            case "EF":
+//                tableEF.addView(row);
+//                break;
+//            case "Q1":
+//                tableQ1.addView(row);
+//                break;
+//            case "Q2":
+//                tableQ2.addView(row);
+//                break;
+//            case "me":
+//                tableMe.addView(row);
+//                break;
+//            default:
+//                Log.d(TAG, "Stufe ist nicht erkannt!");
+//        }
+//    }
+//
+//    public void addDateTableRow(String stufe, String tag, String datum){
+//        TableRow row = new TableRow(this);
+//
+//        TextView day = new TextView(this);
+//        TextView date = new TextView(this);
+//
+//        day.setPadding(15,15,5,15);
+//        date.setPadding(15,15,5,15);
+//
+//        day.setTextSize(20);
+//        date.setTextSize(20);
+//
+//        TableRow.LayoutParams twoColParam = new TableRow.LayoutParams(
+//                TableRow.LayoutParams.MATCH_PARENT,
+//                android.widget.TableRow.LayoutParams.WRAP_CONTENT);
+//        twoColParam.span = 2;
+//
+//        TableRow.LayoutParams threeColParam = new TableRow.LayoutParams(
+//                TableRow.LayoutParams.MATCH_PARENT,
+//                android.widget.TableRow.LayoutParams.WRAP_CONTENT);
+//        threeColParam.span = 3;
+//
+//        day.setLayoutParams(twoColParam);
+//        date.setLayoutParams(threeColParam);
+//
+//        day.setText(tag);
+//        date.setText(datum);
+//
+//        row.addView(day);
+//        row.addView(date);
+//
+//        switch(stufe){
+//            case "EF":
+//                tableEF.addView(row);
+//                break;
+//            case "Q1":
+//                tableQ1.addView(row);
+//                break;
+//            case "Q2":
+//                tableQ2.addView(row);
+//                break;
+//            case "me":
+//                tableMe.addView(row);
+//            default:
+//                Log.d(TAG, "Stufe ist nicht erkannt!");
+//        }
+//
+//        oldDatum=datum;
+//    }
 
-        TextView lesson = new TextView(this);
-        TextView time = new TextView(this);
-        TextView tutor = new TextView(this);
-        TextView room = new TextView(this);
-        TextView extra = new TextView(this);
+//    public void changeStufe(View v){
+//        switch(v.getId()){
+//            case(R.id.fabEF):
+//                tableEF.setVisibility(View.VISIBLE);
+//                tableQ1.setVisibility(View.GONE);
+//                tableQ2.setVisibility(View.GONE);
+//                tableMe.setGravity(View.GONE);
+//                break;
+//            case(R.id.fabQ1):
+//                tableEF.setVisibility(View.GONE);
+//                tableQ1.setVisibility(View.VISIBLE);
+//                tableQ2.setVisibility(View.GONE);
+//                tableMe.setGravity(View.GONE);
+//
+//                easterEggCounter++;
+//                if(easterEggCounter>=10){
+//                    EasterEgg easterEgg = new EasterEgg(VPlanActivity.this);
+//                    try {
+//                        easterEgg.addEmoji("\uD83D\uDC36", "den Hund");
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                    easterEggCounter = 0;
+//                }
+//                break;
+//            case(R.id.fabQ2):
+//                tableEF.setVisibility(View.GONE);
+//                tableQ1.setVisibility(View.GONE);
+//                tableQ2.setVisibility(View.VISIBLE);
+//                tableMe.setGravity(View.GONE);
+//                break;
+//            case (R.id.fabMe):
+//                tableEF.setVisibility(View.GONE);
+//                tableQ1.setVisibility(View.GONE);
+//                tableQ2.setVisibility(View.GONE);
+//                tableMe.setVisibility(View.VISIBLE);
+//        }
+//    }
 
-        lesson.setPadding(5,15,15,15);
-        time.setPadding(5,15,15,15);
-        tutor.setPadding(5,15,15,15);
-        room.setPadding(5,15,15,15);
-        extra.setPadding(5,15,15,15);
-
-        lesson.setBackgroundResource(R.drawable.cell_shape);
-        time.setBackgroundResource(R.drawable.cell_shape);
-        tutor.setBackgroundResource(R.drawable.cell_shape);
-        room.setBackgroundResource(R.drawable.cell_shape);
-        extra.setBackgroundResource(R.drawable.cell_shape);
-
-        TableRow.LayoutParams trparams = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.WRAP_CONTENT);
-
-        lesson.setLayoutParams(trparams);
-        time.setLayoutParams(trparams);
-        tutor.setLayoutParams(trparams);
-        room.setLayoutParams(trparams);
-        extra.setLayoutParams(trparams);
-
-
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
-            lesson.setText(Html.fromHtml(fach, Html.FROM_HTML_MODE_COMPACT));
-            time.setText(Html.fromHtml(stunde, Html.FROM_HTML_MODE_COMPACT));
-            tutor.setText(Html.fromHtml(lehrer, Html.FROM_HTML_MODE_COMPACT));
-            room.setText(Html.fromHtml(raum, Html.FROM_HTML_MODE_COMPACT));
-            extra.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
-        }else {
-            lesson.setText(Html.fromHtml(fach));
-            time.setText(Html.fromHtml(stunde));
-            tutor.setText(Html.fromHtml(lehrer));
-            room.setText(Html.fromHtml(raum));
-            extra.setText(Html.fromHtml(text));
-        }
-
-
-        row.addView(lesson);
-        row.addView(time);
-        row.addView(tutor);
-        row.addView(room);
-        row.addView(extra);
-
-        switch(stufe){
-            case "EF":
-                tableEF.addView(row);
-                break;
-            case "Q1":
-                tableQ1.addView(row);
-                break;
-            case "Q2":
-                tableQ2.addView(row);
-                break;
-            case "me":
-                tableMe.addView(row);
-                break;
-            default:
-                Log.d(TAG, "Stufe ist nicht erkannt!");
-        }
-    }
-
-    public void addDateTableRow(String stufe, String tag, String datum){
-        TableRow row = new TableRow(this);
-
-        TextView day = new TextView(this);
-        TextView date = new TextView(this);
-
-        day.setPadding(15,15,5,15);
-        date.setPadding(15,15,5,15);
-
-        day.setTextSize(20);
-        date.setTextSize(20);
-
-        TableRow.LayoutParams twoColParam = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                android.widget.TableRow.LayoutParams.WRAP_CONTENT);
-        twoColParam.span = 2;
-
-        TableRow.LayoutParams threeColParam = new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                android.widget.TableRow.LayoutParams.WRAP_CONTENT);
-        threeColParam.span = 3;
-
-        day.setLayoutParams(twoColParam);
-        date.setLayoutParams(threeColParam);
-
-        day.setText(tag);
-        date.setText(datum);
-
-        row.addView(day);
-        row.addView(date);
-
-        switch(stufe){
-            case "EF":
-                tableEF.addView(row);
-                break;
-            case "Q1":
-                tableQ1.addView(row);
-                break;
-            case "Q2":
-                tableQ2.addView(row);
-                break;
-            case "me":
-                tableMe.addView(row);
-            default:
-                Log.d(TAG, "Stufe ist nicht erkannt!");
-        }
-
-        oldDatum=datum;
-    }
-
-    public void changeStufe(View v){
-        switch(v.getId()){
-            case(R.id.fabEF):
-                tableEF.setVisibility(View.VISIBLE);
-                tableQ1.setVisibility(View.GONE);
-                tableQ2.setVisibility(View.GONE);
-                tableMe.setGravity(View.GONE);
-                break;
-            case(R.id.fabQ1):
-                tableEF.setVisibility(View.GONE);
-                tableQ1.setVisibility(View.VISIBLE);
-                tableQ2.setVisibility(View.GONE);
-                tableMe.setGravity(View.GONE);
-
-                easterEggCounter++;
-                if(easterEggCounter>=10){
-                    EasterEgg easterEgg = new EasterEgg(VPlanActivity.this);
-                    try {
-                        easterEgg.addEmoji("\uD83D\uDC36", "den Hund");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    easterEggCounter = 0;
-                }
-                break;
-            case(R.id.fabQ2):
-                tableEF.setVisibility(View.GONE);
-                tableQ1.setVisibility(View.GONE);
-                tableQ2.setVisibility(View.VISIBLE);
-                tableMe.setGravity(View.GONE);
-                break;
-            case (R.id.fabMe):
-                tableEF.setVisibility(View.GONE);
-                tableQ1.setVisibility(View.GONE);
-                tableQ2.setVisibility(View.GONE);
-                tableMe.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void changeToMyVPlan(View v){
-        tableEF.setVisibility(View.GONE);
-        tableQ1.setVisibility(View.GONE);
-        tableQ2.setVisibility(View.GONE);
-        tableMe.setVisibility(View.VISIBLE);
-
-        // Get Lehrerabk
-        final String lehrerAbk = PreferenceManager.getDefaultSharedPreferences(VPlanActivity.this).getString("lehrer-abk", "noTeacher");
-        if(!lehrerAbk.isEmpty()) {
-            lehrerAbk.toLowerCase();
-
-            conditionRef = mRootRef.child("vPlan");
-            conditionRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    JSONObject tage = null;
-                    try {
-                        tage = new JSONObject("{\"Mo\":[],\"Di\":[],\"Mi\":[],\"Do\":[],\"Fr\":[]}");
-
-
-//                        tableEF.removeAllViews();
-//                        tableQ1.removeAllViews();
-//                        tableQ2.removeAllViews();
-                        tableMe.removeAllViews();
-                        for (DataSnapshot stufenSnapshot : dataSnapshot.getChildren()) {
-                            String stufe = stufenSnapshot.getKey();
-                            for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
-                                String datum = vPlanSnapshot.child("Datum").getValue(String.class);
-
-//                                System.out.println(mAuth.getCurrentUser().getDisplayName());
-//                                System.out.println(vPlanSnapshot.child("Vertreter").getValue(String.class));
-                                String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
-                                if(vertreter!=null){
-                                    vertreter = vertreter.toLowerCase();
-                                }
-                                if (vertreter!=null && lehrerAbk.equals(vertreter)) {
-
-                                    String date = vPlanSnapshot.child("Tag").getValue(String.class);
-
-                                    JSONArray tag = tage.getJSONArray(date);
-
-                                    JSONObject data = new JSONObject();
-                                    data.put("fach", vPlanSnapshot.child("Fach").getValue(String.class));
-                                    data.put("stunde", vPlanSnapshot.child("Stunde").getValue(String.class));
-                                    data.put("vertreter", vPlanSnapshot.child("Vertreter").getValue(String.class));
-                                    data.put("raum", vPlanSnapshot.child("Raum").getValue(String.class));
-                                    data.put("text", vPlanSnapshot.child("Vertretungs-Text").getValue(String.class));
-                                    data.put("tag", vPlanSnapshot.child("Tag").getValue(String.class));
-                                    data.put("datum", vPlanSnapshot.child("Datum").getValue(String.class));
-
-
-                                    tag.put(data);
-                                    tage.put(date, tag);
-
-//                            if (!oldDatum.equals(datum) && !(datum == null || datum.contains("Datum"))) {
-//                                String tag = vPlanSnapshot.child("Tag").getValue(String.class);
-//                                addDateTableRow("me", tag, datum);
+//    public void changeToMyVPlan(View v){
+//        tableEF.setVisibility(View.GONE);
+//        tableQ1.setVisibility(View.GONE);
+//        tableQ2.setVisibility(View.GONE);
+//        tableMe.setVisibility(View.VISIBLE);
+//
+//        // Get Lehrerabk
+//        final String lehrerAbk = PreferenceManager.getDefaultSharedPreferences(VPlanActivity.this).getString("lehrer-abk", "noTeacher");
+//        if(!lehrerAbk.isEmpty()) {
+//            lehrerAbk.toLowerCase();
+//
+//            conditionRef = mRootRef.child("vPlan");
+//            conditionRef.addValueEventListener(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    JSONObject tage = null;
+//                    try {
+//                        tage = new JSONObject("{\"Mo\":[],\"Di\":[],\"Mi\":[],\"Do\":[],\"Fr\":[]}");
+//
+//
+////                        tableEF.removeAllViews();
+////                        tableQ1.removeAllViews();
+////                        tableQ2.removeAllViews();
+//                        tableMe.removeAllViews();
+//                        for (DataSnapshot stufenSnapshot : dataSnapshot.getChildren()) {
+//                            String stufe = stufenSnapshot.getKey();
+//                            for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
+//                                String datum = vPlanSnapshot.child("Datum").getValue(String.class);
+//
+////                                System.out.println(mAuth.getCurrentUser().getDisplayName());
+////                                System.out.println(vPlanSnapshot.child("Vertreter").getValue(String.class));
+//                                String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
+//                                if(vertreter!=null){
+//                                    vertreter = vertreter.toLowerCase();
+//                                }
+//                                if (vertreter!=null && lehrerAbk.equals(vertreter)) {
+//
+//                                    String date = vPlanSnapshot.child("Tag").getValue(String.class);
+//
+//                                    JSONArray tag = tage.getJSONArray(date);
+//
+//                                    JSONObject data = new JSONObject();
+//                                    data.put("fach", vPlanSnapshot.child("Fach").getValue(String.class));
+//                                    data.put("stunde", vPlanSnapshot.child("Stunde").getValue(String.class));
+//                                    data.put("vertreter", vPlanSnapshot.child("Vertreter").getValue(String.class));
+//                                    data.put("raum", vPlanSnapshot.child("Raum").getValue(String.class));
+//                                    data.put("text", vPlanSnapshot.child("Vertretungs-Text").getValue(String.class));
+//                                    data.put("tag", vPlanSnapshot.child("Tag").getValue(String.class));
+//                                    data.put("datum", vPlanSnapshot.child("Datum").getValue(String.class));
+//
+//
+//                                    tag.put(data);
+//                                    tage.put(date, tag);
+//
+////                            if (!oldDatum.equals(datum) && !(datum == null || datum.contains("Datum"))) {
+////                                String tag = vPlanSnapshot.child("Tag").getValue(String.class);
+////                                addDateTableRow("me", tag, datum);
+////                            }
+////
+//                                }
+//                            }
+//                        }
+//
+//                        for (int i = 0; i < 5; i++) {
+//                            JSONArray date = new JSONArray();
+//                            switch (i) {
+//                                case 0:
+//                                    date = tage.getJSONArray("Mo");
+//                                    break;
+//                                case 1:
+//                                    date = tage.getJSONArray("Di");
+//                                    break;
+//                                case 2:
+//                                    date = tage.getJSONArray("Mi");
+//                                    break;
+//                                case 3:
+//                                    date = tage.getJSONArray("Do");
+//                                    break;
+//                                case 4:
+//                                    date = tage.getJSONArray("Fr");
+//                                    break;
 //                            }
 //
-                                }
-                            }
-                        }
-
-                        for (int i = 0; i < 5; i++) {
-                            JSONArray date = new JSONArray();
-                            switch (i) {
-                                case 0:
-                                    date = tage.getJSONArray("Mo");
-                                    break;
-                                case 1:
-                                    date = tage.getJSONArray("Di");
-                                    break;
-                                case 2:
-                                    date = tage.getJSONArray("Mi");
-                                    break;
-                                case 3:
-                                    date = tage.getJSONArray("Do");
-                                    break;
-                                case 4:
-                                    date = tage.getJSONArray("Fr");
-                                    break;
-                            }
-
-                            for (int j = 0; j < date.length(); j++) {
-                                JSONObject joData = date.getJSONObject(j);
-
-                                String tag = joData.getString("tag");
-                                String datum = joData.getString("datum");
-
-                                if (j == 0) {
-                                    addDateTableRow("me", tag, datum);
-                                }
-
-                                String fach = joData.getString("fach");
-                                String stunde = joData.getString("stunde");
-                                String vertreter = joData.getString("vertreter");
-                                String raum = joData.getString("raum");
-                                String text = joData.getString("text");
-                                addTableRow("me", fach, stunde, vertreter, raum, text);
-                            }
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-    }
+//                            for (int j = 0; j < date.length(); j++) {
+//                                JSONObject joData = date.getJSONObject(j);
+//
+//                                String tag = joData.getString("tag");
+//                                String datum = joData.getString("datum");
+//
+//                                if (j == 0) {
+//                                    addDateTableRow("me", tag, datum);
+//                                }
+//
+//                                String fach = joData.getString("fach");
+//                                String stunde = joData.getString("stunde");
+//                                String vertreter = joData.getString("vertreter");
+//                                String raum = joData.getString("raum");
+//                                String text = joData.getString("text");
+//                                addTableRow("me", fach, stunde, vertreter, raum, text);
+//                            }
+//                        }
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            });
+//        }
+//    }
 
     public JSONArray dataToJSON(List data){
         JSONArray root = new JSONArray();
@@ -638,82 +633,43 @@ public class VPlanActivity extends AppCompatActivity
         return root;
     }
 
-    public static Map<String, Object> toMap(JSONObject object) throws JSONException {
-        Map<String, Object> map = new HashMap();
-        Iterator keys = object.keys();
-        while (keys.hasNext()) {
-            String key = (String) keys.next();
-            map.put(key, fromJson(object.get(key)));
-        }
-        return map;
-    }
+//    public static Map<String, Object> toMap(JSONObject object) throws JSONException {
+//        Map<String, Object> map = new HashMap();
+//        Iterator keys = object.keys();
+//        while (keys.hasNext()) {
+//            String key = (String) keys.next();
+//            map.put(key, fromJson(object.get(key)));
+//        }
+//        return map;
+//    }
+//
+//    public static List toList(JSONArray array) throws JSONException {
+//        List list = new ArrayList();
+//        for (int i = 0; i < array.length(); i++) {
+//            list.add(fromJson(array.get(i)));
+//        }
+//        return list;
+//    }
+//
+//    private static Object fromJson(Object json) throws JSONException {
+//        if (json == JSONObject.NULL) {
+//            return null;
+//        } else if (json instanceof JSONObject) {
+//            return toMap((JSONObject) json);
+//        } else if (json instanceof JSONArray) {
+//            return toList((JSONArray) json);
+//        } else {
+//            return json;
+//        }
+//    }
+//
+//    public void uploadFirebase(String jahrgang, List data){
+//        FirebaseDatabase mData = FirebaseDatabase.getInstance();
+//
+//        if(mAuth.getCurrentUser()!=null){
+//            DatabaseReference mRef = mData.getReference("vPlan/" + jahrgang);
+//            mRef.setValue(data);
+//        }
+//    }
 
-    public static List toList(JSONArray array) throws JSONException {
-        List list = new ArrayList();
-        for (int i = 0; i < array.length(); i++) {
-            list.add(fromJson(array.get(i)));
-        }
-        return list;
-    }
-
-    private static Object fromJson(Object json) throws JSONException {
-        if (json == JSONObject.NULL) {
-            return null;
-        } else if (json instanceof JSONObject) {
-            return toMap((JSONObject) json);
-        } else if (json instanceof JSONArray) {
-            return toList((JSONArray) json);
-        } else {
-            return json;
-        }
-    }
-
-    public void uploadFirebase(String jahrgang, List data){
-        FirebaseDatabase mData = FirebaseDatabase.getInstance();
-
-        if(mAuth.getCurrentUser()!=null){
-            DatabaseReference mRef = mData.getReference("vPlan/" + jahrgang);
-            mRef.setValue(data);
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-//        client.connect();
-//        Action viewAction = Action.newAction(
-//                Action.TYPE_VIEW, // TODO: choose an action type.
-//                "VPlan Page", // TODO: Define a title for the content shown.
-//                // TODO: If you have web page content that matches this app activity's content,
-//                // make sure this auto-generated web page URL is correct.
-//                // Otherwise, set the URL to null.
-//                Uri.parse("http://host/path"),
-//                // TODO: Make sure this auto-generated app URL is correct.
-//                Uri.parse("android-app://com.github.leonardpieper.ceciVPlan/http/host/path")
-//        );
-//        AppIndex.AppIndexApi.start(client, viewAction);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-//        Action viewAction = Action.newAction(
-//                Action.TYPE_VIEW, // TODO: choose an action type.
-//                "VPlan Page", // TODO: Define a title for the content shown.
-//                // TODO: If you have web page content that matches this app activity's content,
-//                // make sure this auto-generated web page URL is correct.
-//                // Otherwise, set the URL to null.
-//                Uri.parse("http://host/path"),
-//                // TODO: Make sure this auto-generated app URL is correct.
-//                Uri.parse("android-app://com.github.leonardpieper.ceciVPlan/http/host/path")
-//        );
-//        AppIndex.AppIndexApi.end(client, viewAction);
-//        client.disconnect();
-    }
 }
