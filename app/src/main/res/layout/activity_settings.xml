@@ -58,25 +58,47 @@
                     android:inputType="textPassword"
                     android:hint="Passwort"/>
 
+
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Jahrgangsstufe"
+                    android:textSize="16dp"
                     android:id="@+id/btnSpinnerJahrgang"
                     style="?android:attr/spinnerStyle" >
                 </Button>
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/btnLogin"
-                    android:text="Anmelden"/>
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/btnLogout"
-                    android:text="Abmelden"
-                    android:visibility="gone"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/btnLogin"
+                        android:layout_alignParentLeft="true"
+                        android:text="Anmelden"
+                        android:textColor="@color/colorAccent"
+                        style="?android:attr/borderlessButtonStyle"/>
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/btnAdvanced"
+                        android:layout_alignParentRight="true"
+                        android:text="Erweiterte Optionen"
+                        android:visibility="gone"
+                        android:enabled="false"
+                        style="?android:attr/borderlessButtonStyle"/>
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/btnLogout"
+                        android:layout_alignParentLeft="true"
+                        android:text="Abmelden"
+                        android:textColor="@color/colorAccent"
+                        android:visibility="gone"
+                        style="?android:attr/borderlessButtonStyle"/>
+                </RelativeLayout>
+
 
             </LinearLayout>
 
@@ -142,6 +164,40 @@
                     android:textColor="@color/colorAccent"
                     android:visibility="visible"
                     style="?android:attr/borderlessButtonStyle"/>/>
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:id="@+id/cvTeacher"
+            android:visibility="gone"
+            card_view:cardCornerRadius="1dp"
+            card_view:cardUseCompatPadding="true"
+            card_view:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:id="@+id/etLehrerkrzl"
+                    android:inputType="text"
+                    android:hint="Lehrerkürzel (z.B. Mug)" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnSave"
+                    android:layout_alignParentRight="true"
+                    android:text="Bestätigen" />
 
             </LinearLayout>
 

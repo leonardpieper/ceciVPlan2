@@ -2,7 +2,9 @@ package com.github.leonardpieper.ceciVPlan;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -28,12 +30,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -103,57 +110,70 @@ public class KurseActivity extends AppCompatActivity
     }
 
     private void getPermissionStatus(){
-        mRootRef.child("Data").child("lehrerRead").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue(Boolean.class)==true){
-                    com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
-                    kursCreateFab.setVisibility(View.VISIBLE);
-                }
-            }
+        LocalUser user = new LocalUser(this);
+        if(user.getTeacherStatus()==true) {
+            com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
+            kursCreateFab.setVisibility(View.VISIBLE);
+        }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void getKurse(){
         final LinearLayout llroot = (LinearLayout)findViewById(R.id.kurse_ll);
 
-        if(mAuth.getCurrentUser()!=null){
-            DatabaseReference kurseRef = mRootRef
-                    .child("Users")
-                    .child(mAuth.getCurrentUser().getUid())
-                    .child("Kurse");
+        final KursCache kursCache = new KursCache(KurseActivity.this);
 
-            kurseRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    llroot.removeAllViews();
-                    for(DataSnapshot childSnapshot: dataSnapshot.getChildren()){
-                        TextView tv = new TextView(KurseActivity.this);
-                        final String title = childSnapshot.child("name").getValue(String.class);
-//                        tv.setText(childSnapshot.child("name").getValue(String.class));
-//                        tv.setOnClickListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View v) {
-//                                Intent intent = new Intent(KurseActivity.this, KursActivity.class);
-//                                intent.putExtra("name", title);
-//                                startActivity(intent);
-//                            }
-//                        });
-                        CardView cv = createKursCard(title);
-                        llroot.addView(cv);
+        long cachedTime = kursCache.getCacheTime();
+        long currMill = System.currentTimeMillis();
+
+        if(cachedTime == -1 || cachedTime + 604800000 < currMill ) {
+
+
+            if (mAuth.getCurrentUser() != null) {
+                DatabaseReference kurseRef = mRootRef
+                        .child("Users")
+                        .child(mAuth.getCurrentUser().getUid())
+                        .child("Kurse");
+
+                kurseRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        kursCache.newCache();
+                        llroot.removeAllViews();
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            TextView tv = new TextView(KurseActivity.this);
+                            final String title = childSnapshot.child("name").getValue(String.class);
+
+                            kursCache.addCache(title);
+
+                            String displayName = title.replace("%2E", ".");
+                            CardView cv = createKursCard(displayName);
+                            llroot.addView(cv);
+                        }
                     }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }else{
+            JSONObject root = kursCache.getCache();
+            JSONArray kurse = null;
+
+            try {
+                kurse = root.getJSONArray("kurse");
+                for(int i = 0; i<kurse.length(); i++){
+                    String title = kurse.getString(i);
+
+                    CardView cv = createKursCard(title);
+                    llroot.addView(cv);
                 }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -256,7 +276,11 @@ public class KurseActivity extends AppCompatActivity
 
     private void leaveKurs(String name){
         if(mAuth.getCurrentUser()!=null) {
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).removeValue();
+            final String refName = name.replace(".", "%2E");
+            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).removeValue();
+
+            KursCache kursCache = new KursCache(KurseActivity.this);
+            kursCache.removeFromCache(name);
         }else {
             Toast t = Toast.makeText(KurseActivity.this, "Kein Nutzer angemeldet", Toast.LENGTH_LONG);
             t.show();
@@ -269,13 +293,13 @@ public class KurseActivity extends AppCompatActivity
         fach=fach.toLowerCase();
         switch (fach){
             case "bi":
-                return R.drawable.ic_biologie_tree;
+                return R.drawable.ic_biologie_bug;
             case "ch":
                 return  R.drawable.ic_chemie_poppet;
             case "d":
-                return R.drawable.ic_deutsch_book;
+                return R.drawable.ic_deutsch;
             case "e":
-                return R.drawable.ic_englisch_book;
+                return R.drawable.ic_englisch;
             case "ek":
                 return R.drawable.ic_erdkunde_landscape;
             case "el":
@@ -283,9 +307,9 @@ public class KurseActivity extends AppCompatActivity
             case "ew":
                 return R.drawable.ic_erziehungswissenschaften_child;
             case "f":
-                return R.drawable.ic_franzosisch_book;
+                return R.drawable.ic_franzosisch;
             case "ge":
-                return R.drawable.ic_geschichte_hourglass;
+                return R.drawable.ic_geschichte_buste;
             case "if":
                 return R.drawable.ic_informatik_computer;
             case "ku":
@@ -301,7 +325,7 @@ public class KurseActivity extends AppCompatActivity
             case "sw":
                 return R.drawable.ic_sozialwissenschaften_group;
             case "s":
-                return R.drawable.ic_spanisch_book;
+                return R.drawable.ic_spanisch;
             case "sp":
                 return R.drawable.ic_sport_run;
             default:
@@ -354,7 +378,8 @@ public class KurseActivity extends AppCompatActivity
         mRootRef.child("Data").child("lehrerRead").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mRootRef.child("Kurse").child(name).child("secret").addListenerForSingleValueEvent(new ValueEventListener() {
+                final String refName = name.replace(".", "%2E");
+                mRootRef.child("Kurse").child(refName).child("secret").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if(dataSnapshot.getValue()!=null){
@@ -362,12 +387,16 @@ public class KurseActivity extends AppCompatActivity
                             t.show();
                         }else{
                             if(!name.isEmpty()&&!secret.isEmpty()){
-                                mRootRef.child("Kurse").child(name).child("secret").setValue(secret);
+
+                                mRootRef.child("Kurse").child(refName).child("secret").setValue(secret);
 
                                 HashMap<String, Object> user = new HashMap<String, Object>();
                                 user.put("name", name);
                                 user.put("secret", secret);
-                                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).setValue(user);
+                                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
+
+                                KursCache kursCache = new KursCache(KurseActivity.this);
+                                kursCache.addCache(name);
                             }
 
                         }
@@ -396,7 +425,12 @@ public class KurseActivity extends AppCompatActivity
         HashMap<String, Object> user = new HashMap<String, Object>();
         user.put("name", name);
         user.put("secret", secret);
-        mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(name).setValue(user);
+
+        String refName = name.replace(".", "%2E");
+        mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
+
+        KursCache kursCache = new KursCache(KurseActivity.this);
+        kursCache.addCache(name);
     }
 
     @Override
@@ -432,6 +466,10 @@ public class KurseActivity extends AppCompatActivity
             case R.id.nav_klausuren:
                 Intent kIntent = new Intent(this, KlausurenActivity.class);
                 startActivity(kIntent);
+                break;
+            case R.id.nav_about:
+                Intent aboutIntent = new Intent(this, AboutActivity.class);
+                startActivity(aboutIntent);
                 break;
             case R.id.nav_settings:
                 Intent sIntent = new Intent(this, SettingsActivity.class);

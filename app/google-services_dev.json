@@ -1,0 +1,58 @@
+{
+  "project_info": {
+    "project_number": "445583886225",
+    "firebase_url": "https://test-e84e5.firebaseio.com",
+    "project_id": "test-e84e5",
+    "storage_bucket": "test-e84e5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445583886225:android:3352fdc6f5f86519",
+        "android_client_info": {
+          "package_name": "com.github.leonardpieper.ceciVPlan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445583886225-ntblbeb0r6urmr1jq1nrea0rtv5ctrtv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.leonardpieper.ceciVPlan",
+            "certificate_hash": "B16065461BA4A656D14523789AA86CE5DFF87F0C"
+          }
+        },
+        {
+          "client_id": "445583886225-ku69q3646b6fgoq4hrfbooi7ivcpisjq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.leonardpieper.ceciVPlan",
+            "certificate_hash": "85CEBE3848358757E1BBA29A8AF60FF37FBA9A2D"
+          }
+        },
+        {
+          "client_id": "445583886225-i0lvaj5fcpg27068hdrorso0b2pkgjsv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-qdmPi3DpvZzzjTONn5b6m9ZH4o76-bA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

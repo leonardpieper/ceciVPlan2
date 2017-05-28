@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.github.leonardpieper.ceciVPlan.LoginActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/anon_header_pic"
+        android:adjustViewBounds="true"
+        android:src="@drawable/header_signup" />
+    <RelativeLayout
+        android:id="@+id/activity_login"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-Mail Adresse"
+            android:inputType="textEmailAddress"
+            android:id="@+id/etEmail_reAcc"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/etPwd_reAcc"
+            android:hint="Passwort"
+            android:inputType="textPassword"
+            android:layout_below="@id/etEmail_reAcc"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvDescSpin_reAcc"
+            android:layout_below="@+id/etPwd_reAcc"
+            android:text="Jahrgangsstufe"/>
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinYear_reAcc"
+            android:layout_below="@+id/tvDescSpin_reAcc"
+            android:spinnerMode="dialog"
+            android:entries="@array/stufen" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Weiter"
+            android:id="@+id/btnLogin_reAcc"
+
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:textColor="@color/colorAccent"
+            android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"
+            style="?android:attr/borderlessButtonStyle"/>
+
+
+    </RelativeLayout>
+</LinearLayout>

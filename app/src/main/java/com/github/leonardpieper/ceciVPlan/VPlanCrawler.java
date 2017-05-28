@@ -3,11 +3,6 @@ package com.github.leonardpieper.ceciVPlan;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +48,7 @@ public class VPlanCrawler extends AsyncTask<String, Void, String> {
                     Pattern p = Pattern.compile("text/html;\\s+charset=([^\\s]+)\\s*");
                     Matcher m = p.matcher(ucon.getContentType());
 
-                    String charset = m.matches() ? m.group(1) : "UTF-8";
+                    String charset = m.matches() ? m.group(1) : "ISO-8859-1";
                     Reader r = new InputStreamReader(ucon.getInputStream(), charset);
                     StringBuilder buf = new StringBuilder();
                     while (true){

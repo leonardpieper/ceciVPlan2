@@ -5,10 +5,12 @@ import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -30,8 +32,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.api.client.googleapis.util.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,6 +45,10 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Calendar;
 
@@ -55,8 +63,11 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    private CardView cvKurse;
+
     private TableLayout tlToday;
     private TableLayout tlTomorrow;
+    private TextView tvErr;
 
 
     DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
@@ -72,14 +83,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         setTitle("Dashboard");
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -93,19 +96,25 @@ public class MainActivity extends AppCompatActivity
 //        final TextView vPlanTomorrow = (TextView)findViewById(R.id.vPlanTomorrow);
         tlToday = (TableLayout)findViewById(R.id.vPlanToday);
         tlTomorrow = (TableLayout)findViewById(R.id.vPlanTomorrow);
+        tvErr = (TextView)findViewById(R.id.tvErr_Main);
+
+        cvKurse = (CardView)findViewById(R.id.cv_Kurse);
 
         mAuth = FirebaseAuth.getInstance();
+
 
         checkFirstRun();
 
         setDailyAlarm();
         displayKurse();
 
+
+
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
 
-        System.out.println(FirebaseInstanceId.getInstance().getToken());
-        FirebaseMessaging.getInstance().subscribeToTopic("D__EFa");
+//        System.out.println(FirebaseInstanceId.getInstance().getToken());
+//        FirebaseMessaging.getInstance().subscribeToTopic("D__EFa");
 //        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
 
 
@@ -170,18 +179,44 @@ public class MainActivity extends AppCompatActivity
 
                 }else{
                     Log.d("FirebaseAuth", "onAuthStateChanged:signed_out");
+                    tvErr.setText("Du bist nicht angemeldet!");
+                    tvErr.setVisibility(View.VISIBLE);
                 }
             }
         };
 
+
+        //Crashes when no Google Play Services installed
+//        Log.d(TAG, "Hallo");
+//        System.out.println(FirebaseInstanceId.getInstance().getToken());
+//        Log.d(TAG, FirebaseInstanceId.getInstance().getToken());
+//        Log.d(TAG, "Tschüss");
+
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+
+//        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
+
+//        mAuth.signInWithEmailAndPassword("g@g.co", "123456");
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setDeveloperModeEnabled(BuildConfig.DEBUG)
                 .build();
 
         mFirebaseRemoteConfig.activateFetched();
         mFirebaseRemoteConfig.setConfigSettings(configSettings);
         mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
-        mFirebaseRemoteConfig.fetch(0)//21600 = 6 Hours in seconds
+        mFirebaseRemoteConfig.fetch(21600)//21600 = 6 Hours in seconds
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -193,17 +228,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 });
-
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-
-//        mAuth.signInWithEmailAndPassword("g@g.co", "123456");
-    }
-
 
     public void addTableRow(String tag, String fach, String stunde, String lehrer, String raum, String text) {
         TableRow row = new TableRow(this);
@@ -261,84 +286,137 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void displayKurse(){
+        final KursCache kursCache = new KursCache(MainActivity.this);
         final LinearLayout ll = (LinearLayout) findViewById(R.id.main_kurse_display);
 
-        if(mAuth.getCurrentUser() != null){
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
-                        String kurs = childSnapshot.child("name").getValue(String.class);
+        long cachedTime = kursCache.getCacheTime();
+        long currMill = System.currentTimeMillis();
 
-                        mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                final String name = dataSnapshot.getKey();
+        if(cachedTime == -1 || cachedTime + 604800000 < currMill) {
 
+            if (mAuth.getCurrentUser() != null) {
+                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        kursCache.newCache();
 
-                                final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
-                                int width = (int) (50 * scale + 0.5f);
-                                int height = (int) (50 * scale + 0.5f);
+                        if(dataSnapshot.getValue()==null) {
+                            cvKurse.setVisibility(View.VISIBLE);
+                            TextView tvNoKurse = (TextView)findViewById(R.id.noKurse);
+                            tvNoKurse.setVisibility(View.VISIBLE);
+                        }else {
+                            cvKurse.setVisibility(View.VISIBLE);
+                        }
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            final String kurs = childSnapshot.child("name").getValue(String.class);
 
-                                LinearLayout column = new LinearLayout(MainActivity.this);
-                                LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        ViewGroup.LayoutParams.MATCH_PARENT
-                                );
-                                LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
-                                        width,
-                                        height
-                                );
-                                LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        ViewGroup.LayoutParams.MATCH_PARENT
-                                );
+                            kursCache.addCache(kurs);
 
-                                column.setLayoutParams(columnParams);
-                                column.setPadding(32,0,32,0);
-                                column.setOrientation(LinearLayout.VERTICAL);
-                                column.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        Intent intent = new Intent(MainActivity.this, KursActivity.class);
-                                        intent.putExtra("name", name);
-                                        startActivity(intent);
-                                    }
-                                });
+                            LinearLayout column = makeKursIcon(kurs);
+                            ll.addView(column);
+                            ll.setPadding(0, 0, 0, 0);
 
-                                ImageView iv = new ImageView(MainActivity.this);
-                                iv.setBackgroundResource(getResourceIdByName(name));
-                                iv.setScaleType(ImageView.ScaleType.FIT_START);
-                                iv.setAdjustViewBounds(true);
-                                iv.setLayoutParams(ivParams);
+//                        mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                TextView tv = new TextView(MainActivity.this);
-                                tv.setText(name);
-                                tv.setGravity(Gravity.CENTER);
-                                tv.setTextColor(getResources().getColor(R.color.colorAccent));
-                                tv.setLayoutParams(tvParams);
+                        }
 
-                                column.addView(iv);
-                                column.addView(tv);
-
-                                ll.addView(column);
-                                ll.setPadding(0,0,0,0);
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
+//                            @Override
+//                            public void onCancelled(DatabaseError databaseError) {
+//
+//                            }
+//                        });
+//                    }
                     }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }else {
+
+            JSONObject root = kursCache.getCache();
+            JSONArray kurse = null;
+
+            try {
+                kurse = root.getJSONArray("kurse");
+                if(kurse==null || kurse.length()==0) {
+                    cvKurse.setVisibility(View.VISIBLE);
+                    TextView tvNoKurse = (TextView)findViewById(R.id.noKurse);
+                    tvNoKurse.setVisibility(View.VISIBLE);
+                }else {
+                    cvKurse.setVisibility(View.VISIBLE);
+                }
+                for(int i = 0; i<kurse.length(); i++){
+                    String title = kurse.getString(i);
+
+                    LinearLayout column = makeKursIcon(title);
+                    ll.addView(column);
+                    ll.setPadding(0, 0, 0, 0);
                 }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-                }
-            });
+
+
         }
+    }
+
+    private LinearLayout makeKursIcon(final String title){
+
+
+        final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
+        int width = (int) (50 * scale + 0.5f);
+        int height = (int) (50 * scale + 0.5f);
+
+        LinearLayout column = new LinearLayout(MainActivity.this);
+        LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
+                width,
+                height
+        );
+        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+
+        column.setLayoutParams(columnParams);
+        column.setPadding(32, 0, 32, 0);
+        column.setOrientation(LinearLayout.VERTICAL);
+        column.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, KursActivity.class);
+                intent.putExtra("name", title);
+                startActivity(intent);
+            }
+        });
+
+        ImageView iv = new ImageView(MainActivity.this);
+        iv.setBackgroundResource(getResourceIdByName(title));
+        iv.setScaleType(ImageView.ScaleType.FIT_START);
+        iv.setAdjustViewBounds(true);
+        iv.setLayoutParams(ivParams);
+
+        TextView tv = new TextView(MainActivity.this);
+        tv.setText(title);
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextColor(getResources().getColor(R.color.colorAccent));
+        tv.setLayoutParams(tvParams);
+
+        column.addView(iv);
+        column.addView(tv);
+
+        return column;
+
     }
 
     private int getResourceIdByName(String name){
@@ -347,13 +425,13 @@ public class MainActivity extends AppCompatActivity
         fach=fach.toLowerCase();
         switch (fach){
             case "bi":
-                return R.drawable.ic_biologie_tree;
+                return R.drawable.ic_biologie_bug;
             case "ch":
                 return  R.drawable.ic_chemie_poppet;
             case "d":
-                return R.drawable.ic_deutsch_book;
+                return R.drawable.ic_deutsch;
             case "e":
-                return R.drawable.ic_englisch_book;
+                return R.drawable.ic_englisch;
             case "ek":
                 return R.drawable.ic_erdkunde_landscape;
             case "el":
@@ -361,9 +439,9 @@ public class MainActivity extends AppCompatActivity
             case "ew":
                 return R.drawable.ic_erziehungswissenschaften_child;
             case "f":
-                return R.drawable.ic_franzosisch_book;
+                return R.drawable.ic_franzosisch;
             case "ge":
-                return R.drawable.ic_geschichte_hourglass;
+                return R.drawable.ic_geschichte_buste;
             case "if":
                 return R.drawable.ic_informatik_computer;
             case "ku":
@@ -379,7 +457,7 @@ public class MainActivity extends AppCompatActivity
             case "sw":
                 return R.drawable.ic_sozialwissenschaften_group;
             case "s":
-                return R.drawable.ic_spanisch_book;
+                return R.drawable.ic_spanisch;
             case "sp":
                 return R.drawable.ic_sport_run;
             default:
@@ -459,6 +537,10 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_devSettings:
                 Intent devIntent = new Intent(this, DevActivity.class);
                 startActivity(devIntent);
+                break;
+            case R.id.nav_about:
+                Intent aboutIntent = new Intent(this, AboutActivity.class);
+                startActivity(aboutIntent);
                 break;
             case R.id.nav_signup:
                 Intent signIntent = new Intent(this, SignUpActivity.class);
@@ -553,16 +635,50 @@ public class MainActivity extends AppCompatActivity
 
             return;
         } else if (savedVersionCode == DOESNT_EXIST) {
-            // TODO This is a new install
+            Intent signIntent = new Intent(this, SignUpActivity.class);
+            signIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(signIntent);
 
-        } else if (currentVersionCode > savedVersionCode) {
+        }else if(savedVersionCode==23){
+            final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("Du hast dieses Update erhalten, da du dich für die Beta-Version im Google Play Store angemeldet hast. " +
+                    "Bitte sei im Klaren, dass es während der Beta gehäuft zu Problemen und unerwünschten Verhalten kommen kann. " +
+                    "Um die stabile Version zu installieren verlasse einfach das Betaprogramm.")
+                    .setTitle("Info zum Betaprogramm")
+                    .setPositiveButton("Ich habe verstanden", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+            builder.show();
+
+        }
+        else if (currentVersionCode > savedVersionCode && savedVersionCode!=23) {
             // TODO This is an upgrade
-            if(!mAuth.getCurrentUser().isAnonymous()){
-                if(mAuth.getCurrentUser().getEmail().contains("ceci@example.com")){
-                    Intent signAIntent = new Intent(this, SignUpAnonymActivity.class);
-                    startActivity(signAIntent);
-                }
-            }
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+                    try {
+                        builder1.setMessage("Neuerungen:\n\n- Im Gegensatz zur Ceci-Hompage werden 99,26% weniger mobiler Daten beansprucht\n\n- Android O wird unterstützt")
+                                .setTitle("Update " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                        builder1.show();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+//            if(mAuth.getCurrentUser()!=null){
+//                if(!mAuth.getCurrentUser().isAnonymous()){
+//                    if(mAuth.getCurrentUser().getEmail().contains("ceci@example.com")){
+//                        Intent signAIntent = new Intent(this, SignUpAnonymActivity.class);
+//                        startActivity(signAIntent);
+//                    }
+//                }
+//            }
         }
         // Update the shared preferences with the current version code
         prefs.edit().putInt(PREF_VERSION_CODE_KEY, currentVersionCode).commit();

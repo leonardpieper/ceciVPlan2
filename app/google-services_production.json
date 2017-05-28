@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "811320534951",
+    "firebase_url": "https://ceciplan-8709c.firebaseio.com",
+    "project_id": "ceciplan-8709c",
+    "storage_bucket": "ceciplan-8709c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811320534951:android:3352fdc6f5f86519",
+        "android_client_info": {
+          "package_name": "com.github.leonardpieper.ceciVPlan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "811320534951-fkb5eqrnbfofo9su2rg3obb9fpulvdm3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCcfWLfu3jhOMvmaZ0LkF5GVXCK08KZtY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

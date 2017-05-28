@@ -1,28 +1,27 @@
 {
   "project_info": {
-    "project_number": "445583886225",
-    "firebase_url": "https://test-e84e5.firebaseio.com",
-    "project_id": "test-e84e5",
-    "storage_bucket": "test-e84e5.appspot.com"
+    "project_number": "811320534951",
+    "firebase_url": "https://ceciplan-8709c.firebaseio.com",
+    "project_id": "ceciplan-8709c",
+    "storage_bucket": "ceciplan-8709c.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:445583886225:android:3352fdc6f5f86519",
+        "mobilesdk_app_id": "1:811320534951:android:3352fdc6f5f86519",
         "android_client_info": {
           "package_name": "com.github.leonardpieper.ceciVPlan"
         }
       },
       "oauth_client": [
         {
-//          "client_id": "445583886225-i0lvaj5fcpg27068hdrorso0b2pkgjsv.apps.googleusercontent.com",
-          "client_id": "445583886225-ku69q3646b6fgoq4hrfbooi7ivcpisjq.apps.googleusercontent.com",
+          "client_id": "811320534951-fkb5eqrnbfofo9su2rg3obb9fpulvdm3.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC-qdmPi3DpvZzzjTONn5b6m9ZH4o76-bA"
+          "current_key": "AIzaSyCCcfWLfu3jhOMvmaZ0LkF5GVXCK08KZtY"
         }
       ],
       "services": {

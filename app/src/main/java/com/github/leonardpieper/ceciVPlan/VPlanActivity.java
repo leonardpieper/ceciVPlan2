@@ -1,11 +1,15 @@
 package com.github.leonardpieper.ceciVPlan;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -24,9 +28,12 @@ import android.widget.TextView;
 
 //import com.google.android.gms.appindexing.Action;
 //import com.google.android.gms.appindexing.AppIndex;
+import com.github.leonardpieper.ceciVPlan.tools.EasterEgg;
+import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -37,10 +44,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.EventObject;
@@ -48,17 +51,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VPlanActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-//    /**
-//     * ATTENTION: This was auto-generated to implement the App Indexing API.
-//     * See https://g.co/AppIndexing/AndroidStudio for more information.
-//     */
-//    private GoogleApiClient client;
 
     private static final String TAG = "VPlanActivity";
 
@@ -68,11 +66,13 @@ public class VPlanActivity extends AppCompatActivity
     private com.github.clans.fab.FloatingActionButton fabEF;
     private com.github.clans.fab.FloatingActionButton fabQ1;
     private com.github.clans.fab.FloatingActionButton fabQ2;
+    private com.github.clans.fab.FloatingActionButton fabMe;
 
     private LinearLayout tablePlaceholder;
     private TableLayout tableEF;
     private TableLayout tableQ1;
     private TableLayout tableQ2;
+    private TableLayout tableMe;
 
     private FirebaseAuth mAuth;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
@@ -81,6 +81,8 @@ public class VPlanActivity extends AppCompatActivity
 
     private String oldDatum = "99.99";
     private String currentStufe = "EF";
+
+    private int easterEggCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,19 +95,16 @@ public class VPlanActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-
         fabyear = (com.github.clans.fab.FloatingActionMenu)findViewById(R.id.fab_year);
         fabEF = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabEF);
         fabQ1 = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabQ1);
         fabQ2 = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabQ2);
+        fabMe = (com.github.clans.fab.FloatingActionButton)findViewById(R.id.fabMe);
+
+        LocalUser localUser = new LocalUser(VPlanActivity.this);
+        if(localUser.getTeacherStatus()){
+            fabMe.setVisibility(View.VISIBLE);
+        }
 
 
 
@@ -119,14 +118,12 @@ public class VPlanActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-//        // ATTENTION: This was auto-generated to implement the App Indexing API.
-//        // See https://g.co/AppIndexing/AndroidStudio for more information.
-//        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
 //        tableLayout = (TableLayout)findViewById(R.id.vPlanTableLayout);
         tableEF = (TableLayout)findViewById(R.id.vPlanTableLayoutEF);
         tableQ1 = (TableLayout)findViewById(R.id.vPlanTableLayoutQ1);
         tableQ2 = (TableLayout)findViewById(R.id.vPlanTableLayoutQ2);
+        tableMe = (TableLayout)findViewById(R.id.vPlanTableLayoutMe);
 
 //        String s = mAuth.getCurrentUser().getUid();
 //        Log.d("", s);
@@ -189,6 +186,7 @@ public class VPlanActivity extends AppCompatActivity
         if(mFirebaseRemoteConfig.getBoolean("load_vplan_enabled")) {
             crawler.execute("");
         }
+
         if(mAuth.getCurrentUser()!=null){
             if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
                 conditionRef = mRootRef.child("vPlan");
@@ -228,6 +226,7 @@ public class VPlanActivity extends AppCompatActivity
                 tableQ2.removeAllViews();
                 for(DataSnapshot stufenSnapshot: dataSnapshot.getChildren()) {
                     String stufe = stufenSnapshot.getKey();
+                    oldDatum = "99.99";
                     for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
                         String datum = vPlanSnapshot.child("Datum").getValue(String.class);
 
@@ -251,7 +250,7 @@ public class VPlanActivity extends AppCompatActivity
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.d(TAG, "Cancelled");
             }
         });
     }
@@ -308,6 +307,10 @@ public class VPlanActivity extends AppCompatActivity
                 Intent devIntent = new Intent(this, DevActivity.class);
                 startActivity(devIntent);
                 break;
+            case R.id.nav_about:
+                Intent aboutIntent = new Intent(this, AboutActivity.class);
+                startActivity(aboutIntent);
+                break;
             case R.id.nav_signup:
                 Intent signIntent = new Intent(this, SignUpActivity.class);
                 startActivity(signIntent);
@@ -350,11 +353,21 @@ public class VPlanActivity extends AppCompatActivity
         room.setLayoutParams(trparams);
         extra.setLayoutParams(trparams);
 
-        lesson.setText(fach);
-        time.setText(stunde);
-        tutor.setText(lehrer);
-        room.setText(raum);
-        extra.setText(text);
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+            lesson.setText(Html.fromHtml(fach, Html.FROM_HTML_MODE_COMPACT));
+            time.setText(Html.fromHtml(stunde, Html.FROM_HTML_MODE_COMPACT));
+            tutor.setText(Html.fromHtml(lehrer, Html.FROM_HTML_MODE_COMPACT));
+            room.setText(Html.fromHtml(raum, Html.FROM_HTML_MODE_COMPACT));
+            extra.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
+        }else {
+            lesson.setText(Html.fromHtml(fach));
+            time.setText(Html.fromHtml(stunde));
+            tutor.setText(Html.fromHtml(lehrer));
+            room.setText(Html.fromHtml(raum));
+            extra.setText(Html.fromHtml(text));
+        }
+
 
         row.addView(lesson);
         row.addView(time);
@@ -371,6 +384,9 @@ public class VPlanActivity extends AppCompatActivity
                 break;
             case "Q2":
                 tableQ2.addView(row);
+                break;
+            case "me":
+                tableMe.addView(row);
                 break;
             default:
                 Log.d(TAG, "Stufe ist nicht erkannt!");
@@ -418,6 +434,8 @@ public class VPlanActivity extends AppCompatActivity
             case "Q2":
                 tableQ2.addView(row);
                 break;
+            case "me":
+                tableMe.addView(row);
             default:
                 Log.d(TAG, "Stufe ist nicht erkannt!");
         }
@@ -431,16 +449,150 @@ public class VPlanActivity extends AppCompatActivity
                 tableEF.setVisibility(View.VISIBLE);
                 tableQ1.setVisibility(View.GONE);
                 tableQ2.setVisibility(View.GONE);
+                tableMe.setGravity(View.GONE);
                 break;
             case(R.id.fabQ1):
                 tableEF.setVisibility(View.GONE);
                 tableQ1.setVisibility(View.VISIBLE);
                 tableQ2.setVisibility(View.GONE);
+                tableMe.setGravity(View.GONE);
+
+                easterEggCounter++;
+                if(easterEggCounter>=10){
+                    EasterEgg easterEgg = new EasterEgg(VPlanActivity.this);
+                    try {
+                        easterEgg.addEmoji("\uD83D\uDC36", "den Hund");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    easterEggCounter = 0;
+                }
                 break;
             case(R.id.fabQ2):
                 tableEF.setVisibility(View.GONE);
                 tableQ1.setVisibility(View.GONE);
                 tableQ2.setVisibility(View.VISIBLE);
+                tableMe.setGravity(View.GONE);
+                break;
+            case (R.id.fabMe):
+                tableEF.setVisibility(View.GONE);
+                tableQ1.setVisibility(View.GONE);
+                tableQ2.setVisibility(View.GONE);
+                tableMe.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void changeToMyVPlan(View v){
+        tableEF.setVisibility(View.GONE);
+        tableQ1.setVisibility(View.GONE);
+        tableQ2.setVisibility(View.GONE);
+        tableMe.setVisibility(View.VISIBLE);
+
+        // Get Lehrerabk
+        final String lehrerAbk = PreferenceManager.getDefaultSharedPreferences(VPlanActivity.this).getString("lehrer-abk", "noTeacher");
+        if(!lehrerAbk.isEmpty()) {
+            lehrerAbk.toLowerCase();
+
+            conditionRef = mRootRef.child("vPlan");
+            conditionRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    JSONObject tage = null;
+                    try {
+                        tage = new JSONObject("{\"Mo\":[],\"Di\":[],\"Mi\":[],\"Do\":[],\"Fr\":[]}");
+
+
+//                        tableEF.removeAllViews();
+//                        tableQ1.removeAllViews();
+//                        tableQ2.removeAllViews();
+                        tableMe.removeAllViews();
+                        for (DataSnapshot stufenSnapshot : dataSnapshot.getChildren()) {
+                            String stufe = stufenSnapshot.getKey();
+                            for (DataSnapshot vPlanSnapshot : stufenSnapshot.getChildren()) {
+                                String datum = vPlanSnapshot.child("Datum").getValue(String.class);
+
+//                                System.out.println(mAuth.getCurrentUser().getDisplayName());
+//                                System.out.println(vPlanSnapshot.child("Vertreter").getValue(String.class));
+                                String vertreter = vPlanSnapshot.child("Vertreter").getValue(String.class);
+                                if(vertreter!=null){
+                                    vertreter = vertreter.toLowerCase();
+                                }
+                                if (vertreter!=null && lehrerAbk.equals(vertreter)) {
+
+                                    String date = vPlanSnapshot.child("Tag").getValue(String.class);
+
+                                    JSONArray tag = tage.getJSONArray(date);
+
+                                    JSONObject data = new JSONObject();
+                                    data.put("fach", vPlanSnapshot.child("Fach").getValue(String.class));
+                                    data.put("stunde", vPlanSnapshot.child("Stunde").getValue(String.class));
+                                    data.put("vertreter", vPlanSnapshot.child("Vertreter").getValue(String.class));
+                                    data.put("raum", vPlanSnapshot.child("Raum").getValue(String.class));
+                                    data.put("text", vPlanSnapshot.child("Vertretungs-Text").getValue(String.class));
+                                    data.put("tag", vPlanSnapshot.child("Tag").getValue(String.class));
+                                    data.put("datum", vPlanSnapshot.child("Datum").getValue(String.class));
+
+
+                                    tag.put(data);
+                                    tage.put(date, tag);
+
+//                            if (!oldDatum.equals(datum) && !(datum == null || datum.contains("Datum"))) {
+//                                String tag = vPlanSnapshot.child("Tag").getValue(String.class);
+//                                addDateTableRow("me", tag, datum);
+//                            }
+//
+                                }
+                            }
+                        }
+
+                        for (int i = 0; i < 5; i++) {
+                            JSONArray date = new JSONArray();
+                            switch (i) {
+                                case 0:
+                                    date = tage.getJSONArray("Mo");
+                                    break;
+                                case 1:
+                                    date = tage.getJSONArray("Di");
+                                    break;
+                                case 2:
+                                    date = tage.getJSONArray("Mi");
+                                    break;
+                                case 3:
+                                    date = tage.getJSONArray("Do");
+                                    break;
+                                case 4:
+                                    date = tage.getJSONArray("Fr");
+                                    break;
+                            }
+
+                            for (int j = 0; j < date.length(); j++) {
+                                JSONObject joData = date.getJSONObject(j);
+
+                                String tag = joData.getString("tag");
+                                String datum = joData.getString("datum");
+
+                                if (j == 0) {
+                                    addDateTableRow("me", tag, datum);
+                                }
+
+                                String fach = joData.getString("fach");
+                                String stunde = joData.getString("stunde");
+                                String vertreter = joData.getString("vertreter");
+                                String raum = joData.getString("raum");
+                                String text = joData.getString("text");
+                                addTableRow("me", fach, stunde, vertreter, raum, text);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     }
 

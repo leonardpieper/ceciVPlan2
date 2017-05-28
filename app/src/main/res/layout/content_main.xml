@@ -28,19 +28,28 @@
 
             <android.support.v7.widget.CardView
                 xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/cv"
+                android:id="@+id/cv_Kurse"
                 android:layout_height="100dp"
                 android:layout_width="match_parent"
                 card_view:cardCornerRadius="1dp"
                 card_view:cardUseCompatPadding="true"
                 card_view:cardElevation="2dp"
+                android:visibility="gone"
                 android:nestedScrollingEnabled="true">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/noKurse"
+                    android:textAlignment="center"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:text="@string/no_kurse"/>
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:orientation="horizontal"
                         android:id="@+id/main_kurse_display">
@@ -85,7 +94,9 @@
                             android:layout_height="wrap_content"
                             android:indeterminate="true"/>
                         <TextView
-                            android:text="Entweder bist du nicht angemeldet, oder deine Internetverbindung ist langsam.\nEs wird versucht den Vertretungsplan zu laden.."/>
+                            android:id="@+id/tvErr_Main"
+                            android:textAlignment="center"
+                            android:visibility="gone"/>
                     </TableLayout>
                 </RelativeLayout>
             </android.support.v7.widget.CardView>

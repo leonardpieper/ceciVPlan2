@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_height="match_parent">
+
+    <Switch
+        android:text="Ich bin ein Lehrer "
+        android:textSize="16dp"
+        android:textColor="@android:color/secondary_text_light"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/swtchTeacher"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:layout_marginTop="19dp"
+        android:id="@+id/etTeacherPwd"
+        android:hint="Lehrer-Passwort"
+        android:layout_below="@+id/swtchTeacher"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+</RelativeLayout>
