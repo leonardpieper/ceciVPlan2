@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.github.leonardpieper.ceciVPlan.KursCache;
-import com.github.leonardpieper.ceciVPlan.SettingsActivity;
-
 /**
  * Created by Leonard on 18.02.2017.
  */

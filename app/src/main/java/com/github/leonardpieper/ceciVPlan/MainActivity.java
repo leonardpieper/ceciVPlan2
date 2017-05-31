@@ -7,11 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -26,25 +24,22 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.leonardpieper.ceciVPlan.fragments.KurseFragment;
 import com.github.leonardpieper.ceciVPlan.fragments.MainFragment;
 import com.github.leonardpieper.ceciVPlan.fragments.VPlanFragment;
+import com.github.leonardpieper.ceciVPlan.tools.KursCache;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.api.client.googleapis.util.Utils;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 //import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
@@ -53,8 +48,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Calendar;
-
-import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -538,8 +531,11 @@ public class MainActivity extends AppCompatActivity
                         .commit();
                 break;
             case R.id.nav_kurse:
-                Intent kuIntent = new Intent(this, KurseActivity.class);
-                startActivity(kuIntent);
+                KurseFragment kurseFragment = new KurseFragment();
+                this.getFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentContainer, kurseFragment)
+                        .addToBackStack(null)
+                        .commit();
                 break;
             case R.id.nav_klausuren:
                 Intent kIntent = new Intent(this, KlausurenActivity.class);

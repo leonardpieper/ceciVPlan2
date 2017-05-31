@@ -16,6 +16,27 @@
         android:layout_height="wrap_content"
         android:inputType="textPassword"
         android:ems="10"
+        android:visibility="gone"
         android:id="@+id/dialog_add_pwd"
         android:hint="Passwort" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/dialog_kurse_add_chkbx_offline"
+            android:checked="true"
+            android:enabled="false"
+            android:textSize="18sp"
+            android:textColor="@android:color/tertiary_text_light"
+            android:text="Offline Kurs"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableEnd="@drawable/ic_info_outline_black_24dp"
+            android:gravity="center"
+            android:drawableRight="@drawable/ic_info_outline_black_24dp" />
+    </LinearLayout>
 </LinearLayout>
