@@ -36,7 +36,7 @@ public class KursCache extends Application{
         }
     }
 
-    public void addCache(String kurs){
+    public void addCache(String kursName, String kursType){
         FileInputStream inputStream;
         FileOutputStream outputStream;
         StringBuffer strContent = new StringBuffer("");
@@ -50,16 +50,19 @@ public class KursCache extends Application{
             }
 
             JSONObject root = new JSONObject(strContent.toString());
+            JSONObject kursContent = new JSONObject();
+            kursContent.put("name", kursName);
+            kursContent.put("type", kursType);
 
             long time= System.currentTimeMillis();
             root.put("mill", time);
             if(!root.has("kurse")){
                 JSONArray kurse = new JSONArray();
-                kurse.put(kurs);
+                kurse.put(kursContent);
                 root.put("kurse", kurse);
             }else {
                 JSONArray kurse = root.getJSONArray("kurse");
-                kurse.put(kurs);
+                kurse.put(kursContent);
                 root.put("kurse", kurse);
             }
 
@@ -73,7 +76,7 @@ public class KursCache extends Application{
         }
     }
 
-    public void removeFromCache(String kurs){
+    public void removeFromCache(String kursName){
         FileInputStream inputStream;
         FileOutputStream outputStream;
         StringBuffer strContent = new StringBuffer("");
@@ -92,7 +95,7 @@ public class KursCache extends Application{
             if(root.has("kurse")){
                 JSONArray kurse = root.getJSONArray("kurse");
                 for(int i = 0; i<kurse.length(); i++){
-                    if(kurse.getString(i).equals(kurs)) {
+                    if(kurse.getJSONObject(1).getString("name").equals(kursName)) {
                         kurse = removeJsonObjectAtJsonArrayIndex(kurse, i);
                     }
                 }

@@ -312,7 +312,7 @@ public class MainActivity extends AppCompatActivity
                         for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                             final String kurs = childSnapshot.child("name").getValue(String.class);
 
-                            kursCache.addCache(kurs);
+//                            kursCache.addCache(kurs);
 
                             LinearLayout column = makeKursIcon(kurs);
                             ll.addView(column);

@@ -104,11 +104,12 @@ public class KurseFragment extends Fragment {
                             for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                                 TextView tv = new TextView(getActivity());
                                 final String title = childSnapshot.child("name").getValue(String.class);
+                                final String type = childSnapshot.child("type").getValue(String.class);
 
-                                kursCache.addCache(title);
+                                kursCache.addCache(title, type);
 
                                 String displayName = title.replace("%2E", ".");
-                                CardView cv = createKursCard(displayName);
+                                CardView cv = createKursCard(displayName, type);
                                 llKurse.addView(cv);
                             }
                         }
@@ -127,9 +128,10 @@ public class KurseFragment extends Fragment {
             try {
                 kurse = root.getJSONArray("kurse");
                 for(int i = 0; i<kurse.length(); i++){
-                    String title = kurse.getString(i);
+                    String title = kurse.getJSONObject(i).getString("name");
+                    String type = kurse.getJSONObject(i).getString("type");
 
-                    CardView cv = createKursCard(title);
+                    CardView cv = createKursCard(title, type);
                     llKurse.addView(cv);
                 }
 
@@ -139,7 +141,7 @@ public class KurseFragment extends Fragment {
         }
     }
 
-    private CardView createKursCard(final String title){
+    private CardView createKursCard(final String title, String kursType){
         final float scale = getActivity().getResources().getDisplayMetrics().density;
         int ivWidth = (int) (50 * scale + 0.5f);
         int ivHeight = (int) (50 * scale + 0.5f);
@@ -153,14 +155,17 @@ public class KurseFragment extends Fragment {
         cv.setContentPadding(15, 15, 15, 15);
         cv.setCardElevation(5);
         cv.setMinimumHeight(250);
-        cv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), KursActivity.class);
-                intent.putExtra("name", title);
-                startActivity(intent);
-            }
-        });
+
+        if(!kursType.equals("offline")) {
+            cv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), KursActivity.class);
+                    intent.putExtra("name", title);
+                    startActivity(intent);
+                }
+            });
+        }
 
 
         LinearLayout.LayoutParams cvParams = new LinearLayout.LayoutParams(
@@ -325,7 +330,11 @@ public class KurseFragment extends Fragment {
                 builder.setPositiveButton("Beitreten", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), checkBox.isChecked());
+                        if(checkBox.isChecked()) {
+                            joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "offline");
+                        }else{
+                            joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "online");
+                        }
                     }
                 });
                 break;
@@ -340,17 +349,16 @@ public class KurseFragment extends Fragment {
         builder.show();
     }
 
-    private void joinKurs(String name, String secret, boolean typeOffline){
+    private void joinKurs(String name, String secret, String typeOffline){
         HashMap<String, Object> user = new HashMap<String, Object>();
-        name = name.toLowerCase();
 
-        if(typeOffline){
+        if(typeOffline.equals("offline")){
             user.put("name", name);
-            user.put("type", "offline");
+            user.put("type", typeOffline);
         }else {
             user.put("name", name);
             user.put("secret", secret);
-            user.put("type", "online");
+            user.put("type", typeOffline);
         }
 
         String refName = name.replace(".", "%2E");
@@ -362,6 +370,6 @@ public class KurseFragment extends Fragment {
         FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
 
         KursCache kursCache = new KursCache(getActivity());
-        kursCache.addCache(name);
+        kursCache.addCache(name, typeOffline);
     }
 }

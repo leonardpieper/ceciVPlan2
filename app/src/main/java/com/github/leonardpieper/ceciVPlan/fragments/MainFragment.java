@@ -212,6 +212,6 @@ public class MainFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        stufenRef.removeEventListener(valueEventListener);
+//        stufenRef.removeEventListener(valueEventListener);
     }
 }

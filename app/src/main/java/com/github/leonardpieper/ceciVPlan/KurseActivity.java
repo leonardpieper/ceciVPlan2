@@ -379,7 +379,7 @@ public class KurseActivity extends AppCompatActivity
                                 mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
 
                                 KursCache kursCache = new KursCache(KurseActivity.this);
-                                kursCache.addCache(name);
+//                                kursCache.addCache(name);
                             }
 
                         }
