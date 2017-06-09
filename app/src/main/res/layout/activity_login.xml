@@ -12,6 +12,7 @@
         android:id="@+id/anon_header_pic"
         android:adjustViewBounds="true"
         android:src="@drawable/header_signup" />
+
     <RelativeLayout
         android:id="@+id/activity_login"
         android:layout_width="match_parent"
@@ -22,44 +23,47 @@
         android:paddingTop="@dimen/activity_vertical_margin">
 
         <EditText
+            android:id="@+id/etEmail_reAcc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="E-Mail Adresse"
-            android:inputType="textEmailAddress"
-            android:id="@+id/etEmail_reAcc"/>
+            android:inputType="textEmailAddress" />
+
         <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:id="@+id/etPwd_reAcc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/etEmail_reAcc"
             android:hint="Passwort"
-            android:inputType="textPassword"
-            android:layout_below="@id/etEmail_reAcc"/>
+            android:inputType="textPassword" />
+
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:id="@+id/tvDescSpin_reAcc"
-            android:layout_below="@+id/etPwd_reAcc"
-            android:text="Jahrgangsstufe"/>
-        <Spinner
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/etPwd_reAcc"
+            android:text="Jahrgangsstufe" />
+
+        <Spinner
             android:id="@+id/spinYear_reAcc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/tvDescSpin_reAcc"
-            android:spinnerMode="dialog"
-            android:entries="@array/stufen" />
+            android:entries="@array/stufen"
+            android:spinnerMode="dialog" />
 
         <Button
+            android:id="@+id/btnLogin_reAcc"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Weiter"
-            android:id="@+id/btnLogin_reAcc"
 
             android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:textColor="@color/colorAccent"
+            android:layout_alignParentRight="true"
             android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"
-            style="?android:attr/borderlessButtonStyle"/>
+            android:text="Weiter"
+            android:textColor="@color/colorAccent" />
 
 
     </RelativeLayout>

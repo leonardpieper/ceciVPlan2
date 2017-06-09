@@ -3,102 +3,187 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.github.leonardpieper.ceciVPlan.SignUpActivity"
     android:orientation="vertical">
     <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
     <!--android:paddingRight="@dimen/activity_horizontal_margin"-->
     <!--android:paddingTop="@dimen/activity_vertical_margin"-->
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <!--<ImageView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/imageView2"-->
-            <!--android:adjustViewBounds="true"-->
-            <!--android:layout_marginLeft="-24dp"-->
-            <!--android:layout_marginTop="-16dp"-->
-            <!--android:layout_marginRight="-16dp"-->
-            <!--android:src="@drawable/header_signup" />-->
+    <!--<RelativeLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:orientation="vertical"-->
+        <!--android:paddingLeft="16dp"-->
+        <!--android:paddingRight="16dp">-->
+
         <!--<TextView-->
+            <!--android:id="@+id/textView2"-->
             <!--android:layout_width="wrap_content"-->
             <!--android:layout_height="wrap_content"-->
-            <!--android:gravity="bottom|left"-->
-            <!--android:layout_marginTop="150dp"-->
-            <!--android:text="Anmelden"-->
-            <!--android:textSize="20sp"-->
-            <!--android:textColor="@color/white"/>-->
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Erstelle einen Account um die App optimal nutzen zu können."
-            android:textSize="18dp"
-            android:id="@+id/textView2"
-            android:layout_gravity="center_vertical"
-            android:layout_marginBottom="12dp"/>
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:layout_marginBottom="12dp"-->
+            <!--android:text="Erstelle einen Account um die App optimal nutzen zu können."-->
+            <!--android:textSize="18dp" />-->
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:hint="E-Mail-Adresse"
-            android:layout_below="@+id/textView2"
-            android:id="@+id/personalEmail" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:hint="Eigenes Passwort"
-            android:layout_below="@+id/personalEmail"
-            android:id="@+id/signPwd" />
         <!--<EditText-->
+            <!--android:id="@+id/personalEmail"-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="wrap_content"-->
-            <!--android:inputType="textPassword"-->
-            <!--android:hint="Passwort wiederholen"-->
-            <!--android:layout_below="@id/editText2Pwd"-->
-            <!--android:id="@+id/editTextPwdRepeat" />-->
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:id="@+id/btnSignUpNext"
-            android:text="Weiter "
-            android:textColor="@color/colorAccent"
-            android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"
-            android:layout_below="@+id/signPwd"
-            style="?android:attr/borderlessButtonStyle"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/signPwd"
-            android:id="@+id/signBtnNoSign"
-            android:text="Abbrechen"
-            android:textColor="@color/colorAccent"
-            style="?android:attr/borderlessButtonStyle"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:id="@+id/btnSignLogin"
-            android:layout_alignParentBottom="true"
-            android:text="Ich habe bereits einen Account"
-            android:textColor="@color/colorAccent"
-            style="?android:attr/borderlessButtonStyle"/>
-    </RelativeLayout>
+            <!--android:layout_below="@+id/textView2"-->
+            <!--android:hint="E-Mail-Adresse"-->
+            <!--android:inputType="textEmailAddress" />-->
 
+        <!--<EditText-->
+            <!--android:id="@+id/signPwd"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@+id/personalEmail"-->
+            <!--android:hint="Eigenes Passwort"-->
+            <!--android:inputType="textPassword" />-->
+        <!--&lt;!&ndash;<EditText&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:inputType="textPassword"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:hint="Passwort wiederholen"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_below="@id/editText2Pwd"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:id="@+id/editTextPwdRepeat" />&ndash;&gt;-->
+        <!--<Button-->
+            <!--android:id="@+id/btnSignUpNext"-->
+            <!--style="?android:attr/borderlessButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_below="@+id/signPwd"-->
+            <!--android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"-->
+            <!--android:text="Weiter "-->
+            <!--android:textColor="@color/colorAccent" />-->
 
+        <!--<Button-->
+            <!--android:id="@+id/signBtnNoSign"-->
+            <!--style="?android:attr/borderlessButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentLeft="true"-->
+            <!--android:layout_below="@id/signPwd"-->
+            <!--android:text="Abbrechen"-->
+            <!--android:textColor="@color/colorAccent" />-->
 
+        <!--<Button-->
+            <!--android:id="@+id/btnSignLogin"-->
+            <!--style="?android:attr/borderlessButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentBottom="true"-->
+            <!--android:layout_gravity="bottom|end"-->
+            <!--android:text="Ich habe bereits einen Account"-->
+            <!--android:textColor="@color/colorAccent" />-->
+    <!--</RelativeLayout>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="191dp">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/anon_header_pic"
+                android:adjustViewBounds="true"
+                android:src="@drawable/header_signup" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text="Anmelden"
+                android:textColor="@color/white"
+                android:textSize="28dp"
+                android:background="#F2607D8B"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/signUp_btn_phone"
+                android:background="@color/phone"
+                android:paddingLeft="16dp"
+                android:text="Mit Telefonnummer anmelden"
+                android:textColor="@color/white"
+                android:drawableStart="@drawable/ic_phone_white_24dp"
+                android:drawableLeft="@drawable/ic_phone_white_24dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_below="@+id/signUp_btn_phone">
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/signUp_et_phone"
+                    android:hint="Telefonnummer"
+                    android:inputType="phone"
+                    android:visibility="gone"/>
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/signUp_et_smsCode"
+                    android:hint="Telefonnummer"
+                    android:inputType="numberDecimal"
+                    android:visibility="gone"/>
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/signUp_et_email"
+                    android:hint="E-Mail"
+                    android:inputType="textEmailAddress"
+                    android:visibility="gone"/>
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/signUp_et_pwd"
+                    android:hint="Passwort"
+                    android:inputType="textPassword"
+                    android:visibility="gone"/>
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/signUp_btn_signUp"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:text="Anmelden"
+                    android:textColor="@color/colorAccent"
+                    android:gravity="center|end"
+                    android:drawableEnd="@drawable/ic_arrow_forward_accent_24dp"
+                    android:drawableRight="@drawable/ic_arrow_forward_accent_24dp" />
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/signUp_btn_Verify"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:text="Bestätigen"
+                    android:textColor="@color/colorAccent"
+                    android:gravity="center|end"
+                    android:visibility="gone"
+                    android:drawableEnd="@drawable/ic_arrow_forward_accent_24dp"
+                    android:drawableRight="@drawable/ic_arrow_forward_accent_24dp" />
+            </LinearLayout>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                style="?android:attr/borderlessButtonStyle"
+                android:text="Lieber mit Email anmelden"
+                android:textColor="@color/phone"/>
+        </RelativeLayout>
+    </LinearLayout>
 
 </LinearLayout>
