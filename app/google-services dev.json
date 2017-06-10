@@ -19,15 +19,7 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.github.leonardpieper.ceciVPlan",
-            "certificate_hash": "B16065461BA4A656D14523789AA86CE5DFF87F0C"
-          }
-        },
-        {
-          "client_id": "445583886225-ku69q3646b6fgoq4hrfbooi7ivcpisjq.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.github.leonardpieper.ceciVPlan",
-            "certificate_hash": "85CEBE3848358757E1BBA29A8AF60FF37FBA9A2D"
+            "certificate_hash": "b16065461ba4a656d14523789aa86ce5dff87f0c"
           }
         },
         {

@@ -6,10 +6,13 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,10 +23,15 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthEmailException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.auth.ProviderQueryResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -38,7 +46,6 @@ public class SignUpActivity extends AppCompatActivity {
 
     private Button nexButton;
     private Button cancelBtn;
-    private Button btnSignLogin;
 
     private Button ceciLoginBtn;
 
@@ -52,7 +59,12 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText etEmail;
     private EditText etPwd;
 
+    private TextView tvDatenschutz;
+
+    private Button phoneSignUp;
+    private Button emailSignUp;
     private Button btnVerify;
+    private Button signUpBtn;
 
 
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
@@ -64,110 +76,72 @@ public class SignUpActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        etPhone = (EditText)findViewById(R.id.signUp_et_phone);
-        etSMSCode = (EditText)findViewById(R.id.signUp_et_smsCode);
-        etEmail = (EditText)findViewById(R.id.signUp_et_email);
-        etPwd = (EditText)findViewById(R.id.signUp_et_pwd);
+        etPhone = (EditText) findViewById(R.id.signUp_et_phone);
+        etSMSCode = (EditText) findViewById(R.id.signUp_et_smsCode);
+        etEmail = (EditText) findViewById(R.id.signUp_et_email);
+        etPwd = (EditText) findViewById(R.id.signUp_et_pwd);
 
-        btnVerify = (Button)findViewById(R.id.signUp_btn_Verify);
+        btnVerify = (Button) findViewById(R.id.signUp_btn_Verify);
 
-        Button phoneSignUp = (Button)findViewById(R.id.signUp_btn_phone);
-        Button signUpBtn = (Button)findViewById(R.id.signUp_btn_signUp);
+        phoneSignUp = (Button) findViewById(R.id.signUp_btn_phone);
+        emailSignUp = (Button) findViewById(R.id.signUp_btn_email);
+        signUpBtn = (Button) findViewById(R.id.signUp_btn_signUp);
+
+        tvDatenschutz = (TextView) findViewById(R.id.signUp_tv_dataProt);
+        tvDatenschutz.setMovementMethod(LinkMovementMethod.getInstance());
 
         phoneSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 etPhone.setVisibility(View.VISIBLE);
+                signUpBtn.setVisibility(View.VISIBLE);
+                tvDatenschutz.setVisibility(View.VISIBLE);
                 etEmail.setVisibility(View.GONE);
                 etPwd.setVisibility(View.GONE);
+
+                phoneSignUp.setVisibility(View.GONE);
+                emailSignUp.setVisibility(View.GONE);
+            }
+        });
+        emailSignUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                etPhone.setVisibility(View.GONE);
+                signUpBtn.setVisibility(View.VISIBLE);
+                tvDatenschutz.setVisibility(View.VISIBLE);
+                etEmail.setVisibility(View.VISIBLE);
+                etPwd.setVisibility(View.VISIBLE);
+
+                phoneSignUp.setVisibility(View.GONE);
+                emailSignUp.setVisibility(View.GONE);
             }
         });
 
         signUpBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(etPhone.isShown()&&(!etEmail.isShown()||!etPwd.isShown())){
+                if (etPhone.isShown() && (!etEmail.isShown() || !etPwd.isShown())) {
                     String phoneNumber = etPhone.getText().toString();
+
+                    etPhone.setVisibility(View.GONE);
+                    etSMSCode.setVisibility(View.VISIBLE);
+                    btnVerify.setVisibility(View.VISIBLE);
+                    signUpBtn.setVisibility(View.GONE);
+
                     loginWithPhone(phoneNumber);
 
-                }else if(etEmail.isShown()&&etPwd.isShown()&&!etPhone.isShown()){
+                } else if (etEmail.isShown() && etPwd.isShown() && !etPhone.isShown()) {
+                    String email = etEmail.getText().toString();
+                    String pwd = etPwd.getText().toString();
 
+                    loginWithEmail(email, pwd);
                 }
             }
         });
 
-        setmCallbacks();
-
-//        nexButton = (Button)findViewById(R.id.btnSignUpNext);
-//        cancelBtn = (Button)findViewById(R.id.signBtnNoSign);
-//        btnSignLogin = (Button)findViewById(R.id.btnSignLogin);
-//
-//        nexButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-////                setContentView(R.layout.activity_sign_up_schoolchooser);
-//                if(mAuth.getCurrentUser()!=null) {
-//                    if (mAuth.getCurrentUser().isAnonymous()) {
-//                        migrateAnonToPwd();
-//                        SignUpActivity.this.finish();
-//                    } else {
-//                        if(!email.getText().toString().isEmpty()&&!pwd.getText().toString().isEmpty()){
-//                            signUp();
-//                        }
-//
-//                    }
-//                }else {
-//                    if(!email.getText().toString().isEmpty()&&!pwd.getText().toString().isEmpty()){
-//                        signUp();
-//                    }
-//                }
-//
-//            }
-//        });
-//        cancelBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
-//                builder.setTitle("Möchtest du wirklich abbrechen?")
-//                        .setMessage("Wenn du deine Email nicht hinzufügst kannst du unter umständen nicht alle Funktionen der App nnutzen.")
-//                        .setPositiveButton("Nein", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//
-//                            }
-//                        })
-//                        .setNegativeButton("Ja", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                SignUpActivity.this.finish();
-//                            }
-//                        });
-//                AlertDialog dialog = builder.create();
-//                dialog.show();
-//            }
-//        });
-//        btnSignLogin.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent signIntent = new Intent(SignUpActivity.this, LoginActivity.class);
-//                signIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                startActivityForResult(signIntent, LOGIN_REQUEST_CODE);
-//            }
-//        });
-
     }
 
-    private void loginWithPhone(String phoneNumber){
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                phoneNumber,
-                60,
-                TimeUnit.SECONDS,
-                this,
-                mCallbacks
-        );
-    }
-
-    private void setmCallbacks(){
+    private void loginWithPhone(String phoneNumber) {
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
@@ -184,9 +158,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onCodeSent(final String verificationId, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
                 Log.d(TAG, "onCodeSent:" + verificationId);
-                etPhone.setVisibility(View.GONE);
-                etSMSCode.setVisibility(View.VISIBLE);
-                btnVerify.setVisibility(View.VISIBLE);
+
 
                 btnVerify.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -198,6 +170,14 @@ public class SignUpActivity extends AppCompatActivity {
                 });
             }
         };
+
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                phoneNumber,
+                60,
+                TimeUnit.SECONDS,
+                this,
+                mCallbacks
+        );
     }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
@@ -207,13 +187,13 @@ public class SignUpActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
+                            Log.d(TAG, "signInWithPhone:success");
 
                             FirebaseUser user = task.getResult().getUser();
                             // ...
                         } else {
                             // Sign in failed, display a message and update the UI
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            Log.w(TAG, "signInWithPhone:failure", task.getException());
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 // The verification code entered was invalid
                             }
@@ -222,100 +202,105 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-//    private void migrateAnonToPwd(){
-//        AuthCredential credential = EmailAuthProvider.getCredential(email.getText().toString(), pwd.getText().toString());
-//        mAuth.getCurrentUser().linkWithCredential(credential)
-//                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<AuthResult> task) {
-//                        Log.d(TAG, "linkWithCredential:onComplete:" + task.isSuccessful());
-//
-//                        // If sign in fails, display a message to the user. If sign in succeeds
-//                        // the auth state listener will be notified and logic to handle the
-//                        // signed in user can be handled in the listener.
-//                        if (!task.isSuccessful()) {
-//                            Toast.makeText(SignUpActivity.this, "Authentication failed.",
-//                                    Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                });
-//    }
+    private void loginWithEmail(final String email, final String password){
+        if(email!=null&&password!=null&&!email.isEmpty()&&!password.isEmpty()) {
+            final ProgressBar progressBar = (ProgressBar)findViewById(R.id.signUp_progress_progBar);
+            progressBar.setVisibility(View.VISIBLE);
 
-//    private void signUp(){
-//        mAuth.createUserWithEmailAndPassword(email.getText().toString(), pwd.getText().toString())
-//                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<AuthResult> task) {
-//                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-//
-//                        // If sign in fails, display a message to the user. If sign in succeeds
-//                        // the auth state listener will be notified and logic to handle the
-//                        // signed in user can be handled in the listener.
-//                        if (!task.isSuccessful()) {
-//                            String s = task.getException().getMessage();
-//                            Toast.makeText(SignUpActivity.this, s,
-//                                    Toast.LENGTH_SHORT).show();
-//                        }else {
-//                            setContentView(R.layout.activity_sign_up_log_in_ceci);
-//                            loginCeci();
-//                        }
-//                    }
-//                });
-//    }
+            mAuth.fetchProvidersForEmail(email).addOnCompleteListener(this, new OnCompleteListener<ProviderQueryResult>() {
+                @Override
+                public void onComplete(@NonNull Task<ProviderQueryResult> task) {
+                    if (task.isSuccessful()) {
+                        //Überprüft, ob ein Nutzer mit der Email bereits existiert.
+                        if (task.getResult().getProviders() != null && task.getResult().getProviders().size() >= 1) {
+                            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    progressBar.setVisibility(View.GONE);
+                                    if (task.isSuccessful()) {
+                                        Log.d(TAG, "signInWithEmail:success");
+                                        SignUpActivity.this.finish();
+                                    } else {
+                                        try {
+                                            throw task.getException();
+                                        } catch (FirebaseAuthInvalidUserException e) {
+                                            etEmail.setError("Ungültige E-Mail Adresse");
+                                            etEmail.requestFocus();
+                                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                                            etPwd.setError("Falsches Passwort");
+                                            etPwd.requestFocus();
+                                        } catch (Exception e) {
+                                            Log.e(TAG, e.getMessage());
+                                        }
+                                    }
+                                }
+                            });
+                        } else {
+                            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    progressBar.setVisibility(View.GONE);
+                                    if (task.isSuccessful()) {
+                                        Log.d(TAG, "createUserWithEmail:success");
+                                        SignUpActivity.this.finish();
+                                    } else {
+                                        try {
+                                            throw task.getException();
+                                        } catch (FirebaseAuthWeakPasswordException e) {
+                                            etPwd.setError("Passwort zu schwach (mind. 6 Zeichen)");
+                                            etPwd.requestFocus();
+                                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                                            etEmail.setError("Ungültige E-Mail Adresse");
+                                            etEmail.requestFocus();
+                                        } catch (FirebaseAuthUserCollisionException e) {
+                                            etEmail.setError("Dieser Nutzer existiert bereits");
+                                            etEmail.requestFocus();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        progressBar.setVisibility(View.GONE);
+                        try {
+                            throw task.getException();
+                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                            etEmail.setError("Ungültige E-Mail Adresse");
+                            etEmail.requestFocus();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
 
-    private void loginCeci(){
-        ceciLoginBtn = (Button)findViewById(R.id.ceciLogBtn);
-        final EditText ceciUname = (EditText)findViewById(R.id.ceciUnameET);
-        final EditText ceciPwd = (EditText)findViewById(R.id.ceciPwdET);
-
-        ceciLoginBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DatabaseReference conditionRef = mRootRef
-                        .child("Users")
-                        .child(mAuth.getCurrentUser().getUid())
-                        .child("vPlan");
-                DatabaseReference pwRef = conditionRef.child("pwd");
-                DatabaseReference uNameRef = conditionRef.child("uname");
-
-                String uname = ceciUname.getText().toString();
-                String pwd = ceciPwd.getText().toString();
-
-                pwRef.setValue(pwd);
-                uNameRef.setValue(uname);
-
-                SignUpActivity.this.finish();
-            }
-        });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode){
-            case LOGIN_REQUEST_CODE:
-                if(resultCode == RESULT_OK) {
-                    this.finish();
-                    break;
                 }
+            });
         }
     }
 
-    //    public void onCreateSchoolChooser(){
-//        slctCeciTv = (TextView)findViewById(R.id.tvSlctCeci);
-//        slctHGTv = (TextView)findViewById(R.id.tvSlctHG);
-//        slctCeciTv.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//            }
-//        });
-//        slctHGTv.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(SignUpActivity.this, "Noch nicht verfügbar", Toast.LENGTH_LONG).show();
-//            }
-//        });
-//    }
+    @Override
+    public void onBackPressed() {
+        if(signUpBtn.isShown()){
+            ProgressBar progressBar = (ProgressBar)findViewById(R.id.signUp_progress_progBar);
+            progressBar.setVisibility(View.GONE);
+
+            etPhone.setVisibility(View.GONE);
+            signUpBtn.setVisibility(View.GONE);
+            tvDatenschutz.setVisibility(View.GONE);
+            etEmail.setVisibility(View.GONE);
+            etPwd.setVisibility(View.GONE);
+
+            phoneSignUp.setVisibility(View.VISIBLE);
+            emailSignUp.setVisibility(View.VISIBLE);
+        }else if(btnVerify.isShown()){
+            etPhone.setVisibility(View.VISIBLE);
+            etSMSCode.setVisibility(View.GONE);
+            btnVerify.setVisibility(View.GONE);
+            signUpBtn.setVisibility(View.VISIBLE);
+        }else{
+            super.onBackPressed();
+        }
+
+    }
 }
