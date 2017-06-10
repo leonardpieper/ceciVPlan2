@@ -142,42 +142,44 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void loginWithPhone(String phoneNumber) {
-        mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-            @Override
-            public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-                Log.d(TAG, "onVerificationCompleted:" + phoneAuthCredential);
+        if(phoneNumber!=null&&!phoneNumber.isEmpty()) {
+            mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                @Override
+                public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+                    Log.d(TAG, "onVerificationCompleted:" + phoneAuthCredential);
 
-                signInWithPhoneAuthCredential(phoneAuthCredential);
-            }
+                    signInWithPhoneAuthCredential(phoneAuthCredential);
+                }
 
-            @Override
-            public void onVerificationFailed(FirebaseException e) {
-                Log.w(TAG, "onVerificationFailed", e);
-            }
+                @Override
+                public void onVerificationFailed(FirebaseException e) {
+                    Log.w(TAG, "onVerificationFailed", e);
+                }
 
-            @Override
-            public void onCodeSent(final String verificationId, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-                Log.d(TAG, "onCodeSent:" + verificationId);
+                @Override
+                public void onCodeSent(final String verificationId, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                    Log.d(TAG, "onCodeSent:" + verificationId);
 
 
-                btnVerify.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String smsCode = etSMSCode.getText().toString();
-                        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, smsCode);
-                        signInWithPhoneAuthCredential(credential);
-                    }
-                });
-            }
-        };
+                    btnVerify.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String smsCode = etSMSCode.getText().toString();
+                            PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, smsCode);
+                            signInWithPhoneAuthCredential(credential);
+                        }
+                    });
+                }
+            };
 
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                phoneNumber,
-                60,
-                TimeUnit.SECONDS,
-                this,
-                mCallbacks
-        );
+            PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                    phoneNumber,
+                    60,
+                    TimeUnit.SECONDS,
+                    this,
+                    mCallbacks
+            );
+        }
     }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {

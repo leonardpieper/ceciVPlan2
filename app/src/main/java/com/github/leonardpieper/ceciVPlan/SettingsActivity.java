@@ -322,8 +322,7 @@ public class SettingsActivity extends AppCompatActivity {
         FirebaseUser user = mAuth.getCurrentUser();
         if(user != null){
             if(!user.isAnonymous()) {
-                String uName = user.getEmail().replace("@example.com", "");
-                tvLoggedInUser.setText("Hallo, " + uName);
+                tvLoggedInUser.setText("Hallo, " + user.getEmail());
 
                 tvLoggedInUser.setVisibility(View.VISIBLE);
                 btnLogout.setVisibility(View.VISIBLE);
@@ -344,6 +343,10 @@ public class SettingsActivity extends AppCompatActivity {
                     cvTeacher.setVisibility(View.VISIBLE);
                 }
             }
+        }else {
+            Intent intent = new Intent(this, SignUpActivity.class);
+            startActivity(intent);
+            overridePendingTransition(0,0);
         }
     }
 
