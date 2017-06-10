@@ -6,9 +6,11 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
 import android.text.method.LinkMovementMethod;
 import android.text.method.MovementMethod;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
@@ -35,6 +38,7 @@ import com.google.firebase.auth.ProviderQueryResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -221,7 +225,8 @@ public class SignUpActivity extends AppCompatActivity {
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
                                         Log.d(TAG, "signInWithEmail:success");
-                                        SignUpActivity.this.finish();
+                                        loadVPlanlayout();
+//                                        SignUpActivity.this.finish();
                                     } else {
                                         try {
                                             throw task.getException();
@@ -244,7 +249,7 @@ public class SignUpActivity extends AppCompatActivity {
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
                                         Log.d(TAG, "createUserWithEmail:success");
-                                        SignUpActivity.this.finish();
+                                        loadVPlanlayout();
                                     } else {
                                         try {
                                             throw task.getException();
@@ -281,9 +286,59 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
+    private void loadVPlanlayout(){
+        Button finishBtn = (Button)findViewById(R.id.signUp_btn_finish);
+        final Button yearBtn = (Button)findViewById(R.id.signUp_btn_year);
+        final TextView vplanUname = (TextView)findViewById(R.id.signUp_et_vplan_uname);
+        final TextView vplanPwd = (TextView)findViewById(R.id.signUp_et_vplan_pwd);
+
+        signUpBtn.setVisibility(View.GONE);
+        tvDatenschutz.setVisibility(View.GONE);
+        etEmail.setVisibility(View.GONE);
+        etPwd.setVisibility(View.GONE);
+
+        finishBtn.setVisibility(View.VISIBLE);
+        yearBtn.setVisibility(View.VISIBLE);
+        vplanUname.setVisibility(View.VISIBLE);
+        vplanPwd.setVisibility(View.VISIBLE);
+
+        yearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(SignUpActivity.this, v);
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        yearBtn.setText(item.getTitle());
+                        LocalUser user = new LocalUser(SignUpActivity.this);
+                        user.setJahrgangText(item.getTitle().toString());
+                        return true;
+                    }
+                });
+                popupMenu.inflate(R.menu.jahrgang_popup_menu);
+                popupMenu.show();
+            }
+        });
+
+        finishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String uname = vplanUname.getText().toString();
+                String pwd = vplanPwd.getText().toString();
+                if(!uname.isEmpty()&&!pwd.isEmpty()&&mAuth.getCurrentUser()!=null){
+                    HashMap<String, Object> hm = new HashMap<>();
+                    hm.put("uname", uname);
+                    hm.put("pwd", pwd);
+                    mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("vPlan").setValue(hm);
+                }
+            }
+        });
+    }
+
     @Override
     public void onBackPressed() {
-        if(signUpBtn.isShown()){
+//        View finishBtn = findViewById(R.id.signUp_vplan_btn_finish);
+        if(signUpBtn!=null&&signUpBtn.isShown()){
             ProgressBar progressBar = (ProgressBar)findViewById(R.id.signUp_progress_progBar);
             progressBar.setVisibility(View.GONE);
 
@@ -295,7 +350,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             phoneSignUp.setVisibility(View.VISIBLE);
             emailSignUp.setVisibility(View.VISIBLE);
-        }else if(btnVerify.isShown()){
+        }else if(btnVerify!=null && btnVerify.isShown()){
             etPhone.setVisibility(View.VISIBLE);
             etSMSCode.setVisibility(View.GONE);
             btnVerify.setVisibility(View.GONE);

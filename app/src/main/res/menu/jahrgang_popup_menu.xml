@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/year_menu_q2"
+        app:showAsAction="ifRoom|withText"
+        android:title="Q2"
+        android:visible="true"/>
+    <item
+        android:id="@+id/year_menu_q1"
+        app:showAsAction="ifRoom|withText"
+        android:title="Q1"
+        android:visible="true"/>
+    <item
+        android:id="@+id/year_menu_ef"
+        app:showAsAction="ifRoom|withText"
+        android:title="EF"
+        android:visible="true"/>
+    <item
+        android:id="@+id/year_menu_teacher"
+        app:showAsAction="ifRoom|withText"
+        android:title="Lehrer"
+        android:visible="true"/>
+</menu>

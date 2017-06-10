@@ -5,79 +5,6 @@
     android:layout_height="match_parent"
     tools:context="com.github.leonardpieper.ceciVPlan.SignUpActivity"
     android:orientation="vertical">
-    <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
-    <!--android:paddingRight="@dimen/activity_horizontal_margin"-->
-    <!--android:paddingTop="@dimen/activity_vertical_margin"-->
-
-    <!--<RelativeLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:orientation="vertical"-->
-        <!--android:paddingLeft="16dp"-->
-        <!--android:paddingRight="16dp">-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/textView2"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_vertical"-->
-            <!--android:layout_marginBottom="12dp"-->
-            <!--android:text="Erstelle einen Account um die App optimal nutzen zu können."-->
-            <!--android:textSize="18dp" />-->
-
-        <!--<EditText-->
-            <!--android:id="@+id/personalEmail"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_below="@+id/textView2"-->
-            <!--android:hint="E-Mail-Adresse"-->
-            <!--android:inputType="textEmailAddress" />-->
-
-        <!--<EditText-->
-            <!--android:id="@+id/signPwd"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_below="@+id/personalEmail"-->
-            <!--android:hint="Eigenes Passwort"-->
-            <!--android:inputType="textPassword" />-->
-        <!--&lt;!&ndash;<EditText&ndash;&gt;-->
-        <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:inputType="textPassword"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:hint="Passwort wiederholen"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:layout_below="@id/editText2Pwd"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:id="@+id/editTextPwdRepeat" />&ndash;&gt;-->
-        <!--<Button-->
-            <!--android:id="@+id/btnSignUpNext"-->
-            <!--style="?android:attr/borderlessButtonStyle"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_alignParentRight="true"-->
-            <!--android:layout_below="@+id/signPwd"-->
-            <!--android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"-->
-            <!--android:text="Weiter "-->
-            <!--android:textColor="@color/colorAccent" />-->
-
-        <!--<Button-->
-            <!--android:id="@+id/signBtnNoSign"-->
-            <!--style="?android:attr/borderlessButtonStyle"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_alignParentLeft="true"-->
-            <!--android:layout_below="@id/signPwd"-->
-            <!--android:text="Abbrechen"-->
-            <!--android:textColor="@color/colorAccent" />-->
-
-        <!--<Button-->
-            <!--android:id="@+id/btnSignLogin"-->
-            <!--style="?android:attr/borderlessButtonStyle"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_alignParentBottom="true"-->
-            <!--android:layout_gravity="bottom|end"-->
-            <!--android:text="Ich habe bereits einen Account"-->
-            <!--android:textColor="@color/colorAccent" />-->
-    <!--</RelativeLayout>-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -135,8 +62,10 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_below="@+id/signUp_btn_phone"
-                android:orientation="vertical">
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true">
 
                 <EditText
                     android:id="@+id/signUp_et_phone"
@@ -177,6 +106,22 @@
                     android:text="@string/datenschutzhinweis"
                     android:visibility="gone" />
 
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/signUp_et_vplan_uname"
+                    android:inputType="text"
+                    android:hint="Vertretungsplan Benutzername"
+                    android:visibility="gone"/>
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/signUp_et_vplan_pwd"
+                    android:inputType="textPassword"
+                    android:hint="Vertretungsplan Passwort"
+                    android:visibility="gone"/>
+
+
                 <Button
                     android:id="@+id/signUp_btn_signUp"
                     style="?android:attr/borderlessButtonStyle"
@@ -200,6 +145,16 @@
                     android:text="Bestätigen"
                     android:textColor="@color/colorAccent"
                     android:visibility="gone" />
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/dropdown_spinner_material"
+                    android:id="@+id/signUp_btn_year"
+                    android:text="Jahrgangsstufe"
+                    android:textSize="18sp"
+                    android:entries="@array/stufen"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <Button
@@ -210,6 +165,18 @@
                 android:layout_alignParentBottom="true"
                 android:text="Lieber mit Email anmelden"
                 android:textColor="@color/phone" />
+
+            <Button
+                android:id="@+id/signUp_btn_finish"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:gravity="center|end"
+                android:text="Bestätigen"
+                android:textAlignment="textEnd"
+                android:textColor="@color/colorAccent"
+                android:visibility="gone"/>
         </RelativeLayout>
     </LinearLayout>
 
