@@ -42,6 +42,8 @@ public class MainFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        getActivity().setTitle("Dashboard");
+
         mAuth = FirebaseAuth.getInstance();
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();

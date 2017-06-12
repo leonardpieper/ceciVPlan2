@@ -26,7 +26,6 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthEmailException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
@@ -77,6 +76,7 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+        setTitle("Anmelden");
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -330,6 +330,8 @@ public class SignUpActivity extends AppCompatActivity {
                     hm.put("uname", uname);
                     hm.put("pwd", pwd);
                     mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("vPlan").setValue(hm);
+
+                    SignUpActivity.this.finish();
                 }
             }
         });

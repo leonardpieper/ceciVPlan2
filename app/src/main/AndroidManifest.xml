@@ -82,7 +82,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".KursActivity" />
-        <activity android:name=".SignUpAnonymActivity" />
         <activity android:name=".DevActivity" />
         <activity
             android:name=".DevWebViewActivity"

@@ -95,7 +95,8 @@ public class KursCache extends Application{
             if(root.has("kurse")){
                 JSONArray kurse = root.getJSONArray("kurse");
                 for(int i = 0; i<kurse.length(); i++){
-                    if(kurse.getJSONObject(1).getString("name").equals(kursName)) {
+//                    System.out.println(kurse.getJSONObject(i).getString("name"));
+                    if(kurse.getJSONObject(i).getString("name").equals(kursName)) {
                         kurse = removeJsonObjectAtJsonArrayIndex(kurse, i);
                     }
                 }

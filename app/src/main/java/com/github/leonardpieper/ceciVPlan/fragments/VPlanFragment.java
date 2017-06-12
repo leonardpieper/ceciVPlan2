@@ -56,11 +56,12 @@ public class VPlanFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.app_bar_vplan, container, false);
+        getActivity().setTitle("Vertretungsplan");
+
         mAuth = FirebaseAuth.getInstance();
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-
-        View view = inflater.inflate(R.layout.app_bar_vplan, container, false);
 
         tableStufe = (TableLayout)view.findViewById(R.id.vplan_tl_stufe);
 
