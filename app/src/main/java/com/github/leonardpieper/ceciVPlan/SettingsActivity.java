@@ -59,19 +59,17 @@ public class SettingsActivity extends AppCompatActivity {
     GoogleAccountCredential mCredential;
 
     private TextView tvLoggedInUser;
-    private EditText etUname;
-    private EditText etPwd;
 
     private CardView cvTeacher;
     private EditText etTeacherShortc;
     private String year = "";
     private Button btnSave;
 
-    private Button btnJahrgangslct;
+//    private Button btnJahrgangslct;
     private Button btnLogin;
     private Button btnAdvanced;
     private Button btnLogout;
-    private Button btnSignUp;
+//    private Button btnSignUp;
     private Button btnDriveLink;
 
     private EditText etVPlanU;
@@ -102,22 +100,19 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         tvLoggedInUser = (TextView)findViewById(R.id.tvLogInUser);
-        etUname = (EditText)findViewById(R.id.etUname);
-        etPwd = (EditText)findViewById(R.id.etPwd);
-
 
         etTeacherShortc = (EditText)findViewById(R.id.etLehrerkrzl);
         btnSave = (Button)findViewById(R.id.btnSave);
         cvTeacher = (CardView)findViewById(R.id.cvTeacher);
 
-        btnLogin = (Button)findViewById(R.id.btnSpinnerJahrgang);
+//        btnLogin = (Button)findViewById(R.id.btnSpinnerJahrgang);
         btnLogin = (Button)findViewById(R.id.btnLogin);
         btnAdvanced = (Button)findViewById(R.id.btnAdvanced);
         btnLogout = (Button)findViewById(R.id.btnLogout);
-        btnSignUp = (Button)findViewById(R.id.btnSignUpNew);
+//        btnSignUp = (Button)findViewById(R.id.btnSignUpNew);
         btnDriveLink = (Button)findViewById(R.id.btnDriveLink);
 
-        btnJahrgangslct = (Button)findViewById(R.id.btnSpinnerJahrgang);
+//        btnJahrgangslct = (Button)findViewById(R.id.btnSpinnerJahrgang);
 
         cvVPlan = (CardView)findViewById(R.id.cvVPlanCred);
         etVPlanU = (EditText)findViewById(R.id.set_vplanU);
@@ -133,97 +128,97 @@ public class SettingsActivity extends AppCompatActivity {
         isfbLoggedIn();
 
 
-        btnJahrgangslct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String[] stufen = new String[]{"EF", "Q1", "Q2"};
+//        btnJahrgangslct.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                final String[] stufen = new String[]{"EF", "Q1", "Q2"};
+//
+//                AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+//                builder.setTitle("Wähle deine Jahrgangsstufe");
+//                builder.setItems(stufen, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
+//                        SharedPreferences.Editor editor = preferences.edit();
+//                        editor.putString("jahrgang", stufen[which]);
+//                        editor.putInt("jahrgangNumber", convertJahrgang(stufen[which]));
+//                        editor.commit();
+//                        year = stufen[which];
+//
+//                        FirebaseAnalytics.getInstance(SettingsActivity.this).setUserProperty("jahrgangsstufe", String.valueOf(convertJahrgang(stufen[which])));
+//
+//                        btnJahrgangslct.setText(stufen[which]);
+//                    }
+//                });
+//                builder.show();
+//
+//                easterEggCounter++;
+//                if(easterEggCounter>=5){
+//                    EasterEgg easterEgg = new EasterEgg(SettingsActivity.this);
+//                    try {
+//                        easterEgg.addEmoji("\uD83C\uDF6A ", "den Cookie");
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                    easterEggCounter = 0;
+//                }
+//            }
+//        });
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-                builder.setTitle("Wähle deine Jahrgangsstufe");
-                builder.setItems(stufen, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putString("jahrgang", stufen[which]);
-                        editor.putInt("jahrgangNumber", convertJahrgang(stufen[which]));
-                        editor.commit();
-                        year = stufen[which];
-
-                        FirebaseAnalytics.getInstance(SettingsActivity.this).setUserProperty("jahrgangsstufe", String.valueOf(convertJahrgang(stufen[which])));
-
-                        btnJahrgangslct.setText(stufen[which]);
-                    }
-                });
-                builder.show();
-
-                easterEggCounter++;
-                if(easterEggCounter>=5){
-                    EasterEgg easterEgg = new EasterEgg(SettingsActivity.this);
-                    try {
-                        easterEgg.addEmoji("\uD83C\uDF6A ", "den Cookie");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    easterEggCounter = 0;
-                }
-            }
-        });
-
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String uname = etUname.getText().toString();
-//                String email = uname + "@example.com";
-                String pwd  =etPwd.getText().toString();
-
-                if(!uname.isEmpty()&&!pwd.isEmpty()&&year!=""){
-                    mAuth.signInWithEmailAndPassword(uname, pwd).addOnCompleteListener(SettingsActivity.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()){
-                                Toast.makeText(SettingsActivity.this, "Anmeldung erfolgreich", Toast.LENGTH_LONG).show();
-                                isfbLoggedIn();
-                            }else{
-                                FirebaseAuthException e = (FirebaseAuthException) task.getException();
-                                switch (e.getErrorCode()) {
-                                    case "ERROR_USER_NOT_FOUND":
-                                        etUname.setError("Benutzer nicht gefunden");
-                                        etUname.requestFocus();
-                                        break;
-                                    case "ERROR_INVALID_EMAIL":
-                                        etUname.setError("Ungültige E-Mail Adresse");
-                                        etUname.requestFocus();
-                                        break;
-                                    case "ERROR_WRONG_PASSWORD":
-                                        etPwd.setError("Falsches Passwort");
-                                        etPwd.requestFocus();
-                                        break;
-                                    case "ERROR_USER_DISABLED":
-                                        etUname.setError("Benutzerkonto deaktiviert");
-                                        etUname.requestFocus();
-                                        break;
-                                    default:
-                                        Log.d(TAG, e.getErrorCode());
-
-                                }
-//                                Toast.makeText(SettingsActivity.this, "Anmeldung fehlgeschlagen", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
-                }else{
-                    if(uname.isEmpty()){
-                        Toast.makeText(SettingsActivity.this, "Bitte E-Mail eingeben", Toast.LENGTH_SHORT).show();
-                    }else if(pwd.isEmpty()){
-                        Toast.makeText(SettingsActivity.this, "Bitte Passwort eingeben", Toast.LENGTH_SHORT).show();
-                    }else if(year==""){
-                        Toast.makeText(SettingsActivity.this, "Bitte Jahrgangsstufe auswählen", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-
-            }
-        });
+//        btnLogin.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String uname = etUname.getText().toString();
+////                String email = uname + "@example.com";
+//                String pwd  =etPwd.getText().toString();
+//
+//                if(!uname.isEmpty()&&!pwd.isEmpty()&&year!=""){
+//                    mAuth.signInWithEmailAndPassword(uname, pwd).addOnCompleteListener(SettingsActivity.this, new OnCompleteListener<AuthResult>() {
+//                        @Override
+//                        public void onComplete(@NonNull Task<AuthResult> task) {
+//                            if(task.isSuccessful()){
+//                                Toast.makeText(SettingsActivity.this, "Anmeldung erfolgreich", Toast.LENGTH_LONG).show();
+//                                isfbLoggedIn();
+//                            }else{
+//                                FirebaseAuthException e = (FirebaseAuthException) task.getException();
+//                                switch (e.getErrorCode()) {
+//                                    case "ERROR_USER_NOT_FOUND":
+//                                        etUname.setError("Benutzer nicht gefunden");
+//                                        etUname.requestFocus();
+//                                        break;
+//                                    case "ERROR_INVALID_EMAIL":
+//                                        etUname.setError("Ungültige E-Mail Adresse");
+//                                        etUname.requestFocus();
+//                                        break;
+//                                    case "ERROR_WRONG_PASSWORD":
+//                                        etPwd.setError("Falsches Passwort");
+//                                        etPwd.requestFocus();
+//                                        break;
+//                                    case "ERROR_USER_DISABLED":
+//                                        etUname.setError("Benutzerkonto deaktiviert");
+//                                        etUname.requestFocus();
+//                                        break;
+//                                    default:
+//                                        Log.d(TAG, e.getErrorCode());
+//
+//                                }
+////                                Toast.makeText(SettingsActivity.this, "Anmeldung fehlgeschlagen", Toast.LENGTH_LONG).show();
+//                            }
+//                        }
+//                    });
+//                }else{
+//                    if(uname.isEmpty()){
+//                        Toast.makeText(SettingsActivity.this, "Bitte E-Mail eingeben", Toast.LENGTH_SHORT).show();
+//                    }else if(pwd.isEmpty()){
+//                        Toast.makeText(SettingsActivity.this, "Bitte Passwort eingeben", Toast.LENGTH_SHORT).show();
+//                    }else if(year==""){
+//                        Toast.makeText(SettingsActivity.this, "Bitte Jahrgangsstufe auswählen", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//
+//
+//            }
+//        });
 
         btnAdvanced.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -276,13 +271,13 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        btnSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent signAIntent = new Intent(SettingsActivity.this, SignUpActivity.class);
-                startActivity(signAIntent);
-            }
-        });
+//        btnSignUp.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent signAIntent = new Intent(SettingsActivity.this, SignUpActivity.class);
+//                startActivity(signAIntent);
+//            }
+//        });
 
         btnDriveLink.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -312,11 +307,11 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        isfbLoggedIn();
-    }
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        isfbLoggedIn();
+//    }
 
     public void isfbLoggedIn(){
         FirebaseUser user = mAuth.getCurrentUser();
@@ -332,11 +327,11 @@ public class SettingsActivity extends AppCompatActivity {
 //                btnSave.setVisibility(View.VISIBLE);
                 cvVPlan.setVisibility(View.VISIBLE);
 
-                etUname.setVisibility(View.GONE);
-                etPwd.setVisibility(View.GONE);
+//                etUname.setVisibility(View.GONE);
+//                etPwd.setVisibility(View.GONE);
 //                btnJahrgangslct.setVisibility(View.GONE);
                 btnLogin.setVisibility(View.GONE);
-                btnSignUp.setVisibility(View.GONE);
+//                btnSignUp.setVisibility(View.GONE);
 
                 LocalUser localUser = new LocalUser(SettingsActivity.this);
                 if(localUser.getTeacherStatus()){
@@ -365,11 +360,11 @@ public class SettingsActivity extends AppCompatActivity {
             cvTeacher.setVisibility(View.GONE);
             cvVPlan.setVisibility(View.GONE);
 
-            etUname.setVisibility(View.VISIBLE);
-            etPwd.setVisibility(View.VISIBLE);
+//            etUname.setVisibility(View.VISIBLE);
+//            etPwd.setVisibility(View.VISIBLE);
 //            btnJahrgangslct.setVisibility(View.VISIBLE);
             btnLogin.setVisibility(View.VISIBLE);
-            btnSignUp.setVisibility(View.VISIBLE);
+//            btnSignUp.setVisibility(View.VISIBLE);
         }
     }
 

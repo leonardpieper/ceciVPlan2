@@ -13,6 +13,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.github.leonardpieper.ceciVPlan.MainActivity;
 import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.Vertretungsplan;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,6 +30,9 @@ import java.util.Map;
 
 public class MainFragment extends Fragment {
     private final String TAG = "MainFragment";
+    private static boolean isInForeground;
+
+    private TextView notLoggedIn;
 
     private FirebaseAuth mAuth;
 
@@ -43,16 +47,25 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         getActivity().setTitle("Dashboard");
+        View view = inflater.inflate(R.layout.app_bar_main, container, false);
 
         mAuth = FirebaseAuth.getInstance();
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
+        notLoggedIn = (TextView)view.findViewById(R.id.main_tv_errMain);
 
-        setFirebaseAuthListener();
-
-        return inflater.inflate(R.layout.content_main, container, false);
+        return view;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        isInForeground = true;
+        setFirebaseAuthListener();
+    }
+
+
 
     /**
      * Setzt den Listener, ob ein Nutzer angemeldet ist
@@ -61,7 +74,9 @@ public class MainFragment extends Fragment {
         FirebaseAuth.AuthStateListener mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                getVPlan(firebaseAuth);
+                if(MainFragment.isInForeground) {
+                    getVPlan(firebaseAuth);
+                }
             }
         };
         mAuth.addAuthStateListener(mAuthListener);
@@ -132,9 +147,11 @@ public class MainFragment extends Fragment {
 
         }else{
             Log.d("FirebaseAuth", "onAuthStateChanged:signed_out");
-            TextView tvErr = (TextView)getActivity().findViewById(R.id.main_tv_errMain);
-            tvErr.setText("Du bist nicht angemeldet!");
-            tvErr.setVisibility(View.VISIBLE);
+
+            if(MainActivity.isInForeground) {
+                notLoggedIn.setText("Du bist nicht angemeldet!");
+                notLoggedIn.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -214,6 +231,6 @@ public class MainFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-//        stufenRef.removeEventListener(valueEventListener);
+        isInForeground=false;
     }
 }

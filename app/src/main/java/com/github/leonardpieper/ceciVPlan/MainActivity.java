@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
+    public static boolean isInForeground;
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private FirebaseAuth mAuth;
@@ -206,6 +207,12 @@ public class MainActivity extends AppCompatActivity
 //        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
 
 //        mAuth.signInWithEmailAndPassword("g@g.co", "123456");
+    }
+
+    @Override
+    protected void onResume() {
+        isInForeground = true;
+        super.onResume();
     }
 
     @Override
@@ -468,6 +475,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
+        isInForeground=false;
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }

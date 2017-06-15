@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.method.MovementMethod;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +38,7 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.auth.ProviderQueryResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.hbb20.CountryCodePicker;
 
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +64,7 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText etSMSCode;
     private EditText etEmail;
     private EditText etPwd;
+    private CountryCodePicker ccpCode;
 
     private TextView tvDatenschutz;
 
@@ -68,6 +72,9 @@ public class SignUpActivity extends AppCompatActivity {
     private Button emailSignUp;
     private Button btnVerify;
     private Button signUpBtn;
+    private Button signUpHelp;
+
+    private RelativeLayout signUpHelpRl;
 
 
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
@@ -85,11 +92,17 @@ public class SignUpActivity extends AppCompatActivity {
         etEmail = (EditText) findViewById(R.id.signUp_et_email);
         etPwd = (EditText) findViewById(R.id.signUp_et_pwd);
 
+        ccpCode = (CountryCodePicker)findViewById(R.id.signUp_ccp_code);
+        ccpCode.registerCarrierNumberEditText(etPhone);
+
         btnVerify = (Button) findViewById(R.id.signUp_btn_Verify);
 
         phoneSignUp = (Button) findViewById(R.id.signUp_btn_phone);
         emailSignUp = (Button) findViewById(R.id.signUp_btn_email);
         signUpBtn = (Button) findViewById(R.id.signUp_btn_signUp);
+        signUpHelp = (Button) findViewById(R.id.signUp_btn_help);
+
+        signUpHelpRl = (RelativeLayout) findViewById(R.id.signUp_rl_help);
 
         tvDatenschutz = (TextView) findViewById(R.id.signUp_tv_dataProt);
         tvDatenschutz.setMovementMethod(LinkMovementMethod.getInstance());
@@ -98,6 +111,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 etPhone.setVisibility(View.VISIBLE);
+                ccpCode.setVisibility(View.VISIBLE);
                 signUpBtn.setVisibility(View.VISIBLE);
                 tvDatenschutz.setVisibility(View.VISIBLE);
                 etEmail.setVisibility(View.GONE);
@@ -105,12 +119,14 @@ public class SignUpActivity extends AppCompatActivity {
 
                 phoneSignUp.setVisibility(View.GONE);
                 emailSignUp.setVisibility(View.GONE);
+                signUpHelpRl.setVisibility(View.GONE);
             }
         });
         emailSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 etPhone.setVisibility(View.GONE);
+                ccpCode.setVisibility(View.GONE);
                 signUpBtn.setVisibility(View.VISIBLE);
                 tvDatenschutz.setVisibility(View.VISIBLE);
                 etEmail.setVisibility(View.VISIBLE);
@@ -118,6 +134,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                 phoneSignUp.setVisibility(View.GONE);
                 emailSignUp.setVisibility(View.GONE);
+                signUpHelpRl.setVisibility(View.GONE);
             }
         });
 
@@ -125,9 +142,10 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (etPhone.isShown() && (!etEmail.isShown() || !etPwd.isShown())) {
-                    String phoneNumber = etPhone.getText().toString();
+                    String phoneNumber = ccpCode.getFullNumberWithPlus();
 
                     etPhone.setVisibility(View.GONE);
+                    ccpCode.setVisibility(View.GONE);
                     etSMSCode.setVisibility(View.VISIBLE);
                     btnVerify.setVisibility(View.VISIBLE);
                     signUpBtn.setVisibility(View.GONE);
@@ -140,6 +158,25 @@ public class SignUpActivity extends AppCompatActivity {
 
                     loginWithEmail(email, pwd);
                 }
+            }
+        });
+
+        signUpHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
+                builder.setTitle("Informationen zur Anmeldung")
+                        .setMessage(Html.fromHtml(new StringBuilder()
+                                .append("Ceciplan benötigt Ihre Anmeldedaten in Form von Telefonnummer oder E-Mail-Adresse um Missbrauch des Service zu vermindern.<br /><br />")
+                                .append("Da es möglich ist nutzergenerierte Inhalte innerhalb der App zu erstellen, wird zum Schutz aller Benutzer eine Kontaktmöglichkeit vorausgesetzt. Die App soll <b>keine Möglichkeit für anonymes Mobbing</b> geben. Ferner soll sichergestellt werden, dass gesetzeswidrige Medien oder Schriften nicht über diese Plattform verbreitet werden.<br /><br />")
+                                .append("Sollten Sie Datenschutzbedenken haben lesen Sie sich bitte die <a href=“http://leonardpieper.github.io/ceciplan/content/datenschutz.html“>Datenschutzbestimmungen</a> durch")
+                                .toString()))
+                        .setPositiveButton("Verstanden", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                builder.show();
             }
         });
 
@@ -345,6 +382,7 @@ public class SignUpActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
 
             etPhone.setVisibility(View.GONE);
+            ccpCode.setVisibility(View.GONE);
             signUpBtn.setVisibility(View.GONE);
             tvDatenschutz.setVisibility(View.GONE);
             etEmail.setVisibility(View.GONE);
@@ -352,8 +390,10 @@ public class SignUpActivity extends AppCompatActivity {
 
             phoneSignUp.setVisibility(View.VISIBLE);
             emailSignUp.setVisibility(View.VISIBLE);
+            signUpHelpRl.setVisibility(View.VISIBLE);
         }else if(btnVerify!=null && btnVerify.isShown()){
             etPhone.setVisibility(View.VISIBLE);
+            ccpCode.setVisibility(View.VISIBLE);
             etSMSCode.setVisibility(View.GONE);
             btnVerify.setVisibility(View.GONE);
             signUpBtn.setVisibility(View.VISIBLE);
