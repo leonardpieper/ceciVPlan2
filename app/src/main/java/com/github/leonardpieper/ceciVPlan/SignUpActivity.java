@@ -36,8 +36,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.auth.ProviderQueryResult;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.hbb20.CountryCodePicker;
 
 import java.util.HashMap;
@@ -224,6 +227,8 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
+        final ProgressBar progressBar = (ProgressBar)findViewById(R.id.signUp_progress_progBar);
+        progressBar.setVisibility(View.VISIBLE);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -231,14 +236,17 @@ public class SignUpActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithPhone:success");
-
                             FirebaseUser user = task.getResult().getUser();
-                            // ...
+
+                            vpCredentialsExist(user, progressBar);
+
                         } else {
                             // Sign in failed, display a message and update the UI
                             Log.w(TAG, "signInWithPhone:failure", task.getException());
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                                // The verification code entered was invalid
+                                Toast t = Toast.makeText(SignUpActivity.this, "Ungültiger Code", Toast.LENGTH_SHORT);
+                                t.show();
+                                progressBar.setVisibility(View.GONE);
                             }
                         }
                     }
@@ -262,8 +270,9 @@ public class SignUpActivity extends AppCompatActivity {
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
                                         Log.d(TAG, "signInWithEmail:success");
-                                        loadVPlanlayout();
-//                                        SignUpActivity.this.finish();
+                                        FirebaseUser user = task.getResult().getUser();
+
+                                        vpCredentialsExist(user, progressBar);
                                     } else {
                                         try {
                                             throw task.getException();
@@ -323,6 +332,27 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
+    private void vpCredentialsExist(FirebaseUser user, final ProgressBar progressBar){
+        mRootRef.child("Users").child(user.getUid()).child("vPlan").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                progressBar.setVisibility(View.GONE);
+                if(dataSnapshot.hasChild("uname")){
+                    SignUpActivity.this.finish();
+                }else {
+                    loadVPlanlayout();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                progressBar.setVisibility(View.GONE);
+                loadVPlanlayout();
+            }
+        });
+    }
+
     private void loadVPlanlayout(){
         Button finishBtn = (Button)findViewById(R.id.signUp_btn_finish);
         final Button yearBtn = (Button)findViewById(R.id.signUp_btn_year);
@@ -333,6 +363,8 @@ public class SignUpActivity extends AppCompatActivity {
         tvDatenschutz.setVisibility(View.GONE);
         etEmail.setVisibility(View.GONE);
         etPwd.setVisibility(View.GONE);
+        etSMSCode.setVisibility(View.GONE);
+        btnVerify.setVisibility(View.GONE);
 
         finishBtn.setVisibility(View.VISIBLE);
         yearBtn.setVisibility(View.VISIBLE);

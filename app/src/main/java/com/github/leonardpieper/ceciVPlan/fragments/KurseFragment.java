@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.leonardpieper.ceciVPlan.KursActivity;
+import com.github.leonardpieper.ceciVPlan.SettingsActivity;
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
 import com.github.leonardpieper.ceciVPlan.R;
@@ -302,7 +303,7 @@ public class KurseFragment extends Fragment {
      */
     private void leaveKurs(String name) {
         if (mAuth.getCurrentUser() != null) {
-            final String refName = name.replace(".", "%2E");
+            String refName = name.replace(".", "%2E").toLowerCase();
             mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).removeValue();
 
             KursCache kursCache = new KursCache(getActivity());
@@ -422,26 +423,31 @@ public class KurseFragment extends Fragment {
      * @param type Der Kurstyp: "online" oder "offline"
      */
     private void joinKurs(String name, String secret, String type){
-        HashMap<String, Object> user = new HashMap<String, Object>();
+        if(mAuth.getCurrentUser()!=null) {
+            HashMap<String, Object> user = new HashMap<String, Object>();
 
-        if(type.equals("offline")){
-            user.put("name", name);
-            user.put("type", type);
-        }else {
-            user.put("name", name);
-            user.put("secret", secret);
-            user.put("type", type);
+            if (type.equals("offline")) {
+                user.put("name", name);
+                user.put("type", type);
+            } else {
+                user.put("name", name);
+                user.put("secret", secret);
+                user.put("type", type);
+            }
+
+            String refName = name.replace(".", "%2E");
+            refName = refName.toLowerCase();
+            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
+
+
+            String fcmTopic = refName.replace(" ", "%20");
+            FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
+
+            KursCache kursCache = new KursCache(getActivity());
+            kursCache.addCache(name, type);
+        }else{
+            Toast t = Toast.makeText(getActivity(), "Für diese Aktion musst du angemeldet sein", Toast.LENGTH_LONG);
+            t.show();
         }
-
-        String refName = name.replace(".", "%2E");
-        refName = refName.toLowerCase();
-        mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
-
-
-        String fcmTopic = refName.replace(" ", "%20");
-        FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
-
-        KursCache kursCache = new KursCache(getActivity());
-        kursCache.addCache(name, type);
     }
 }

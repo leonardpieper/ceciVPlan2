@@ -89,6 +89,14 @@
         <activity android:name=".LoginActivity" />
         <activity android:name=".AboutActivity"></activity>
 
+        <activity android:name=".SettingsActivity2"
+            android:label="@string/action_settings"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.github.leonardpieper.ceciVPlan.MainActivity" />
+        </activity>
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher_alpha" />

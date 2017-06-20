@@ -110,7 +110,7 @@ public class SettingsActivity extends AppCompatActivity {
         btnAdvanced = (Button)findViewById(R.id.btnAdvanced);
         btnLogout = (Button)findViewById(R.id.btnLogout);
 //        btnSignUp = (Button)findViewById(R.id.btnSignUpNew);
-        btnDriveLink = (Button)findViewById(R.id.btnDriveLink);
+//        btnDriveLink = (Button)findViewById(R.id.btnDriveLink);
 
 //        btnJahrgangslct = (Button)findViewById(R.id.btnSpinnerJahrgang);
 
@@ -279,12 +279,12 @@ public class SettingsActivity extends AppCompatActivity {
 //            }
 //        });
 
-        btnDriveLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                linkGDrive();
-            }
-        });
+//        btnDriveLink.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                linkGDrive();
+//            }
+//        });
 
         btnSetVPlan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -353,7 +353,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             tvLoggedInUser.setVisibility(View.GONE);
             btnLogout.setVisibility(View.GONE);
-            btnDriveLink.setVisibility(View.GONE);
+//            btnDriveLink.setVisibility(View.GONE);
             btnAdvanced.setVisibility(View.GONE);
 //            etTeacherShortc.setVisibility(View.GONE);
 //            btnSave.setVisibility(View.GONE);
