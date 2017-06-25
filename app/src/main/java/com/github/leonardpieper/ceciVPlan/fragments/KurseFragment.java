@@ -13,39 +13,32 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.leonardpieper.ceciVPlan.KursActivity;
-import com.github.leonardpieper.ceciVPlan.SettingsActivity;
+import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
-import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.tools.Kurse;
 import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class KurseFragment extends Fragment {
     private final String TAG = "KurseFragment";

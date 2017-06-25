@@ -1,8 +1,8 @@
 package com.github.leonardpieper.ceciVPlan;
 
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
@@ -10,12 +10,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.github.leonardpieper.ceciVPlan.tools.EasterEgg;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.firebase.FirebaseApp;
 
 import org.json.JSONException;
-import org.w3c.dom.Text;
 
 public class AboutActivity extends AppCompatActivity {
 

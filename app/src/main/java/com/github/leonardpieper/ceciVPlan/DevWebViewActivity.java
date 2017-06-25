@@ -1,7 +1,6 @@
 package com.github.leonardpieper.ceciVPlan;
 
 import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
