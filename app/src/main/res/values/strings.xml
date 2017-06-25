@@ -75,4 +75,5 @@
 
     <string name="no_kurse"><b>Dein</b> Vertretungsplan auf einen Blick.\nFüge deine Kurse hinzu.</string>
     <string name="datenschutzhinweis">Mit Klick auf Anmelden besätigst du, dass du die <a href='http://leonardpieper.github.io/ceciplan/content/datenschutz.html'>Datenschutzhinweise</a> gelesen und akzeptiert hast</string>
+    <string name="datenschutz_in_about">Die aktuellen Datenschutzbestimmungen finden Sie unter <a href='http://leonardpieper.github.io/ceciplan/content/datenschutz.html'>http://leonardpieper.github.io/ceciplan/content/datenschutz.html</a></string>
 </resources>

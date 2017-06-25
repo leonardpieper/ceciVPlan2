@@ -313,183 +313,183 @@ public class MainActivity extends AppCompatActivity
 //        }
 //    }
 
-    private void displayKurse(){
-        final KursCache kursCache = new KursCache(MainActivity.this);
-        final LinearLayout ll = (LinearLayout) findViewById(R.id.main_kurse_display);
-
-        long cachedTime = kursCache.getCacheTime();
-        long currMill = System.currentTimeMillis();
-
-        if(cachedTime == -1 || cachedTime + 604800000 < currMill) {
-
-            if (mAuth.getCurrentUser() != null) {
-                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        kursCache.newCache();
-
-                        if(dataSnapshot.getValue()==null) {
-                            cvKurse.setVisibility(View.VISIBLE);
-                            TextView tvNoKurse = (TextView)findViewById(R.id.noKurse);
-                            tvNoKurse.setVisibility(View.VISIBLE);
-                        }else {
-                            cvKurse.setVisibility(View.VISIBLE);
-                        }
-                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                            final String kurs = childSnapshot.child("name").getValue(String.class);
-
-//                            kursCache.addCache(kurs);
-
-                            LinearLayout column = makeKursIcon(kurs);
-                            ll.addView(column);
-                            ll.setPadding(0, 0, 0, 0);
-
-//                        mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
-//                            @Override
-//                            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                        }
-
-//                            @Override
-//                            public void onCancelled(DatabaseError databaseError) {
+//    private void displayKurse(){
+//        final KursCache kursCache = new KursCache(MainActivity.this);
+//        final LinearLayout ll = (LinearLayout) findViewById(R.id.main_kurse_display);
 //
-//                            }
-//                        });
+//        long cachedTime = kursCache.getCacheTime();
+//        long currMill = System.currentTimeMillis();
+//
+//        if(cachedTime == -1 || cachedTime + 604800000 < currMill) {
+//
+//            if (mAuth.getCurrentUser() != null) {
+//                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(DataSnapshot dataSnapshot) {
+//                        kursCache.newCache();
+//
+//                        if(dataSnapshot.getValue()==null) {
+//                            cvKurse.setVisibility(View.VISIBLE);
+//                            TextView tvNoKurse = (TextView)findViewById(R.id.noKurse);
+//                            tvNoKurse.setVisibility(View.VISIBLE);
+//                        }else {
+//                            cvKurse.setVisibility(View.VISIBLE);
+//                        }
+//                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+//                            final String kurs = childSnapshot.child("name").getValue(String.class);
+//
+////                            kursCache.addCache(kurs);
+//
+//                            LinearLayout column = makeKursIcon(kurs);
+//                            ll.addView(column);
+//                            ll.setPadding(0, 0, 0, 0);
+//
+////                        mRootRef.child("Kurse").child(kurs).addListenerForSingleValueEvent(new ValueEventListener() {
+////                            @Override
+////                            public void onDataChange(DataSnapshot dataSnapshot) {
+//
+//                        }
+//
+////                            @Override
+////                            public void onCancelled(DatabaseError databaseError) {
+////
+////                            }
+////                        });
+////                    }
 //                    }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-        }else {
-
-            JSONObject root = kursCache.getCache();
-            JSONArray kurse = null;
-
-            try {
-                kurse = root.getJSONArray("kurse");
-                if(kurse==null || kurse.length()==0) {
-                    cvKurse.setVisibility(View.VISIBLE);
-                    TextView tvNoKurse = (TextView)findViewById(R.id.noKurse);
-                    tvNoKurse.setVisibility(View.VISIBLE);
-                }else {
-                    cvKurse.setVisibility(View.VISIBLE);
-                }
-                for(int i = 0; i<kurse.length(); i++){
-                    String title = kurse.getString(i);
-
-                    LinearLayout column = makeKursIcon(title);
-                    ll.addView(column);
-                    ll.setPadding(0, 0, 0, 0);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-
-
-        }
-    }
-
-    private LinearLayout makeKursIcon(final String title){
-        final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
-        int width = (int) (50 * scale + 0.5f);
-        int height = (int) (50 * scale + 0.5f);
-
-        LinearLayout column = new LinearLayout(MainActivity.this);
-        LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
-                width,
-                height
-        );
-        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-
-        column.setLayoutParams(columnParams);
-        column.setPadding(32, 0, 32, 0);
-        column.setOrientation(LinearLayout.VERTICAL);
-        column.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, KursActivity.class);
-                intent.putExtra("name", title);
-                startActivity(intent);
-            }
-        });
-
-        ImageView iv = new ImageView(MainActivity.this);
-        iv.setBackgroundResource(getResourceIdByName(title));
-        iv.setScaleType(ImageView.ScaleType.FIT_START);
-        iv.setAdjustViewBounds(true);
-        iv.setLayoutParams(ivParams);
-
-        TextView tv = new TextView(MainActivity.this);
-        tv.setText(title);
-        tv.setGravity(Gravity.CENTER);
-        tv.setTextColor(getResources().getColor(R.color.colorAccent));
-        tv.setLayoutParams(tvParams);
-
-        column.addView(iv);
-        column.addView(tv);
-
-        return column;
-
-    }
-
-    private int getResourceIdByName(String name){
-        String arr[] = name.split(" ", 2);
-        String fach = arr[0];
-        fach=fach.toLowerCase();
-        switch (fach){
-            case "bi":
-                return R.drawable.ic_biologie_bug;
-            case "ch":
-                return  R.drawable.ic_chemie_poppet;
-            case "d":
-                return R.drawable.ic_deutsch;
-            case "e":
-                return R.drawable.ic_englisch;
-            case "ek":
-                return R.drawable.ic_erdkunde_landscape;
-            case "el":
-                return R.drawable.ic_ernahrungslehre_dining;
-            case "ew":
-                return R.drawable.ic_erziehungswissenschaften_child;
-            case "f":
-                return R.drawable.ic_franzosisch;
-            case "ge":
-                return R.drawable.ic_geschichte_buste;
-            case "if":
-                return R.drawable.ic_informatik_computer;
-            case "ku":
-                return R.drawable.ic_kunst_art;
-            case "m":
-                return R.drawable.ic_mathe_calc;
-            case "mu":
-                return R.drawable.ic_musik_note;
-            case "pl":
-                return R.drawable.ic_philosophie_scroll;
-            case "ph":
-                return R.drawable.ic_physik_lightbulb;
-            case "sw":
-                return R.drawable.ic_sozialwissenschaften_group;
-            case "s":
-                return R.drawable.ic_spanisch;
-            case "sp":
-                return R.drawable.ic_sport_run;
-            default:
-                return R.drawable.ic_school_black_24dp;
-        }
-    }
+//
+//                    @Override
+//                    public void onCancelled(DatabaseError databaseError) {
+//
+//                    }
+//                });
+//            }
+//        }else {
+//
+//            JSONObject root = kursCache.getCache();
+//            JSONArray kurse = null;
+//
+//            try {
+//                kurse = root.getJSONArray("kurse");
+//                if(kurse==null || kurse.length()==0) {
+//                    cvKurse.setVisibility(View.VISIBLE);
+//                    TextView tvNoKurse = (TextView)findViewById(R.id.noKurse);
+//                    tvNoKurse.setVisibility(View.VISIBLE);
+//                }else {
+//                    cvKurse.setVisibility(View.VISIBLE);
+//                }
+//                for(int i = 0; i<kurse.length(); i++){
+//                    String title = kurse.getString(i);
+//
+//                    LinearLayout column = makeKursIcon(title);
+//                    ll.addView(column);
+//                    ll.setPadding(0, 0, 0, 0);
+//                }
+//
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//
+//
+//
+//        }
+//    }
+//
+//    private LinearLayout makeKursIcon(final String title){
+//        final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
+//        int width = (int) (50 * scale + 0.5f);
+//        int height = (int) (50 * scale + 0.5f);
+//
+//        LinearLayout column = new LinearLayout(MainActivity.this);
+//        LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT
+//        );
+//        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
+//                width,
+//                height
+//        );
+//        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.MATCH_PARENT
+//        );
+//
+//        column.setLayoutParams(columnParams);
+//        column.setPadding(32, 0, 32, 0);
+//        column.setOrientation(LinearLayout.VERTICAL);
+//        column.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(MainActivity.this, KursActivity.class);
+//                intent.putExtra("name", title);
+//                startActivity(intent);
+//            }
+//        });
+//
+//        ImageView iv = new ImageView(MainActivity.this);
+//        iv.setBackgroundResource(getResourceIdByName(title));
+//        iv.setScaleType(ImageView.ScaleType.FIT_START);
+//        iv.setAdjustViewBounds(true);
+//        iv.setLayoutParams(ivParams);
+//
+//        TextView tv = new TextView(MainActivity.this);
+//        tv.setText(title);
+//        tv.setGravity(Gravity.CENTER);
+//        tv.setTextColor(getResources().getColor(R.color.colorAccent));
+//        tv.setLayoutParams(tvParams);
+//
+//        column.addView(iv);
+//        column.addView(tv);
+//
+//        return column;
+//
+//    }
+//
+//    private int getResourceIdByName(String name){
+//        String arr[] = name.split(" ", 2);
+//        String fach = arr[0];
+//        fach=fach.toLowerCase();
+//        switch (fach){
+//            case "bi":
+//                return R.drawable.ic_biologie_bug;
+//            case "ch":
+//                return  R.drawable.ic_chemie_poppet;
+//            case "d":
+//                return R.drawable.ic_deutsch;
+//            case "e":
+//                return R.drawable.ic_englisch;
+//            case "ek":
+//                return R.drawable.ic_erdkunde_landscape;
+//            case "el":
+//                return R.drawable.ic_ernahrungslehre_dining;
+//            case "ew":
+//                return R.drawable.ic_erziehungswissenschaften_child;
+//            case "f":
+//                return R.drawable.ic_franzosisch;
+//            case "ge":
+//                return R.drawable.ic_geschichte_buste;
+//            case "if":
+//                return R.drawable.ic_informatik_computer;
+//            case "ku":
+//                return R.drawable.ic_kunst_art;
+//            case "m":
+//                return R.drawable.ic_mathe_calc;
+//            case "mu":
+//                return R.drawable.ic_musik_note;
+//            case "pl":
+//                return R.drawable.ic_philosophie_scroll;
+//            case "ph":
+//                return R.drawable.ic_physik_lightbulb;
+//            case "sw":
+//                return R.drawable.ic_sozialwissenschaften_group;
+//            case "s":
+//                return R.drawable.ic_spanisch;
+//            case "sp":
+//                return R.drawable.ic_sport_run;
+//            default:
+//                return R.drawable.ic_school_black_24dp;
+//        }
+//    }
 
     @Override
     protected void onStop() {
@@ -591,19 +591,19 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void setDailyAlarm(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 7);
-        calendar.set(Calendar.MINUTE, 00);
-        calendar.set(Calendar.SECOND, 0);
-//        to avoid firing the alarm immediately
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-        Intent intent1 = new Intent(MainActivity.this, AlarmReceiver.class);
-        intent1.putExtra("dailyAlarm", true);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0,intent1, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager am = (AlarmManager) MainActivity.this.getSystemService(MainActivity.this.ALARM_SERVICE);
-        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-    }
+//    private void setDailyAlarm(){
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(Calendar.HOUR_OF_DAY, 7);
+//        calendar.set(Calendar.MINUTE, 00);
+//        calendar.set(Calendar.SECOND, 0);
+////        to avoid firing the alarm immediately
+//        calendar.add(Calendar.DAY_OF_YEAR, 1);
+//        Intent intent1 = new Intent(MainActivity.this, AlarmReceiver.class);
+//        intent1.putExtra("dailyAlarm", true);
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0,intent1, PendingIntent.FLAG_UPDATE_CURRENT);
+//        AlarmManager am = (AlarmManager) MainActivity.this.getSystemService(MainActivity.this.ALARM_SERVICE);
+//        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+//    }
 
     private void checkFirstRun() {
 

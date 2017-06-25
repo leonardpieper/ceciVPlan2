@@ -335,7 +335,8 @@ public class VPlanFragment extends Fragment {
 
     private void showContextMenu(final String kursName) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setItems(R.array.context_kursAdd, new DialogInterface.OnClickListener() {
+        builder.setTitle(kursName)
+                .setItems(R.array.context_kursAdd, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 joinKurs(kursName, "", "offline");
             }

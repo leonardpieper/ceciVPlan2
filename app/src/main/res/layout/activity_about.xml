@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_about"
     android:layout_width="match_parent"
@@ -19,7 +20,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_leo4"
+                app:srcCompat="@drawable/ic_leo4"
                 android:adjustViewBounds="true"
                 android:onClick="aboutEasterEgg"
                 android:scaleType="centerCrop"/>
@@ -27,6 +28,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Entwickelt von Leonard Pieper"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="Datenschutz"
+                android:textSize="18sp"
+                android:textColor="@color/colorAccent"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/datenschutz_in_about"
+                android:autoLink="web"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
