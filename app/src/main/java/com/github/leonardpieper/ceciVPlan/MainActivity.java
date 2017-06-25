@@ -38,6 +38,7 @@ import com.github.leonardpieper.ceciVPlan.fragments.KurseFragment;
 import com.github.leonardpieper.ceciVPlan.fragments.MainFragment;
 import com.github.leonardpieper.ceciVPlan.fragments.VPlanFragment;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
+import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -82,9 +83,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-
-        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mRootRef = MyDatabaseUtil.getDatabase().getReference();
 
         MainFragment mainFragment = new MainFragment();
         this.getFragmentManager().beginTransaction()

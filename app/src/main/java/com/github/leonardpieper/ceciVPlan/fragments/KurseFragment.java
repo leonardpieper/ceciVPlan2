@@ -30,6 +30,7 @@ import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
 import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.tools.Kurse;
+import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -66,7 +67,7 @@ public class KurseFragment extends Fragment {
         getActivity().setTitle("Kurse");
 
         mAuth = FirebaseAuth.getInstance();
-        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mRootRef = MyDatabaseUtil.getDatabase().getReference();
 
         llKurse = (LinearLayout) view.findViewById(R.id.kurse_ll);
 

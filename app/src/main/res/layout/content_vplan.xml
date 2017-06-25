@@ -26,6 +26,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/vplan_progBar_offline"
                 android:indeterminate="true"
+                android:visibility="gone"
                 style="@style/infinite_progress_horizontal"/>
 
             <TableLayout

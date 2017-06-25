@@ -33,6 +33,7 @@ import com.github.leonardpieper.ceciVPlan.VPlanCrawler;
 import com.github.leonardpieper.ceciVPlan.tools.EasterEgg;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
 import com.github.leonardpieper.ceciVPlan.tools.Kurse;
+import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -77,7 +78,7 @@ public class VPlanFragment extends Fragment {
         getActivity().setTitle("Vertretungsplan");
 
         mAuth = FirebaseAuth.getInstance();
-        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mRootRef = MyDatabaseUtil.getDatabase().getReference();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
         tableStufe = (TableLayout) view.findViewById(R.id.vplan_tl_stufe);
@@ -131,7 +132,7 @@ public class VPlanFragment extends Fragment {
     }
 
     private void isConnectedToFirebaseDatabase() {
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        DatabaseReference connectedRef = MyDatabaseUtil.getDatabase().getReference(".info/connected");
         connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -492,7 +493,7 @@ public class VPlanFragment extends Fragment {
     }
 
     public void uploadFirebase(String jahrgang, List data) {
-        FirebaseDatabase mData = FirebaseDatabase.getInstance();
+        FirebaseDatabase mData = MyDatabaseUtil.getDatabase();
         if (mAuth.getCurrentUser() != null) {
             DatabaseReference mRef = mData.getReference("vPlan/" + jahrgang);
             mRef.setValue(data);

@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.github.leonardpieper.ceciVPlan.tools.EasterEgg;
 import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
+import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -80,7 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
-    private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+    private DatabaseReference mRootRef = MyDatabaseUtil.getDatabase().getReference();
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;

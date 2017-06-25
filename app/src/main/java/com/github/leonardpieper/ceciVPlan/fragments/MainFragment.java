@@ -31,6 +31,7 @@ import com.github.leonardpieper.ceciVPlan.Vertretungsplan;
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
 import com.github.leonardpieper.ceciVPlan.tools.Kurse;
+import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -70,7 +71,7 @@ public class MainFragment extends Fragment {
         view = inflater.inflate(R.layout.app_bar_main, container, false);
 
         mAuth = FirebaseAuth.getInstance();
-        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mRootRef = MyDatabaseUtil.getDatabase().getReference();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
         notLoggedIn = (TextView) view.findViewById(R.id.main_tv_errMain);
@@ -105,7 +106,7 @@ public class MainFragment extends Fragment {
     }
 
     private void isConnectedToFirebaseDatabase() {
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        DatabaseReference connectedRef = MyDatabaseUtil.getDatabase().getReference(".info/connected");
         connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {

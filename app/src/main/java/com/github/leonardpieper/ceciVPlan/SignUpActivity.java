@@ -1,15 +1,13 @@
 package com.github.leonardpieper.ceciVPlan;
 
 import android.content.DialogInterface;
-import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.text.method.MovementMethod;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,12 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
+import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
@@ -39,7 +36,6 @@ import com.google.firebase.auth.ProviderQueryResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hbb20.CountryCodePicker;
 
@@ -51,7 +47,7 @@ public class SignUpActivity extends AppCompatActivity {
     private static final String TAG = "SignUpActivity";
     private final int LOGIN_REQUEST_CODE = 6001;
 
-    private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+    private DatabaseReference mRootRef = MyDatabaseUtil.getDatabase().getReference();
 
     private Button nexButton;
     private Button cancelBtn;
