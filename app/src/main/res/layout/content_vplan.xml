@@ -21,16 +21,19 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/vplan_progBar_offline"
+                android:indeterminate="true"
+                style="@style/infinite_progress_horizontal"/>
+
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:stretchColumns="*"
                 android:id="@+id/vplan_tl_stufe"
                 android:visibility="visible">
-                <ProgressBar
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:indeterminate="true"/>
             </TableLayout>
             <TableLayout
                 android:layout_width="match_parent"

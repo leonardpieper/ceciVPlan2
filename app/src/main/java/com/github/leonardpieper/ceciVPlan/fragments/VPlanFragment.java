@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -31,6 +32,7 @@ import com.github.leonardpieper.ceciVPlan.VPlanActivity;
 import com.github.leonardpieper.ceciVPlan.VPlanCrawler;
 import com.github.leonardpieper.ceciVPlan.tools.EasterEgg;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
+import com.github.leonardpieper.ceciVPlan.tools.Kurse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -53,6 +55,7 @@ import java.util.Map;
 
 public class VPlanFragment extends Fragment {
     private final String TAG = "VPlanFragment";
+    private static boolean isInForeground;
 
     private View view;
 
@@ -78,7 +81,6 @@ public class VPlanFragment extends Fragment {
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
         tableStufe = (TableLayout) view.findViewById(R.id.vplan_tl_stufe);
-        registerForContextMenu(tableStufe);
 
         FloatingActionButton fabEF = (FloatingActionButton) view.findViewById(R.id.vplan_fab_ef);
         FloatingActionButton fabQ1 = (FloatingActionButton) view.findViewById(R.id.vplan_fab_q1);
@@ -103,6 +105,8 @@ public class VPlanFragment extends Fragment {
             }
         });
 
+        isConnectedToFirebaseDatabase();
+
         crawlVPlan();
         if (mAuth.getCurrentUser() != null) {
             if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
@@ -112,6 +116,41 @@ public class VPlanFragment extends Fragment {
         }
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        isInForeground=true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        isInForeground=false;
+    }
+
+    private void isConnectedToFirebaseDatabase() {
+        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        connectedRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (VPlanFragment.isInForeground) {
+                    ProgressBar offlineProg = (ProgressBar) view.findViewById(R.id.vplan_progBar_offline);
+                    if (connected) {
+                        offlineProg.setVisibility(View.GONE);
+                    } else {
+                        offlineProg.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.err.println("Listener was cancelled");
+            }
+        });
     }
 
     private void crawlVPlan() {
@@ -168,7 +207,7 @@ public class VPlanFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                if (VPlanFragment.this.isVisible()) {
+                if (VPlanFragment.isInForeground) {
                     tableStufe.removeAllViews();
 
                     String stufe = dataSnapshot.getKey();
@@ -210,7 +249,6 @@ public class VPlanFragment extends Fragment {
                 return true;
             }
         });
-        registerForContextMenu(row);
 
         TextView lesson = new TextView(getActivity());
         TextView time = new TextView(getActivity());
@@ -338,52 +376,11 @@ public class VPlanFragment extends Fragment {
         builder.setTitle(kursName)
                 .setItems(R.array.context_kursAdd, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                joinKurs(kursName, "", "offline");
+                Kurse kurse = new Kurse(getActivity());
+                kurse.joinKurs(kursName, "", "offline");
             }
         });
         builder.show();
-    }
-
-    /**
-     * Lässt einen einem Kurs beitreten.
-     * Hier wird unterschieden zwischen "online" und "offline" Kursen.
-     * Offline Kurse beinhalten nur die Benachrichtigungsfunktion
-     * @param name Der Kursname
-     * @param secret Das Kurspasswort. Bei offline Kursen ist dies nicht nötig
-     * @param type Der Kurstyp: "online" oder "offline"
-     */
-    private void joinKurs(String name, String secret, String type){
-        if(mAuth.getCurrentUser()!=null) {
-            HashMap<String, Object> user = new HashMap<String, Object>();
-
-            if (type.equals("offline")) {
-                user.put("name", name);
-                user.put("type", type);
-            } else {
-                user.put("name", name);
-                user.put("secret", secret);
-                user.put("type", type);
-            }
-
-            String refName = name.replace(".", "%2E");
-            refName = refName.toLowerCase();
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
-
-
-            String fcmTopic = refName.replace(" ", "%20");
-            FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
-
-            KursCache kursCache = new KursCache(getActivity());
-            kursCache.addCache(name, type);
-
-            //Es soll ein Toast als Bestätigung angezeigt werden
-            Toast t = Toast.makeText(getActivity(), name + " hinzugefügt", Toast.LENGTH_SHORT);
-            t.show();
-
-        }else{
-            Toast t = Toast.makeText(getActivity(), "Für diese Aktion musst du angemeldet sein", Toast.LENGTH_LONG);
-            t.show();
-        }
     }
 
     private JSONArray dataToJSON(List data) {

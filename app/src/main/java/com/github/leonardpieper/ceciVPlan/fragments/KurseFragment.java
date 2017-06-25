@@ -29,6 +29,7 @@ import com.github.leonardpieper.ceciVPlan.SettingsActivity;
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
 import com.github.leonardpieper.ceciVPlan.R;
+import com.github.leonardpieper.ceciVPlan.tools.Kurse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,6 +47,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class KurseFragment extends Fragment {
+    private final String TAG = "KurseFragment";
+    private static boolean isInForeground;
+
+    private View view;
 
     private FirebaseAuth mAuth;
     private DatabaseReference mRootRef;
@@ -56,14 +61,14 @@ public class KurseFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.app_bar_kurse, container, false);
+        view = inflater.inflate(R.layout.app_bar_kurse, container, false);
 
         getActivity().setTitle("Kurse");
 
         mAuth = FirebaseAuth.getInstance();
         mRootRef = FirebaseDatabase.getInstance().getReference();
 
-        llKurse = (LinearLayout)view.findViewById(R.id.kurse_ll);
+        llKurse = (LinearLayout) view.findViewById(R.id.kurse_ll);
 
         com.github.clans.fab.FloatingActionButton kursJoinFab = (com.github.clans.fab.FloatingActionButton) view.findViewById(R.id.kurse_join_fab);
         kursJoinFab.setOnClickListener(new View.OnClickListener() {
@@ -77,11 +82,11 @@ public class KurseFragment extends Fragment {
         kursLeaveFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LinearLayout kursell = (LinearLayout)view.findViewById(R.id.kurse_ll);
-                for(int i = 0; i<kursell.getChildCount(); i++){
+                LinearLayout kursell = (LinearLayout) view.findViewById(R.id.kurse_ll);
+                for (int i = 0; i < kursell.getChildCount(); i++) {
                     ViewGroup cvChildViews = (ViewGroup) kursell.getChildAt(i);
                     ViewGroup llChildViews = (ViewGroup) cvChildViews.getChildAt(0);
-                    ViewGroup rlChildViews = (ViewGroup) llChildViews.getChildAt(2) ;
+                    ViewGroup rlChildViews = (ViewGroup) llChildViews.getChildAt(2);
                     View leaveBtn = rlChildViews.getChildAt(0);
                     leaveBtn.setVisibility(View.VISIBLE);
                 }
@@ -100,31 +105,46 @@ public class KurseFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        isInForeground = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        isInForeground = false;
+    }
+
     /**
      * Überprüft, ob der KursCache älter als eine Woche ist.
      * -->Wenn Ja: Der Cache wird aus der Firebase Database neugeladen und gespeichert
      * -->Wenn Nein: Die Kurse werden aus dem Cache abgerufen
      */
-    private void getKurse(){
+    private void getKurse() {
         final KursCache kursCache = new KursCache(getActivity());
 
         long cachedTime = kursCache.getCacheTime();
         long currMill = System.currentTimeMillis();
 
-        if(cachedTime == -1 || cachedTime + 604800000 < currMill ) {
-
-
+        if (cachedTime == -1 || cachedTime + 604800000 < currMill) {
             if (mAuth.getCurrentUser() != null) {
                 reloadKurse();
             }
-        }else{
+        } else {
             JSONObject root = kursCache.getCache();
             JSONArray kurse = null;
 
             try {
                 kurse = root.getJSONArray("kurse");
 
-                for(int i = 0; i<kurse.length(); i++){
+                if (kurse == null || kurse.length() == 0) {
+                    RelativeLayout rlNoKurse = (RelativeLayout) view.findViewById(R.id.kurse_rl_noKurse);
+                    rlNoKurse.setVisibility(View.VISIBLE);
+                }
+
+                for (int i = 0; i < kurse.length(); i++) {
                     String title = (!kurse.getJSONObject(i).isNull("name")) ? kurse.getJSONObject(i).getString("name") : null;
                     String type = (!kurse.getJSONObject(i).isNull("type")) ? kurse.getJSONObject(i).getString("type") : null;
 
@@ -143,7 +163,7 @@ public class KurseFragment extends Fragment {
     /**
      * Lädt die Kurse aus der Firebase Database in den Cache
      */
-    private void reloadKurse(){
+    private void reloadKurse() {
         final KursCache kursCache = new KursCache(getActivity());
         DatabaseReference kurseRef = mRootRef
                 .child("Users")
@@ -155,23 +175,30 @@ public class KurseFragment extends Fragment {
         kurseQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                swrReload.setRefreshing(false);
-                llKurse.removeAllViews();
-                kursCache.newCache();
+                if (KurseFragment.isInForeground) {
+                    swrReload.setRefreshing(false);
+                    llKurse.removeAllViews();
+                    kursCache.newCache();
 
-                ArrayList<DataSnapshot> kurseList = new ArrayList<DataSnapshot>();
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    kurseList.add(childSnapshot);
-                }
-                java.util.Collections.reverse(kurseList);
+                    if (dataSnapshot.getValue() == null) {
+                        RelativeLayout rlNoKurse = (RelativeLayout) view.findViewById(R.id.kurse_rl_noKurse);
+                        rlNoKurse.setVisibility(View.VISIBLE);
+                    }
 
-                for (DataSnapshot childSnapshot : kurseList){
-                    Kurs kurs = childSnapshot.getValue(Kurs.class);
+                    ArrayList<DataSnapshot> kurseList = new ArrayList<DataSnapshot>();
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        kurseList.add(childSnapshot);
+                    }
+                    java.util.Collections.reverse(kurseList);
 
-                    String displayName = kurs.name.replace("%2E", ".");
-                    CardView cardView = createKursCard(displayName, kurs.type);
-                    llKurse.addView(cardView);
-                    kursCache.addCache(kurs.name, kurs.type);
+                    for (DataSnapshot childSnapshot : kurseList) {
+                        Kurs kurs = childSnapshot.getValue(Kurs.class);
+
+                        String displayName = kurs.name.replace("%2E", ".");
+                        CardView cardView = createKursCard(displayName, kurs.type);
+                        llKurse.addView(cardView);
+                        kursCache.addCache(kurs.name, kurs.type);
+                    }
                 }
 
 
@@ -179,18 +206,22 @@ public class KurseFragment extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                swrReload.setRefreshing(false);
+
+                if (KurseFragment.isInForeground) {
+                    swrReload.setRefreshing(false);
+                }
             }
         });
     }
 
     /**
      * Erstellt ein CardView mit Bild und Title des Kurses
-     * @param title Ist der Name des Kurses
+     *
+     * @param title    Ist der Name des Kurses
      * @param kursType Ist der Kurstyp: Entweder "online", oder "offline"
      * @return Gibt einen fertigen CardView zurück
      */
-    private CardView createKursCard(final String title, String kursType){
+    private CardView createKursCard(final String title, String kursType) {
         final float scale = getActivity().getResources().getDisplayMetrics().density;
         int ivWidth = (int) (50 * scale + 0.5f);
         int ivHeight = (int) (50 * scale + 0.5f);
@@ -205,7 +236,7 @@ public class KurseFragment extends Fragment {
         cv.setContentPadding(15, 15, 15, 15);
         cv.setCardElevation(5);
 
-        if(kursType!=null&&!kursType.equals("offline")) {
+        if (kursType != null && !kursType.equals("offline")) {
             cv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -221,7 +252,7 @@ public class KurseFragment extends Fragment {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 height
         );
-        cvParams.setMargins(0,1,0,1);
+        cvParams.setMargins(0, 1, 0, 1);
 
         LinearLayout.LayoutParams llParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -232,7 +263,7 @@ public class KurseFragment extends Fragment {
                 ivWidth,
                 ivHeight
         );
-        ivParams.setMargins(0,ivMarginTop,35,0);
+        ivParams.setMargins(0, ivMarginTop, 35, 0);
 //        ivParams.gravity=Gravity.END;
 
         RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(
@@ -262,10 +293,10 @@ public class KurseFragment extends Fragment {
         tv.setLayoutParams(tvParams);
         tv.setText(title);
         tv.setGravity(Gravity.CENTER_VERTICAL);
-        if(kursType!=null&&kursType.equals("online")){
+        if (kursType != null && kursType.equals("online")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 tv.setTextColor(getResources().getColor(R.color.colorAccent, getActivity().getTheme()));
-            }else {
+            } else {
                 tv.setTextColor(getResources().getColor(R.color.colorAccent));
             }
         }
@@ -310,6 +341,7 @@ public class KurseFragment extends Fragment {
 
     /**
      * Löscht den Kurs sowohl aus dem Cache, als auch aus der Firebase Database
+     *
      * @param name Der Name des zu löschenden Kurses
      */
     private void leaveKurs(String name) {
@@ -327,18 +359,19 @@ public class KurseFragment extends Fragment {
 
     /**
      * Gibt das zum Kurs gehörige Icon aus
+     *
      * @param name Der Kursname zu dem das Icon gehören soll
      * @return Gibt eine RessourceID zurück, unter des das Icon gefunden werden kann
      */
-    private int getResourceIdByName(String name){
+    private int getResourceIdByName(String name) {
         String arr[] = name.split(" ", 2);
         String fach = arr[0];
-        fach=fach.toLowerCase();
-        switch (fach){
+        fach = fach.toLowerCase();
+        switch (fach) {
             case "bi":
                 return R.drawable.ic_biologie_bug;
             case "ch":
-                return  R.drawable.ic_chemie_poppet;
+                return R.drawable.ic_chemie_poppet;
             case "d":
                 return R.drawable.ic_deutsch;
             case "e":
@@ -378,20 +411,21 @@ public class KurseFragment extends Fragment {
 
     /**
      * Erstellt einen Dialog um einen neuen Kurs zu erstellen, oder einem beizutreten.
+     *
      * @param type
      */
-    private void createDialog(int type){
+    private void createDialog(int type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         LayoutInflater factory = LayoutInflater.from(getActivity());
         final View textEntryView = factory.inflate(R.layout.dialog_kurse_add, null);
 
 
-        final EditText kursName = (EditText)   textEntryView.findViewById(R.id.dialog_add_abk);
+        final EditText kursName = (EditText) textEntryView.findViewById(R.id.dialog_add_abk);
         final EditText kursSecret = (EditText) textEntryView.findViewById(R.id.dialog_add_pwd);
         final CheckBox checkBox = (CheckBox) textEntryView.findViewById(R.id.dialog_kurse_add_chkbx_offline);
         builder.setView(textEntryView);
-        switch (type){
+        switch (type) {
             case 1:
                 builder.setTitle("Neuen Kurs erstellen");
                 builder.setPositiveButton("Hinzufügen", new DialogInterface.OnClickListener() {
@@ -406,10 +440,11 @@ public class KurseFragment extends Fragment {
                 builder.setPositiveButton("Beitreten", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(checkBox.isChecked()) {
-                            joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "offline");
-                        }else{
-                            joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "online");
+                        Kurse kurse = new Kurse(getActivity());
+                        if (checkBox.isChecked()) {
+                            kurse.joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "offline");
+                        } else {
+                            kurse.joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "online");
                         }
                     }
                 });
@@ -423,42 +458,5 @@ public class KurseFragment extends Fragment {
             }
         });
         builder.show();
-    }
-
-    /**
-     * Lässt einen einem Kurs beitreten.
-     * Hier wird unterschieden zwischen "online" und "offline" Kursen.
-     * Offline Kurse beinhalten nur die Benachrichtigungsfunktion
-     * @param name Der Kursname
-     * @param secret Das Kurspasswort. Bei offline Kursen ist dies nicht nötig
-     * @param type Der Kurstyp: "online" oder "offline"
-     */
-    private void joinKurs(String name, String secret, String type){
-        if(mAuth.getCurrentUser()!=null) {
-            HashMap<String, Object> user = new HashMap<String, Object>();
-
-            if (type.equals("offline")) {
-                user.put("name", name);
-                user.put("type", type);
-            } else {
-                user.put("name", name);
-                user.put("secret", secret);
-                user.put("type", type);
-            }
-
-            String refName = name.replace(".", "%2E");
-            refName = refName.toLowerCase();
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
-
-
-            String fcmTopic = refName.replace(" ", "%20");
-            FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
-
-            KursCache kursCache = new KursCache(getActivity());
-            kursCache.addCache(name, type);
-        }else{
-            Toast t = Toast.makeText(getActivity(), "Für diese Aktion musst du angemeldet sein", Toast.LENGTH_LONG);
-            t.show();
-        }
     }
 }

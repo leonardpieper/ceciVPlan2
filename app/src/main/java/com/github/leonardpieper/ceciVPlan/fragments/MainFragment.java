@@ -1,6 +1,8 @@
 package com.github.leonardpieper.ceciVPlan.fragments;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,10 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.leonardpieper.ceciVPlan.KursActivity;
 import com.github.leonardpieper.ceciVPlan.MainActivity;
@@ -26,6 +30,7 @@ import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.Vertretungsplan;
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
+import com.github.leonardpieper.ceciVPlan.tools.Kurse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -33,6 +38,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.json.JSONArray;
@@ -53,7 +59,6 @@ public class MainFragment extends Fragment {
     private FirebaseAuth mAuth;
 
     private DatabaseReference mRootRef;
-    private ValueEventListener valueEventListener;
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
@@ -68,7 +73,9 @@ public class MainFragment extends Fragment {
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
-        notLoggedIn = (TextView)view.findViewById(R.id.main_tv_errMain);
+        notLoggedIn = (TextView) view.findViewById(R.id.main_tv_errMain);
+
+        isConnectedToFirebaseDatabase();
 
         return view;
     }
@@ -76,20 +83,19 @@ public class MainFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        setFirebaseAuthListener();
         isInForeground = true;
+        setFirebaseAuthListener();
     }
-
 
 
     /**
      * Setzt den Listener, ob ein Nutzer angemeldet ist
      */
-    private void setFirebaseAuthListener(){
+    private void setFirebaseAuthListener() {
         FirebaseAuth.AuthStateListener mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if(MainFragment.isInForeground) {
+                if (MainFragment.isInForeground) {
                     getVPlan(firebaseAuth);
                     displayKurse();
                 }
@@ -98,23 +104,47 @@ public class MainFragment extends Fragment {
         mAuth.addAuthStateListener(mAuthListener);
     }
 
+    private void isConnectedToFirebaseDatabase() {
+        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        connectedRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (MainFragment.isInForeground) {
+                    ProgressBar offlineProg = (ProgressBar) view.findViewById(R.id.main_progBar_offline);
+                    if (connected) {
+                        offlineProg.setVisibility(View.GONE);
+                    } else {
+                        offlineProg.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.err.println("Listener was cancelled");
+            }
+        });
+    }
+
     /**
      * Lädt den Vertretungsplan herunter
+     *
      * @param newFirebaseAuth Ist der Nutzer, der in setFirebaseAuthListener() bekommen wird
      */
-    private void getVPlan(FirebaseAuth newFirebaseAuth){
+    private void getVPlan(FirebaseAuth newFirebaseAuth) {
         FirebaseUser user = newFirebaseAuth.getCurrentUser();
 
         /*
         Überprüft, ob der Nutzer angemeldet ist.
         Wenn er angemeldet ist ist user != null
          */
-        if(user != null){
+        if (user != null) {
             /*
             Überprüft, ob der Vertretungsplan serverseitig aktiviert wurde.
             Wenn alles OK, dann ist vplan_enabled==true
              */
-            if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+            if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
                 DatabaseReference conditionRef = mRootRef.child("vPlan");
 
                 String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("jahrgang", "EF");
@@ -123,10 +153,10 @@ public class MainFragment extends Fragment {
                 Log.d("FirebaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
 
 
-                stufenRef.addValueEventListener(new ValueEventListener(){
+                stufenRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(MainFragment.this.isVisible()) {
+                        if (MainFragment.this.isVisible()) {
                             TableLayout tlToday = (TableLayout) getActivity().findViewById(R.id.main_tl_vPlanToday);
                             TableLayout tlTomorrow = (TableLayout) getActivity().findViewById(R.id.main_tl_vPlanTomorrow);
 
@@ -152,16 +182,16 @@ public class MainFragment extends Fragment {
                                     }
                                 }
                             }
-                            CardView cvToday = (CardView)view.findViewById(R.id.main_cv_today);
-                            CardView cvTomorrow = (CardView)view.findViewById(R.id.main_cv_tomorrow);
-                            if(tlToday.getChildCount()<1){
+                            CardView cvToday = (CardView) view.findViewById(R.id.main_cv_today);
+                            CardView cvTomorrow = (CardView) view.findViewById(R.id.main_cv_tomorrow);
+                            if (tlToday.getChildCount() < 1) {
                                 cvToday.setVisibility(View.GONE);
                             }
-                            if(tlTomorrow.getChildCount()<1){
+                            if (tlTomorrow.getChildCount() < 1) {
                                 cvTomorrow.setVisibility(View.GONE);
                             }
-                            if(tlToday.getChildCount()<1&&tlTomorrow.getChildCount()<1){
-                                RelativeLayout rlNoVertretung = (RelativeLayout)view.findViewById(R.id.main_rl_noVertretung);
+                            if (tlToday.getChildCount() < 1 && tlTomorrow.getChildCount() < 1) {
+                                RelativeLayout rlNoVertretung = (RelativeLayout) view.findViewById(R.id.main_rl_noVertretung);
                                 rlNoVertretung.setVisibility(View.VISIBLE);
                             }
                         }
@@ -174,10 +204,10 @@ public class MainFragment extends Fragment {
                 });
             }
 
-        }else{
+        } else {
             Log.d("FirebaseAuth", "onAuthStateChanged:signed_out");
 
-            if(MainActivity.isInForeground) {
+            if (MainActivity.isInForeground) {
                 notLoggedIn.setText("Du bist nicht angemeldet!");
                 notLoggedIn.setVisibility(View.VISIBLE);
             }
@@ -186,6 +216,7 @@ public class MainFragment extends Fragment {
 
     /**
      * Fügt eine Zeile zur Tabelle hinzu
+     *
      * @param tag
      * @param fach
      * @param stunde
@@ -193,8 +224,15 @@ public class MainFragment extends Fragment {
      * @param raum
      * @param text
      */
-    public void addTableRow(String tag, String fach, String stunde, String lehrer, String raum, String text) {
+    public void addTableRow(String tag, final String fach, String stunde, String lehrer, String raum, String text) {
         TableRow row = new TableRow(getActivity());
+        row.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showContextMenu(fach);
+                return true;
+            }
+        });
 
         TextView lesson = new TextView(getActivity());
         TextView time = new TextView(getActivity());
@@ -202,11 +240,11 @@ public class MainFragment extends Fragment {
         TextView room = new TextView(getActivity());
         TextView extra = new TextView(getActivity());
 
-        lesson.setPadding(5,15,15,15);
-        time.setPadding(5,15,15,15);
-        tutor.setPadding(5,15,15,15);
-        room.setPadding(5,15,15,15);
-        extra.setPadding(5,15,15,15);
+        lesson.setPadding(5, 15, 15, 15);
+        time.setPadding(5, 15, 15, 15);
+        tutor.setPadding(5, 15, 15, 15);
+        room.setPadding(5, 15, 15, 15);
+        extra.setPadding(5, 15, 15, 15);
 
         lesson.setBackgroundResource(R.drawable.cell_shape);
         time.setBackgroundResource(R.drawable.cell_shape);
@@ -236,10 +274,10 @@ public class MainFragment extends Fragment {
         row.addView(room);
         row.addView(extra);
 
-        TableLayout tlToday = (TableLayout)getActivity().findViewById(R.id.main_tl_vPlanToday);
-        TableLayout tlTomorrow = (TableLayout)getActivity().findViewById(R.id.main_tl_vPlanTomorrow);
+        TableLayout tlToday = (TableLayout) getActivity().findViewById(R.id.main_tl_vPlanToday);
+        TableLayout tlTomorrow = (TableLayout) getActivity().findViewById(R.id.main_tl_vPlanTomorrow);
 
-        switch(tag){
+        switch (tag) {
             case "today":
                 tlToday.addView(row);
                 break;
@@ -251,7 +289,19 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void displayKurse(){
+    private void showContextMenu(final String kursName) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(kursName)
+                .setItems(R.array.context_kursAdd, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Kurse kurse = new Kurse(getActivity());
+                        kurse.joinKurs(kursName, "", "offline");
+                    }
+                });
+        builder.show();
+    }
+
+    private void displayKurse() {
         final KursCache kursCache = new KursCache(getActivity());
         final LinearLayout ll = (LinearLayout) view.findViewById(R.id.main_kurse_display);
 
@@ -260,30 +310,33 @@ public class MainFragment extends Fragment {
         Wenn kursCache.isCacheUpToDate(7)==false, dann wurde der Cache seit 7 Tagen nicht mehr aktualisiert
         und wird neu aus der Firebase Database heruntergeladen
          */
-        if(!kursCache.isCacheUpToDate(7)) {
+        if (!kursCache.isCacheUpToDate(7)) {
             if (mAuth.getCurrentUser() != null) {
-                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
+                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        kursCache.newCache();
+                        if (MainFragment.isInForeground) {
+                            kursCache.newCache();
+                            ll.removeAllViews();
 
-                        if(dataSnapshot.getValue()==null) {
-                            TextView tvNoKurse = (TextView) view.findViewById(R.id.noKurse);
-                            tvNoKurse.setVisibility(View.VISIBLE);
+                            if (dataSnapshot.getValue() == null) {
+                                TextView tvNoKurse = (TextView) view.findViewById(R.id.noKurse);
+                                tvNoKurse.setVisibility(View.VISIBLE);
+                            }
+                            for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                                Kurs kurs = childSnapshot.getValue(Kurs.class);
+                                String displayName = kurs.name.replace("%2E", ".");
+
+                                kursCache.addCache(kurs.name, kurs.type);
+
+                                LinearLayout column = makeKursIcon(displayName, kurs.type);
+                                ll.addView(column);
+                                ll.setPadding(0, 0, 0, 0);
+
+                            }
+                            CardView cvKurse = (CardView) view.findViewById(R.id.main_cv_Kurse);
+                            cvKurse.setVisibility(View.VISIBLE);
                         }
-                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                            Kurs kurs = childSnapshot.getValue(Kurs.class);
-                            String displayName = kurs.name.replace("%2E", ".");
-
-                            kursCache.addCache(kurs.name, kurs.type);
-
-                            LinearLayout column = makeKursIcon(displayName, kurs.type);
-                            ll.addView(column);
-                            ll.setPadding(0, 0, 0, 0);
-
-                        }
-                        CardView cvKurse = (CardView) view.findViewById(R.id.main_cv_Kurse);
-                        cvKurse.setVisibility(View.VISIBLE);
                     }
 
                     @Override
@@ -292,17 +345,18 @@ public class MainFragment extends Fragment {
                     }
                 });
             }
-        }else {
+        } else {
             JSONObject root = kursCache.getCache();
             JSONArray kurse = null;
 
             try {
                 kurse = root.getJSONArray("kurse");
 
-                if(kurse==null || kurse.length()==0){
-                    TextView tvNoKurse = (TextView)view.findViewById(R.id.noKurse);
+                if (kurse == null || kurse.length() == 0) {
+                    TextView tvNoKurse = (TextView) view.findViewById(R.id.noKurse);
                     tvNoKurse.setVisibility(View.VISIBLE);
-                }else {
+                } else {
+                    ll.removeAllViews();
                     for (int i = 0; i < kurse.length(); i++) {
                         String title = (!kurse.getJSONObject(i).isNull("name")) ? kurse.getJSONObject(i).getString("name") : null;
                         String type = (!kurse.getJSONObject(i).isNull("type")) ? kurse.getJSONObject(i).getString("type") : null;
@@ -339,7 +393,7 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private LinearLayout makeKursIcon(final String title, final String kursType){
+    private LinearLayout makeKursIcon(final String title, final String kursType) {
         final float scale = getActivity().getResources().getDisplayMetrics().density;
         int width = (int) (50 * scale + 0.5f);
         int height = (int) (50 * scale + 0.5f);
@@ -362,7 +416,7 @@ public class MainFragment extends Fragment {
         column.setPadding(32, 0, 32, 0);
         column.setOrientation(LinearLayout.VERTICAL);
 
-        if(kursType!=null&&!kursType.equals("offline")) {
+        if (kursType != null && !kursType.equals("offline")) {
             column.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -385,10 +439,10 @@ public class MainFragment extends Fragment {
         tv.setGravity(Gravity.CENTER);
         tv.setLayoutParams(tvParams);
 
-        if(kursType!=null&&kursType.equals("online")){
+        if (kursType != null && kursType.equals("online")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 tv.setTextColor(getResources().getColor(R.color.colorAccent, getActivity().getTheme()));
-            }else {
+            } else {
                 tv.setTextColor(getResources().getColor(R.color.colorAccent));
             }
         }
@@ -400,15 +454,15 @@ public class MainFragment extends Fragment {
 
     }
 
-    private int getResourceIdByName(String name){
+    private int getResourceIdByName(String name) {
         String arr[] = name.split(" ", 2);
         String fach = arr[0];
-        fach=fach.toLowerCase();
-        switch (fach){
+        fach = fach.toLowerCase();
+        switch (fach) {
             case "bi":
                 return R.drawable.ic_biologie_bug;
             case "ch":
-                return  R.drawable.ic_chemie_poppet;
+                return R.drawable.ic_chemie_poppet;
             case "d":
                 return R.drawable.ic_deutsch;
             case "e":
@@ -449,6 +503,6 @@ public class MainFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        isInForeground=false;
+        isInForeground = false;
     }
 }

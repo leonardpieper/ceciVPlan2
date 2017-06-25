@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity
     private TextView tvErr;
 
 
-    DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+    DatabaseReference mRootRef;
 
     TextView mTextview;
 
@@ -81,6 +81,10 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
+        mRootRef = FirebaseDatabase.getInstance().getReference();
 
         MainFragment mainFragment = new MainFragment();
         this.getFragmentManager().beginTransaction()
