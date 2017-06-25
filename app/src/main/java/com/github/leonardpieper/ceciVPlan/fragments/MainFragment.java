@@ -1,21 +1,31 @@
 package com.github.leonardpieper.ceciVPlan.fragments;
 
 import android.app.Fragment;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.github.leonardpieper.ceciVPlan.KursActivity;
 import com.github.leonardpieper.ceciVPlan.MainActivity;
 import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.Vertretungsplan;
+import com.github.leonardpieper.ceciVPlan.models.Kurs;
+import com.github.leonardpieper.ceciVPlan.tools.KursCache;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +35,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,12 +46,13 @@ public class MainFragment extends Fragment {
     private final String TAG = "MainFragment";
     private static boolean isInForeground;
 
+    private View view;
+
     private TextView notLoggedIn;
 
     private FirebaseAuth mAuth;
 
     private DatabaseReference mRootRef;
-    private DatabaseReference stufenRef;
     private ValueEventListener valueEventListener;
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
@@ -47,7 +62,7 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         getActivity().setTitle("Dashboard");
-        View view = inflater.inflate(R.layout.app_bar_main, container, false);
+        view = inflater.inflate(R.layout.app_bar_main, container, false);
 
         mAuth = FirebaseAuth.getInstance();
         mRootRef = FirebaseDatabase.getInstance().getReference();
@@ -61,8 +76,8 @@ public class MainFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        isInForeground = true;
         setFirebaseAuthListener();
+        isInForeground = true;
     }
 
 
@@ -76,6 +91,7 @@ public class MainFragment extends Fragment {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if(MainFragment.isInForeground) {
                     getVPlan(firebaseAuth);
+                    displayKurse();
                 }
             }
         };
@@ -96,17 +112,18 @@ public class MainFragment extends Fragment {
         if(user != null){
             /*
             Überprüft, ob der Vertretungsplan serverseitig aktiviert wurde.
-            Wenn alles OK, dass ist vplan_enabled==true
+            Wenn alles OK, dann ist vplan_enabled==true
              */
             if(mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
                 DatabaseReference conditionRef = mRootRef.child("vPlan");
 
                 String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("jahrgang", "EF");
-                stufenRef = conditionRef.child(stufe);
+                DatabaseReference stufenRef = conditionRef.child(stufe);
 
                 Log.d("FirebaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
 
-                stufenRef.addValueEventListener(valueEventListener = new ValueEventListener(){
+
+                stufenRef.addValueEventListener(new ValueEventListener(){
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if(MainFragment.this.isVisible()) {
@@ -134,6 +151,18 @@ public class MainFragment extends Fragment {
                                         addTableRow("tomorrow", fach, stunde, vertreter, raum, text);
                                     }
                                 }
+                            }
+                            CardView cvToday = (CardView)view.findViewById(R.id.main_cv_today);
+                            CardView cvTomorrow = (CardView)view.findViewById(R.id.main_cv_tomorrow);
+                            if(tlToday.getChildCount()<1){
+                                cvToday.setVisibility(View.GONE);
+                            }
+                            if(tlTomorrow.getChildCount()<1){
+                                cvTomorrow.setVisibility(View.GONE);
+                            }
+                            if(tlToday.getChildCount()<1&&tlTomorrow.getChildCount()<1){
+                                RelativeLayout rlNoVertretung = (RelativeLayout)view.findViewById(R.id.main_rl_noVertretung);
+                                rlNoVertretung.setVisibility(View.VISIBLE);
                             }
                         }
                     }
@@ -222,11 +251,200 @@ public class MainFragment extends Fragment {
         }
     }
 
-//    @Override
-//    public void onDestroyView() {
-//        super.onDestroyView();
-//        stufenRef.removeEventListener(valueEventListener);
-//    }
+    private void displayKurse(){
+        final KursCache kursCache = new KursCache(getActivity());
+        final LinearLayout ll = (LinearLayout) view.findViewById(R.id.main_kurse_display);
+
+        /*
+        Überprüft, ob die Kurse aus dem Cache geladen werden sollen, oder aus der Firebase Database
+        Wenn kursCache.isCacheUpToDate(7)==false, dann wurde der Cache seit 7 Tagen nicht mehr aktualisiert
+        und wird neu aus der Firebase Database heruntergeladen
+         */
+        if(!kursCache.isCacheUpToDate(7)) {
+            if (mAuth.getCurrentUser() != null) {
+                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        kursCache.newCache();
+
+                        if(dataSnapshot.getValue()==null) {
+                            TextView tvNoKurse = (TextView) view.findViewById(R.id.noKurse);
+                            tvNoKurse.setVisibility(View.VISIBLE);
+                        }
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            Kurs kurs = childSnapshot.getValue(Kurs.class);
+                            String displayName = kurs.name.replace("%2E", ".");
+
+                            kursCache.addCache(kurs.name, kurs.type);
+
+                            LinearLayout column = makeKursIcon(displayName, kurs.type);
+                            ll.addView(column);
+                            ll.setPadding(0, 0, 0, 0);
+
+                        }
+                        CardView cvKurse = (CardView) view.findViewById(R.id.main_cv_Kurse);
+                        cvKurse.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }else {
+            JSONObject root = kursCache.getCache();
+            JSONArray kurse = null;
+
+            try {
+                kurse = root.getJSONArray("kurse");
+
+                if(kurse==null || kurse.length()==0){
+                    TextView tvNoKurse = (TextView)view.findViewById(R.id.noKurse);
+                    tvNoKurse.setVisibility(View.VISIBLE);
+                }else {
+                    for (int i = 0; i < kurse.length(); i++) {
+                        String title = (!kurse.getJSONObject(i).isNull("name")) ? kurse.getJSONObject(i).getString("name") : null;
+                        String type = (!kurse.getJSONObject(i).isNull("type")) ? kurse.getJSONObject(i).getString("type") : null;
+
+                        LinearLayout column = makeKursIcon(title, type);
+                        ll.addView(column);
+                        ll.setPadding(0, 0, 0, 0);
+                    }
+                    CardView cvKurse = (CardView) view.findViewById(R.id.main_cv_Kurse);
+                    cvKurse.setVisibility(View.VISIBLE);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+//            try {
+//                kurse = root.getJSONArray("kurse");
+//                if(kurse==null || kurse.length()==0) {
+//                    TextView tvNoKurse = (TextView)view.findViewById(R.id.noKurse);
+//                    tvNoKurse.setVisibility(View.VISIBLE);
+//                }
+//                for(int i = 0; i<kurse.length(); i++){
+//                    String title = kurse.getString(i);
+//
+//                    LinearLayout column = makeKursIcon(title);
+//                    ll.addView(column);
+//                    ll.setPadding(0, 0, 0, 0);
+//                }
+//
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+        }
+    }
+
+    private LinearLayout makeKursIcon(final String title, final String kursType){
+        final float scale = getActivity().getResources().getDisplayMetrics().density;
+        int width = (int) (50 * scale + 0.5f);
+        int height = (int) (50 * scale + 0.5f);
+
+        LinearLayout column = new LinearLayout(getActivity());
+        LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
+                width,
+                height
+        );
+        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+
+        column.setLayoutParams(columnParams);
+        column.setPadding(32, 0, 32, 0);
+        column.setOrientation(LinearLayout.VERTICAL);
+
+        if(kursType!=null&&!kursType.equals("offline")) {
+            column.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), KursActivity.class);
+                    intent.putExtra("name", title);
+                    startActivity(intent);
+                }
+            });
+        }
+
+
+        ImageView iv = new ImageView(getActivity());
+        iv.setBackgroundResource(getResourceIdByName(title));
+        iv.setScaleType(ImageView.ScaleType.FIT_START);
+        iv.setAdjustViewBounds(true);
+        iv.setLayoutParams(ivParams);
+
+        TextView tv = new TextView(getActivity());
+        tv.setText(title);
+        tv.setGravity(Gravity.CENTER);
+        tv.setLayoutParams(tvParams);
+
+        if(kursType!=null&&kursType.equals("online")){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                tv.setTextColor(getResources().getColor(R.color.colorAccent, getActivity().getTheme()));
+            }else {
+                tv.setTextColor(getResources().getColor(R.color.colorAccent));
+            }
+        }
+
+        column.addView(iv);
+        column.addView(tv);
+
+        return column;
+
+    }
+
+    private int getResourceIdByName(String name){
+        String arr[] = name.split(" ", 2);
+        String fach = arr[0];
+        fach=fach.toLowerCase();
+        switch (fach){
+            case "bi":
+                return R.drawable.ic_biologie_bug;
+            case "ch":
+                return  R.drawable.ic_chemie_poppet;
+            case "d":
+                return R.drawable.ic_deutsch;
+            case "e":
+                return R.drawable.ic_englisch;
+            case "ek":
+                return R.drawable.ic_erdkunde_landscape;
+            case "el":
+                return R.drawable.ic_ernahrungslehre_dining;
+            case "ew":
+                return R.drawable.ic_erziehungswissenschaften_child;
+            case "f":
+                return R.drawable.ic_franzosisch;
+            case "ge":
+                return R.drawable.ic_geschichte_buste;
+            case "if":
+                return R.drawable.ic_informatik_computer;
+            case "ku":
+                return R.drawable.ic_kunst_art;
+            case "m":
+                return R.drawable.ic_mathe_calc;
+            case "mu":
+                return R.drawable.ic_musik_note;
+            case "pl":
+                return R.drawable.ic_philosophie_scroll;
+            case "ph":
+                return R.drawable.ic_physik_lightbulb;
+            case "sw":
+                return R.drawable.ic_sozialwissenschaften_group;
+            case "s":
+                return R.drawable.ic_spanisch;
+            case "sp":
+                return R.drawable.ic_sport_run;
+            default:
+                return R.drawable.ic_school_black_24dp;
+        }
+    }
 
     @Override
     public void onStop() {

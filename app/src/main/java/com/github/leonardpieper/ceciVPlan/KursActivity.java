@@ -167,7 +167,7 @@ public class KursActivity extends AppCompatActivity
         scrollView = (NestedScrollView) findViewById(R.id.childScrollKurs);
 
 
-        getResultsFromApi();
+//        getResultsFromApi();
 
     }
 
@@ -241,189 +241,189 @@ public class KursActivity extends AppCompatActivity
      * of the preconditions are not satisfied, the app will prompt the user as
      * appropriate.
      */
-    private void getResultsFromApi() {
-        if (!isGooglePlayServicesAvailable()) {
-            acquireGooglePlayServices();
-        } else if (mCredential.getSelectedAccountName() == null) {
-            chooseAccount();
-        } else if (!isDeviceOnline()) {
-            //FIXME
-//            mOutputText.setText("No network connection available.");
-        } else {
-            getDownloadableMedia(kursNameRef, 5);
-//            new MakeRequestTask(mCredential).execute();
-        }
-    }
-
-    /**
-     * Attempts to set the account used with the API credentials. If an account
-     * name was previously saved it will use that one; otherwise an account
-     * picker dialog will be shown to the user. Note that the setting the
-     * account to use with the credentials object requires the app to have the
-     * GET_ACCOUNTS permission, which is requested here if it is not already
-     * present. The AfterPermissionGranted annotation indicates that this
-     * function will be rerun automatically whenever the GET_ACCOUNTS permission
-     * is granted.
-     */
-    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
-    private void chooseAccount() {
-        if (EasyPermissions.hasPermissions(
-                this, Manifest.permission.GET_ACCOUNTS) && EasyPermissions.hasPermissions(
-                this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            String accountName = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-                    .getString(PREF_ACCOUNT_NAME, null);
-
-            if (accountName != null) {
-                mCredential.setSelectedAccountName(accountName);
-                getResultsFromApi();
-            } else {
-                // Start a dialog from which the user can choose an account
-                startActivityForResult(
-                        mCredential.newChooseAccountIntent(),
-                        REQUEST_ACCOUNT_PICKER);
-            }
-        } else {
-            // Request the GET_ACCOUNTS permission via a user dialog
-            EasyPermissions.requestPermissions(
-                    this,
-                    "Diese App benötigt zugriff auf deinen Google account (via Contacts) und auf deine SD-Karte.",
-                    REQUEST_PERMISSION_GET_ACCOUNTS,
-                    new String[]{Manifest.permission.GET_ACCOUNTS, Manifest.permission.WRITE_EXTERNAL_STORAGE});
-        }
-    }
-
-    /**
-     * Called when an activity launched here (specifically, AccountPicker
-     * and authorization) exits, giving you the requestCode you started it with,
-     * the resultCode it returned, and any additional data from it.
-     *
-     * @param requestCode code indicating which activity result is incoming.
-     * @param resultCode  code indicating the result of the incoming
-     *                    activity result.
-     * @param data        Intent (containing result data) returned by incoming
-     *                    activity result.
-     */
-    @Override
-    protected void onActivityResult(
-            int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case REQUEST_GOOGLE_PLAY_SERVICES:
-                if (resultCode != RESULT_OK) {
-                    //FIXME: Error
-//                    mOutputText.setText(
-//                            "This app requires Google Play Services. Please install " +
-//                                    "Google Play Services on your device and relaunch this app.");
-                } else {
-                    getResultsFromApi();
-                }
-                break;
-            case REQUEST_ACCOUNT_PICKER:
-                if (resultCode == RESULT_OK && data != null &&
-                        data.getExtras() != null) {
-                    String accountName =
-                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                    if (accountName != null) {
-                        SharedPreferences settings =
-                                getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putString(PREF_ACCOUNT_NAME, accountName);
-                        editor.apply();
-                        mCredential.setSelectedAccountName(accountName);
-                        getResultsFromApi();
-                    }
-                }
-                break;
-            case REQUEST_AUTHORIZATION:
-                if (resultCode == RESULT_OK) {
-                    getResultsFromApi();
-                }
-                break;
-            case READ_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
-                    new MakeRequestUploadTask(mCredential).execute(data);
-                }
-                break;
-            case REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE:
-                if(resultCode == RESULT_OK){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(KursActivity.this);
-
-                    builder.setMessage("Bitte nochmal auf \"download klicken\"")
-                            .setTitle("Info");
-                    builder.create();
-                }
-        }
-    }
-
-    public void getDownloadableMedia(String kurs, int count) {
-        Query kursStorageRef = mDatabase.child("Kurse").child(kurs).child("storagePath").orderByChild("date").limitToLast(count);
-
-        kursStorageRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    String id = childSnapshot.child("id").getValue(String.class);
-                    String name = childSnapshot.child("title").getValue(String.class);
-
-
-                    CardView imageCard = getLocalMedia(name, id);
-                    if(imageCard != null) {
-
-                        if (thumbnailCount % 2 == 0) {
-                            thumbnailRow = new LinearLayout(KursActivity.this);
-                            LinearLayout.LayoutParams lLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                            thumbnailRow.setLayoutParams(lLParams);
-                            thumbnailRow.setId(thumbnailCount + 0);
-
-                            thumbnailRow.addView(imageCard);
-
-
-                            lLayoutl.addView(thumbnailRow);
-
-                            previousRowID = thumbnailRow.getId();
-                            thumbnailCount++;
-                        } else {
-                            thumbnailRow.addView(imageCard);
-                            thumbnailCount++;
-                        }
-                    }
-
-
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    }
-
-    private CardView getLocalMedia(String title, String id) {
-
-        String root = Environment.getExternalStorageDirectory().toString();
-        java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
-        java.io.File f = new java.io.File(myDir, title);
-
-        if (f.getPath() != null) {
-            Bitmap bitmap = null;
-
-            bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
-            if (bitmap != null) {
-                return makeCard(title, bitmap, id);
-            }else {
-                new MakeRequestTask(mCredential).execute(id);
-            }
-
-        } else {
-            new MakeRequestTask(mCredential).execute(id);
-        }
-        return null;
-    }
+//    private void getResultsFromApi() {
+//        if (!isGooglePlayServicesAvailable()) {
+//            acquireGooglePlayServices();
+//        } else if (mCredential.getSelectedAccountName() == null) {
+//            chooseAccount();
+//        } else if (!isDeviceOnline()) {
+//            //FIXME
+////            mOutputText.setText("No network connection available.");
+//        } else {
+//            getDownloadableMedia(kursNameRef, 5);
+////            new MakeRequestTask(mCredential).execute();
+//        }
+//    }
+//
+//    /**
+//     * Attempts to set the account used with the API credentials. If an account
+//     * name was previously saved it will use that one; otherwise an account
+//     * picker dialog will be shown to the user. Note that the setting the
+//     * account to use with the credentials object requires the app to have the
+//     * GET_ACCOUNTS permission, which is requested here if it is not already
+//     * present. The AfterPermissionGranted annotation indicates that this
+//     * function will be rerun automatically whenever the GET_ACCOUNTS permission
+//     * is granted.
+//     */
+//    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+//    private void chooseAccount() {
+//        if (EasyPermissions.hasPermissions(
+//                this, Manifest.permission.GET_ACCOUNTS) && EasyPermissions.hasPermissions(
+//                this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+//            String accountName = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+//                    .getString(PREF_ACCOUNT_NAME, null);
+//
+//            if (accountName != null) {
+//                mCredential.setSelectedAccountName(accountName);
+//                getResultsFromApi();
+//            } else {
+//                // Start a dialog from which the user can choose an account
+//                startActivityForResult(
+//                        mCredential.newChooseAccountIntent(),
+//                        REQUEST_ACCOUNT_PICKER);
+//            }
+//        } else {
+//            // Request the GET_ACCOUNTS permission via a user dialog
+//            EasyPermissions.requestPermissions(
+//                    this,
+//                    "Diese App benötigt zugriff auf deinen Google account (via Contacts) und auf deine SD-Karte.",
+//                    REQUEST_PERMISSION_GET_ACCOUNTS,
+//                    new String[]{Manifest.permission.GET_ACCOUNTS, Manifest.permission.WRITE_EXTERNAL_STORAGE});
+//        }
+//    }
+//
+//    /**
+//     * Called when an activity launched here (specifically, AccountPicker
+//     * and authorization) exits, giving you the requestCode you started it with,
+//     * the resultCode it returned, and any additional data from it.
+//     *
+//     * @param requestCode code indicating which activity result is incoming.
+//     * @param resultCode  code indicating the result of the incoming
+//     *                    activity result.
+//     * @param data        Intent (containing result data) returned by incoming
+//     *                    activity result.
+//     */
+//    @Override
+//    protected void onActivityResult(
+//            int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        switch (requestCode) {
+//            case REQUEST_GOOGLE_PLAY_SERVICES:
+//                if (resultCode != RESULT_OK) {
+//                    //FIXME: Error
+////                    mOutputText.setText(
+////                            "This app requires Google Play Services. Please install " +
+////                                    "Google Play Services on your device and relaunch this app.");
+//                } else {
+//                    getResultsFromApi();
+//                }
+//                break;
+//            case REQUEST_ACCOUNT_PICKER:
+//                if (resultCode == RESULT_OK && data != null &&
+//                        data.getExtras() != null) {
+//                    String accountName =
+//                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+//                    if (accountName != null) {
+//                        SharedPreferences settings =
+//                                getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+//                        SharedPreferences.Editor editor = settings.edit();
+//                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+//                        editor.apply();
+//                        mCredential.setSelectedAccountName(accountName);
+//                        getResultsFromApi();
+//                    }
+//                }
+//                break;
+//            case REQUEST_AUTHORIZATION:
+//                if (resultCode == RESULT_OK) {
+//                    getResultsFromApi();
+//                }
+//                break;
+//            case READ_REQUEST_CODE:
+//                if (resultCode == RESULT_OK) {
+//                    new MakeRequestUploadTask(mCredential).execute(data);
+//                }
+//                break;
+//            case REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE:
+//                if(resultCode == RESULT_OK){
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(KursActivity.this);
+//
+//                    builder.setMessage("Bitte nochmal auf \"download klicken\"")
+//                            .setTitle("Info");
+//                    builder.create();
+//                }
+//        }
+//    }
+//
+//    public void getDownloadableMedia(String kurs, int count) {
+//        Query kursStorageRef = mDatabase.child("Kurse").child(kurs).child("storagePath").orderByChild("date").limitToLast(count);
+//
+//        kursStorageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//
+//                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+//                    String id = childSnapshot.child("id").getValue(String.class);
+//                    String name = childSnapshot.child("title").getValue(String.class);
+//
+//
+//                    CardView imageCard = getLocalMedia(name, id);
+//                    if(imageCard != null) {
+//
+//                        if (thumbnailCount % 2 == 0) {
+//                            thumbnailRow = new LinearLayout(KursActivity.this);
+//                            LinearLayout.LayoutParams lLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+//                            thumbnailRow.setLayoutParams(lLParams);
+//                            thumbnailRow.setId(thumbnailCount + 0);
+//
+//                            thumbnailRow.addView(imageCard);
+//
+//
+//                            lLayoutl.addView(thumbnailRow);
+//
+//                            previousRowID = thumbnailRow.getId();
+//                            thumbnailCount++;
+//                        } else {
+//                            thumbnailRow.addView(imageCard);
+//                            thumbnailCount++;
+//                        }
+//                    }
+//
+//
+//                }
+//
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+//
+//    }
+//
+//    private CardView getLocalMedia(String title, String id) {
+//
+//        String root = Environment.getExternalStorageDirectory().toString();
+//        java.io.File myDir = new java.io.File(root + java.io.File.separator + "ceciplan" + java.io.File.separator + "downloads");
+//        java.io.File f = new java.io.File(myDir, title);
+//
+//        if (f.getPath() != null) {
+//            Bitmap bitmap = null;
+//
+//            bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+//            if (bitmap != null) {
+//                return makeCard(title, bitmap, id);
+//            }else {
+//                new MakeRequestTask(mCredential).execute(id);
+//            }
+//
+//        } else {
+//            new MakeRequestTask(mCredential).execute(id);
+//        }
+//        return null;
+//    }
 
     public CardView makeCard(String title, Bitmap image, final String driveId) {
         int id = (int) (Math.random() * 100);

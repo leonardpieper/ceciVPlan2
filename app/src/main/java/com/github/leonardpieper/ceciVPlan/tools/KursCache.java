@@ -170,4 +170,13 @@ public class KursCache extends Application{
         return -1;
     }
 
+    public boolean isCacheUpToDate(int days){
+        long cachedTime = getCacheTime();
+        long currMill = System.currentTimeMillis();
+        if(cachedTime!=-1 || cachedTime + (days * 8.64e+7) > currMill){
+            return true;
+        }
+        return false;
+    }
+
 }

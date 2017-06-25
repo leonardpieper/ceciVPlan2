@@ -6,10 +6,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
+import android.text.SpannableString;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,6 +24,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,6 +101,18 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        TextView textViewNeu = (TextView) navigationView.getMenu().findItem(R.id.nav_kurse).getActionView();
+        textViewNeu.setText("Neu");
+        textViewNeu.setTextColor(Color.WHITE);
+        textViewNeu.setAllCaps(true);
+        textViewNeu.setGravity(Gravity.CENTER_VERTICAL);
+        textViewNeu.setBackgroundResource(R.drawable.round_corner);
+        textViewNeu.setPadding(25,0,25,0);
+
+        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        llp.setMargins(0, 35, 0, 35);
+        textViewNeu.setLayoutParams(llp);
 
 //        final TextView vPlanToday = (TextView)findViewById(R.id.vPlanToday);
 //        final TextView vPlanTomorrow = (TextView)findViewById(R.id.vPlanTomorrow);
@@ -239,7 +258,7 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-//    public void addTableRow(String tag, String fach, String stunde, String lehrer, String raum, String text) {
+    //    public void addTableRow(String tag, String fach, String stunde, String lehrer, String raum, String text) {
 //        TableRow row = new TableRow(this);
 //
 //        TextView lesson = new TextView(this);
