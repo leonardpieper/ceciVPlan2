@@ -34,6 +34,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -149,14 +150,22 @@ public class KurseFragment extends Fragment {
                 .child(mAuth.getCurrentUser().getUid())
                 .child("Kurse");
 
-        kurseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        Query kurseQuery = kurseRef.orderByChild("type");
+
+        kurseQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 swrReload.setRefreshing(false);
                 llKurse.removeAllViews();
                 kursCache.newCache();
 
+                ArrayList<DataSnapshot> kurseList = new ArrayList<DataSnapshot>();
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    kurseList.add(childSnapshot);
+                }
+                java.util.Collections.reverse(kurseList);
+
+                for (DataSnapshot childSnapshot : kurseList){
                     Kurs kurs = childSnapshot.getValue(Kurs.class);
 
                     String displayName = kurs.name.replace("%2E", ".");
@@ -164,6 +173,8 @@ public class KurseFragment extends Fragment {
                     llKurse.addView(cardView);
                     kursCache.addCache(kurs.name, kurs.type);
                 }
+
+
             }
 
             @Override

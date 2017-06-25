@@ -15,4 +15,10 @@
         </item>
     </string-array>
 
+    <string-array name="context_kursAdd">
+        <item>
+            Kurs hinzufügen
+        </item>
+    </string-array>
+
 </resources>
