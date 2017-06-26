@@ -9,8 +9,8 @@ android {
         applicationId "com.github.leonardpieper.ceciVPlan"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 35
-        versionName "17w24a"
+        versionCode 36
+        versionName "17w25a"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {

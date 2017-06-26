@@ -13,7 +13,7 @@
             android:title="Vertretungsplan" />
         <item
             android:id="@+id/nav_kurse"
-            app:actionViewClass="android.widget.TextView"
+            app:actionViewClass="android.widget.LinearLayout"
             android:icon="@drawable/ic_school_black_24dp"
             android:title="Kurse"
             android:visible="true"/>

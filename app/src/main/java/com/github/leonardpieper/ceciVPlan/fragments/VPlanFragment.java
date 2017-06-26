@@ -3,15 +3,20 @@ package com.github.leonardpieper.ceciVPlan.fragments;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -42,10 +47,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class VPlanFragment extends Fragment {
     private final String TAG = "VPlanFragment";
     private static boolean isInForeground;
+
+    private boolean isTutorialNeedful;
 
     private View view;
 
@@ -96,6 +105,28 @@ public class VPlanFragment extends Fragment {
         });
 
         isConnectedToFirebaseDatabase();
+
+        isTutorialNeedful = checkTutorialStatus();
+        Button tutorialFinishBtn = (Button) view.findViewById(R.id.vplan_btn_tutorialFinish);
+        tutorialFinishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("kursTutorialNeedful", false);
+                editor.commit();
+
+                CardView cvTut = (CardView) view.findViewById(R.id.vplan_cv_tutorial);
+                cvTut.setVisibility(View.GONE);
+                view.setBackgroundResource(android.R.color.transparent);
+            }
+        });
+
+        if(isTutorialNeedful){
+            CardView cvTut = (CardView) view.findViewById(R.id.vplan_cv_tutorial);
+            cvTut.setVisibility(View.VISIBLE);
+            view.setBackgroundResource(R.drawable.vplan_tutorial_background);
+        }
 
         crawlVPlan();
         if (mAuth.getCurrentUser() != null) {
@@ -217,7 +248,7 @@ public class VPlanFragment extends Fragment {
                             String raum = vPlanSnapshot.child("Raum").getValue(String.class);
                             String text = vPlanSnapshot.child("Vertretungs-Text").getValue(String.class);
 
-                            addTableRow(stufe, fach, stunde, vertreter, raum, text);
+                            TableRow row = addTableRow(stufe, fach, stunde, vertreter, raum, text);
                         }
                     }
                 }
@@ -230,15 +261,22 @@ public class VPlanFragment extends Fragment {
         });
     }
 
-    private void addTableRow(String stufe, final String fach, String stunde, String lehrer, String raum, String text) {
+    private TableRow addTableRow(String stufe, final String fach, String stunde, String lehrer, String raum, String text) {
         TableRow row = new TableRow(getActivity());
-        row.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                showContextMenu(fach);
-                return true;
-            }
-        });
+        row.setClickable(true);
+        if(false) {
+            row.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    showContextMenu(fach);
+                    return true;
+                }
+            });
+        }
+
+        TypedValue outValue = new TypedValue();
+        getActivity().getTheme().resolveAttribute(R.attr.selectableItemBackground, outValue, true);
+        row.setBackgroundResource(outValue.resourceId);
 
         TextView lesson = new TextView(getActivity());
         TextView time = new TextView(getActivity());
@@ -292,22 +330,7 @@ public class VPlanFragment extends Fragment {
 
         tableStufe.addView(row);
 
-//        switch(stufe){
-//            case "EF":
-//                tableEF.addView(row);
-//                break;
-//            case "Q1":
-//                tableQ1.addView(row);
-//                break;
-//            case "Q2":
-//                tableQ2.addView(row);
-//                break;
-//            case "me":
-//                tableMe.addView(row);
-//                break;
-//            default:
-//                Log.d(TAG, "Stufe ist nicht erkannt!");
-//        }
+        return row;
     }
 
     private void addDateTableRow(String stufe, String tag, String datum) {
@@ -342,21 +365,6 @@ public class VPlanFragment extends Fragment {
         row.addView(date);
 
         tableStufe.addView(row);
-//        switch(stufe){
-//            case "EF":
-//                tableEF.addView(row);
-//                break;
-//            case "Q1":
-//                tableQ1.addView(row);
-//                break;
-//            case "Q2":
-//                tableQ2.addView(row);
-//                break;
-//            case "me":
-//                tableMe.addView(row);
-//            default:
-//                Log.d(TAG, "Stufe ist nicht erkannt!");
-//        }
 
         oldDatum = datum;
     }
@@ -371,6 +379,10 @@ public class VPlanFragment extends Fragment {
             }
         });
         builder.show();
+    }
+
+    private boolean checkTutorialStatus(){
+        return PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("kursTutorialNeedful", true);
     }
 
     private JSONArray dataToJSON(List data) {

@@ -10,6 +10,8 @@
     <color name="extraColorAccent1">#FFCC80</color>
     <color name="extraColorAccent2">#F57C00</color>
 
+    <color name="colorPrimaryDarkerTranslucent">#DD37474f</color>
+
     <color name="white">#FFFFFF</color>
     <color name="background">#E6E6E6</color>
 

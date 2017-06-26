@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -88,17 +89,25 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        TextView textViewNeu = (TextView) navigationView.getMenu().findItem(R.id.nav_kurse).getActionView();
+        final float scale = getResources().getDisplayMetrics().density;
+        int marginDPs = (int) (5 * scale + 0.5f);
+        int paddingDPs = (int) (10 * scale + 0.5f);
+
+        LinearLayout llNeu = (LinearLayout) navigationView.getMenu().findItem(R.id.nav_kurse).getActionView();
+        TextView textViewNeu = new TextView(this);
         textViewNeu.setText("Neu");
         textViewNeu.setTextColor(Color.WHITE);
         textViewNeu.setAllCaps(true);
         textViewNeu.setGravity(Gravity.CENTER_VERTICAL);
         textViewNeu.setBackgroundResource(R.drawable.round_corner);
-        textViewNeu.setPadding(25,0,25,0);
+        textViewNeu.setPadding(paddingDPs,0,paddingDPs,0);
 
         LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        llp.setMargins(0, 35, 0, 35);
-        textViewNeu.setLayoutParams(llp);
+        llNeu.setLayoutParams(llp);
+        llNeu.setGravity(Gravity.CENTER);
+
+        llNeu.addView(textViewNeu);
+
 
 //        final TextView vPlanToday = (TextView)findViewById(R.id.vPlanToday);
 //        final TextView vPlanTomorrow = (TextView)findViewById(R.id.vPlanTomorrow);
