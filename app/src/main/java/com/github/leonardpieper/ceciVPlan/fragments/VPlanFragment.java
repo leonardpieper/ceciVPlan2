@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -47,8 +46,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class VPlanFragment extends Fragment {
     private final String TAG = "VPlanFragment";

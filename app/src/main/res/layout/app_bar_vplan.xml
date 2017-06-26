@@ -14,13 +14,41 @@
         <!--android:theme="@style/AppTheme.AppBarOverlay">-->
 
         <!--<android.support.v7.widget.Toolbar-->
-            <!--android:id="@+id/toolbar"-->
+            <!--android:id="@+id/vplan_toolbar"-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="?attr/actionBarSize"-->
             <!--android:background="?attr/colorPrimary"-->
+            <!--app:title="Hallo"-->
             <!--app:popupTheme="@style/AppTheme.PopupOverlay" />-->
 
     <!--</android.support.design.widget.AppBarLayout>-->
+
+    <android.support.design.widget.TabLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:layout_marginTop="@dimen/toolbar_margin"
+        app:tabSelectedTextColor="@color/colorPrimaryDark"
+        app:tabTextColor="@color/colorPrimaryDark">
+
+        <android.support.design.widget.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="EF" />
+
+        <android.support.design.widget.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Q1" />
+
+        <android.support.design.widget.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Q2" />
+
+    </android.support.design.widget.TabLayout>
+
+
 
     <include layout="@layout/content_vplan" />
 
