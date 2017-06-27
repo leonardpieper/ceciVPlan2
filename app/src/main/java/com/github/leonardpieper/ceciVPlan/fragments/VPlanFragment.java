@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -83,6 +84,9 @@ public class VPlanFragment extends Fragment {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) view.findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
 
 
 //        mAuth = FirebaseAuth.getInstance();
@@ -539,8 +543,8 @@ public class VPlanFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_tabbed, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            View rootView = inflater.inflate(R.layout.item_kurs, container, false);
+            TextView textView = (TextView) rootView.findViewById(R.id.item_kurs_iv_title);
             textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
             return rootView;
         }
@@ -573,11 +577,11 @@ public class VPlanFragment extends Fragment {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return "EF";
                 case 1:
-                    return "SECTION 2";
+                    return "Q1";
                 case 2:
-                    return "SECTION 3";
+                    return "Q2";
             }
             return null;
         }
