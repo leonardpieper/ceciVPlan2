@@ -3,25 +3,25 @@ package com.github.leonardpieper.ceciVPlan.fragments;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.CardView;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.github.clans.fab.FloatingActionButton;
 import com.github.leonardpieper.ceciVPlan.CrawlerFinishListener;
 import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.VPlanCrawler;
@@ -66,72 +66,85 @@ public class VPlanFragment extends Fragment {
 
     private int easterEggCounter = 0;
 
+
+    private VPlanFragment.SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.app_bar_vplan, container, false);
         getActivity().setTitle("Vertretungsplan");
 
-        mAuth = FirebaseAuth.getInstance();
-        mRootRef = MyDatabaseUtil.getDatabase().getReference();
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new VPlanFragment.SectionsPagerAdapter(((AppCompatActivity) getActivity()).getSupportFragmentManager());
 
-        tableStufe = (TableLayout) view.findViewById(R.id.vplan_tl_stufe);
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) view.findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        FloatingActionButton fabEF = (FloatingActionButton) view.findViewById(R.id.vplan_fab_ef);
-        FloatingActionButton fabQ1 = (FloatingActionButton) view.findViewById(R.id.vplan_fab_q1);
-        FloatingActionButton fabQ2 = (FloatingActionButton) view.findViewById(R.id.vplan_fab_q2);
 
-        fabEF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeStufe("EF");
-            }
-        });
-        fabQ1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeStufe("Q1");
-            }
-        });
-        fabQ2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeStufe("Q2");
-            }
-        });
-
-        isConnectedToFirebaseDatabase();
-
-        isTutorialNeedful = checkTutorialStatus();
-        Button tutorialFinishBtn = (Button) view.findViewById(R.id.vplan_btn_tutorialFinish);
-        tutorialFinishBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("kursTutorialNeedful", false);
-                editor.commit();
-
-                CardView cvTut = (CardView) view.findViewById(R.id.vplan_cv_tutorial);
-                cvTut.setVisibility(View.GONE);
-                view.setBackgroundResource(android.R.color.transparent);
-            }
-        });
-
-        if(isTutorialNeedful){
-            CardView cvTut = (CardView) view.findViewById(R.id.vplan_cv_tutorial);
-            cvTut.setVisibility(View.VISIBLE);
-            view.setBackgroundResource(R.drawable.vplan_tutorial_background);
-        }
-
-        crawlVPlan();
-        if (mAuth.getCurrentUser() != null) {
-            if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
-                String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("jahrgang", "EF");
-                getFBData(stufe);
-            }
-        }
+//        mAuth = FirebaseAuth.getInstance();
+//        mRootRef = MyDatabaseUtil.getDatabase().getReference();
+//        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+//
+//        tableStufe = (TableLayout) view.findViewById(R.id.vplan_tl_stufe);
+//
+//        FloatingActionButton fabEF = (FloatingActionButton) view.findViewById(R.id.vplan_fab_ef);
+//        FloatingActionButton fabQ1 = (FloatingActionButton) view.findViewById(R.id.vplan_fab_q1);
+//        FloatingActionButton fabQ2 = (FloatingActionButton) view.findViewById(R.id.vplan_fab_q2);
+//
+//        fabEF.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                changeStufe("EF");
+//            }
+//        });
+//        fabQ1.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                changeStufe("Q1");
+//            }
+//        });
+//        fabQ2.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                changeStufe("Q2");
+//            }
+//        });
+//
+//        isConnectedToFirebaseDatabase();
+//
+//        isTutorialNeedful = checkTutorialStatus();
+//        Button tutorialFinishBtn = (Button) view.findViewById(R.id.vplan_btn_tutorialFinish);
+//        tutorialFinishBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+//                SharedPreferences.Editor editor = preferences.edit();
+//                editor.putBoolean("kursTutorialNeedful", false);
+//                editor.commit();
+//
+//                CardView cvTut = (CardView) view.findViewById(R.id.vplan_cv_tutorial);
+//                cvTut.setVisibility(View.GONE);
+//                view.setBackgroundResource(android.R.color.transparent);
+//            }
+//        });
+//
+//        if(isTutorialNeedful){
+//            CardView cvTut = (CardView) view.findViewById(R.id.vplan_cv_tutorial);
+//            cvTut.setVisibility(View.VISIBLE);
+//            view.setBackgroundResource(R.drawable.vplan_tutorial_background);
+//        }
+//
+//        crawlVPlan();
+//        if (mAuth.getCurrentUser() != null) {
+//            if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+//                String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("jahrgang", "EF");
+//                getFBData(stufe);
+//            }
+//        }
 
         return view;
     }
@@ -495,6 +508,78 @@ public class VPlanFragment extends Fragment {
         if (mAuth.getCurrentUser() != null) {
             DatabaseReference mRef = mData.getReference("vPlan/" + jahrgang);
             mRef.setValue(data);
+        }
+    }
+
+    /**
+     * A placeholder fragment containing a simple view.
+     */
+    public static class PlaceholderFragment extends android.support.v4.app.Fragment {
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+        private static final String ARG_SECTION_NUMBER = "section_number";
+
+        public PlaceholderFragment() {
+        }
+
+        /**
+         * Returns a new instance of this fragment for the given section
+         * number.
+         */
+        public static VPlanFragment.PlaceholderFragment newInstance(int sectionNumber) {
+            VPlanFragment.PlaceholderFragment fragment = new VPlanFragment.PlaceholderFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_tabbed, container, false);
+            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+            return rootView;
+        }
+    }
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public android.support.v4.app.Fragment getItem(int position) {
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a PlaceholderFragment (defined as a static inner class below).
+            return VPlanFragment.PlaceholderFragment.newInstance(position + 1);
+        }
+
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "SECTION 1";
+                case 1:
+                    return "SECTION 2";
+                case 2:
+                    return "SECTION 3";
+            }
+            return null;
         }
     }
 }
