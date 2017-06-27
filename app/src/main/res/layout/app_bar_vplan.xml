@@ -56,58 +56,58 @@
         <!--android:layout_margin="@dimen/fab_margin"-->
         <!--android:src="@android:drawable/ic_dialog_email" />-->
 
-    <com.github.clans.fab.FloatingActionMenu
-        xmlns:fab="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/fab_year"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="8dp"
-        fab:menu_colorNormal="@color/colorAccent"
-        fab:menu_colorPressed="@color/colorAccent">
-        <!--fab:fab_addButtonSize="normal"-->
-        <!--fab:fab_labelStyle="@style/menu_labels_style"-->
-        <!--fab:fab_labelsPosition="left">-->
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fabMe"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="matrix"
-            android:src="@drawable/ic_person_white_24dp"
-            android:visibility="gone"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_colorPressed="@color/colorAccent"
-            fab:fab_size="mini" />
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/vplan_fab_q2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="changeStufe"
-            android:scaleType="matrix"
-            android:src="@drawable/q2"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_colorPressed="@color/colorAccent"
-            fab:fab_size="mini" />
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/vplan_fab_q1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="changeStufe"
-            android:src="@drawable/q1"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_colorPressed="@color/colorAccent"
-            fab:fab_size="mini" />
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/vplan_fab_ef"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="changeStufe"
-            android:src="@drawable/ef"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_colorPressed="@color/colorAccent"
-            fab:fab_size="mini" />
+    <!--<com.github.clans.fab.FloatingActionMenu-->
+        <!--xmlns:fab="http://schemas.android.com/apk/res-auto"-->
+        <!--android:id="@+id/fab_year"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="bottom|end"-->
+        <!--android:layout_margin="8dp"-->
+        <!--fab:menu_colorNormal="@color/colorAccent"-->
+        <!--fab:menu_colorPressed="@color/colorAccent">-->
+        <!--&lt;!&ndash;fab:fab_addButtonSize="normal"&ndash;&gt;-->
+        <!--&lt;!&ndash;fab:fab_labelStyle="@style/menu_labels_style"&ndash;&gt;-->
+        <!--&lt;!&ndash;fab:fab_labelsPosition="left">&ndash;&gt;-->
+        <!--<com.github.clans.fab.FloatingActionButton-->
+            <!--android:id="@+id/fabMe"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:scaleType="matrix"-->
+            <!--android:src="@drawable/ic_person_white_24dp"-->
+            <!--android:visibility="gone"-->
+            <!--fab:fab_colorNormal="@color/colorAccent"-->
+            <!--fab:fab_colorPressed="@color/colorAccent"-->
+            <!--fab:fab_size="mini" />-->
+        <!--<com.github.clans.fab.FloatingActionButton-->
+            <!--android:id="@+id/vplan_fab_q2"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="changeStufe"-->
+            <!--android:scaleType="matrix"-->
+            <!--android:src="@drawable/q2"-->
+            <!--fab:fab_colorNormal="@color/colorAccent"-->
+            <!--fab:fab_colorPressed="@color/colorAccent"-->
+            <!--fab:fab_size="mini" />-->
+        <!--<com.github.clans.fab.FloatingActionButton-->
+            <!--android:id="@+id/vplan_fab_q1"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="changeStufe"-->
+            <!--android:src="@drawable/q1"-->
+            <!--fab:fab_colorNormal="@color/colorAccent"-->
+            <!--fab:fab_colorPressed="@color/colorAccent"-->
+            <!--fab:fab_size="mini" />-->
+        <!--<com.github.clans.fab.FloatingActionButton-->
+            <!--android:id="@+id/vplan_fab_ef"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="changeStufe"-->
+            <!--android:src="@drawable/ef"-->
+            <!--fab:fab_colorNormal="@color/colorAccent"-->
+            <!--fab:fab_colorPressed="@color/colorAccent"-->
+            <!--fab:fab_size="mini" />-->
 
-    </com.github.clans.fab.FloatingActionMenu>
+    <!--</com.github.clans.fab.FloatingActionMenu>-->
 
 
 </android.support.design.widget.CoordinatorLayout>
