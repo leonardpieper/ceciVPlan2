@@ -20,7 +20,7 @@
             android:defaultValue="1"
             android:entries="@array/stufen"
             android:entryValues="@array/stufen"
-            android:key="pref_vplan_lpref_year"
+            android:key="jahrgang"
             android:title="Jahrgang" />
     </PreferenceCategory>
 </PreferenceScreen>

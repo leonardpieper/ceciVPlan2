@@ -142,7 +142,7 @@ public class MainFragment extends Fragment {
             if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
                 DatabaseReference conditionRef = mRootRef.child("vPlan");
 
-                String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("pref_vplan_lpref_year", "EF");
+                String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("jahrgang", "EF");
                 DatabaseReference stufenRef = conditionRef.child(stufe);
 
                 Log.d("FirebaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());
@@ -390,8 +390,10 @@ public class MainFragment extends Fragment {
 
     private LinearLayout makeKursIcon(final String title, final String kursType) {
         final float scale = getActivity().getResources().getDisplayMetrics().density;
+        int widthIv = (int) (45 * scale + 0.5f);
+        int height = (int) (45 * scale + 0.5f);
         int width = (int) (50 * scale + 0.5f);
-        int height = (int) (50 * scale + 0.5f);
+
 
         LinearLayout column = new LinearLayout(getActivity());
         LinearLayout.LayoutParams columnParams = new LinearLayout.LayoutParams(
@@ -399,11 +401,12 @@ public class MainFragment extends Fragment {
                 ViewGroup.LayoutParams.MATCH_PARENT
         );
         LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(
-                width,
+                widthIv,
                 height
         );
+        ivParams.gravity=Gravity.CENTER_HORIZONTAL;
         LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                width,
                 ViewGroup.LayoutParams.MATCH_PARENT
         );
 
@@ -425,7 +428,7 @@ public class MainFragment extends Fragment {
 
         ImageView iv = new ImageView(getActivity());
         iv.setBackgroundResource(getResourceIdByName(title));
-        iv.setScaleType(ImageView.ScaleType.FIT_START);
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
         iv.setAdjustViewBounds(true);
         iv.setLayoutParams(ivParams);
 

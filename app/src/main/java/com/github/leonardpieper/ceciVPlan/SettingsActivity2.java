@@ -341,7 +341,7 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("pref_vplan_etpref_user"));
             bindPreferenceSummaryToValue(findPreference("pref_vplan_etpref_pwd"));
-            bindPreferenceSummaryToValue(findPreference("pref_vplan_lpref_year"));
+            bindPreferenceSummaryToValue(findPreference("jahrgang"));
         }
 
         @Override

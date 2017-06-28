@@ -70,7 +70,7 @@ public class VPlanFragment extends Fragment {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) view.findViewById(R.id.vplan_container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("pref_vplan_lpref_year", "EF");
+        String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("jahrgang", "EF");
         mViewPager.setCurrentItem(convertStufeToPos(stufe), false);
 
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabs);
