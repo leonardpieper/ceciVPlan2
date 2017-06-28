@@ -1,21 +1,18 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Preference
+    <EditTextPreference
         android:key="pref_account_etpref_phone"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:inputType="phone"
-        android:title="Telephonnummer"
-        android:editable="false"
-        android:summary="+4915170372853"/>
+        android:title="Telephonnummer"/>
 
     <EditTextPreference
         android:key="pref_account_etpref_email"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:inputType="textEmailAddress"
-        android:title="E-Mail-Adresse"
-        android:summary="leonard@pieper.cool"/>
+        android:title="E-Mail-Adresse" />
     <EditTextPreference
         android:key="pref_account_etpref_pwd"
         android:selectAllOnFocus="true"

@@ -188,6 +188,9 @@ public class VPlanPageFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, "Cancelled");
+                if(isInForeground){
+                    tableStufe.removeAllViews();
+                }
             }
         });
     }

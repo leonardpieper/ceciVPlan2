@@ -22,6 +22,11 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.view.MenuItem;
 
+import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.List;
 
 /**
@@ -36,6 +41,7 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity2 extends AppCompatPreferenceActivity {
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -83,9 +89,32 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 if(preference instanceof EditTextPreference && ((EditTextPreference) preference).getEditText().getInputType() == (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)){
+                    //Damit Passwörter in der Summary nicht im Klartext angezeigt werden
                     preference.setSummary(((EditTextPreference) preference).getEditText().getTransformationMethod().getTransformation(stringValue, ((EditTextPreference) preference).getEditText()).toString());
                 }else{
                     preference.setSummary(stringValue);
+                }
+
+                if(preference instanceof EditTextPreference && preference.getKey().equals("pref_vplan_etpref_user")){
+                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                    if(mAuth.getCurrentUser()!=null) {
+                        DatabaseReference vplanRef = MyDatabaseUtil.getDatabase().getReference()
+                                .child("Users")
+                                .child(mAuth.getCurrentUser().getUid())
+                                .child("vPlan")
+                                .child("uname");
+                        vplanRef.setValue(stringValue);
+                    }
+                }else if(preference instanceof EditTextPreference && preference.getKey().equals("pref_vplan_etpref_pwd")){
+                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                    if(mAuth.getCurrentUser()!=null) {
+                        DatabaseReference vplanRef = MyDatabaseUtil.getDatabase().getReference()
+                                .child("Users")
+                                .child(mAuth.getCurrentUser().getUid())
+                                .child("vPlan")
+                                .child("pwd");
+                        vplanRef.setValue(stringValue);
+                    }
                 }
 
             }
@@ -127,6 +156,7 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+
         getFragmentManager().beginTransaction().replace(android.R.id.content,
                 new MainPreferenceFragment()).commit();
     }
@@ -180,15 +210,15 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_main);
             setHasOptionsMenu(true);
 
-            Preference generalButton = findPreference("pref_main_pref_general");
-            generalButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    getFragmentManager().beginTransaction().replace(android.R.id.content,
-                            new GeneralPreferenceFragment()).commit();
-                    return true;
-                }
-            });
+//            Preference generalButton = findPreference("pref_main_pref_general");
+//            generalButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//                @Override
+//                public boolean onPreferenceClick(Preference preference) {
+//                    getFragmentManager().beginTransaction().replace(android.R.id.content,
+//                            new GeneralPreferenceFragment()).commit();
+//                    return true;
+//                }
+//            });
             Preference accountButton = findPreference("pref_main_pref_account");
             accountButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -207,15 +237,15 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
-            Preference kurseButton = findPreference("pref_main_pref_general");
-            kurseButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    getFragmentManager().beginTransaction().replace(android.R.id.content,
-                            new GeneralPreferenceFragment()).commit();
-                    return true;
-                }
-            });
+//            Preference kurseButton = findPreference("pref_main_pref_general");
+//            kurseButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//                @Override
+//                public boolean onPreferenceClick(Preference preference) {
+//                    getFragmentManager().beginTransaction().replace(android.R.id.content,
+//                            new GeneralPreferenceFragment()).commit();
+//                    return true;
+//                }
+//            });
         }
 
         @Override
@@ -272,11 +302,14 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_account);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-//            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+            if(mAuth.getCurrentUser()!=null) {
+                EditTextPreference etEmail = (EditTextPreference) findPreference("pref_account_etpref_email");
+                EditTextPreference etPhone = (EditTextPreference) findPreference("pref_account_etpref_phone");
+                etEmail.setSummary(mAuth.getCurrentUser().getEmail());
+                etPhone.setSummary(mAuth.getCurrentUser().getPhoneNumber());
+            }
         }
 
         @Override

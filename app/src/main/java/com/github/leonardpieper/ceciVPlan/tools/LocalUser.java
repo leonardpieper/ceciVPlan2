@@ -30,7 +30,7 @@ public class LocalUser {
         this.jahrgangText = jahrgangText;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("jahrgang", jahrgangText);
+        editor.putString("pref_vplan_lpref_year", jahrgangText);
         editor.commit();
     }
 
