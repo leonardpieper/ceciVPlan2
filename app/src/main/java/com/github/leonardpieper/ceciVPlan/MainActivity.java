@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -68,6 +69,12 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         mRootRef = MyDatabaseUtil.getDatabase().getReference();
+        mAuth = FirebaseAuth.getInstance();
+
+
+        if(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("pref_vplan_etpref_user", "unknowm").equals("unknowm")) {
+            migrateVPlanToSharedPref();
+        }
 
         MainFragment mainFragment = new MainFragment();
         this.getFragmentManager().beginTransaction()
@@ -107,6 +114,8 @@ public class MainActivity extends AppCompatActivity
         llNeu.setGravity(Gravity.CENTER);
 
         llNeu.addView(textViewNeu);
+
+//        checkFirstRun();
 
 
 //        final TextView vPlanToday = (TextView)findViewById(R.id.vPlanToday);
@@ -211,6 +220,29 @@ public class MainActivity extends AppCompatActivity
 
 
 
+    }
+
+    private void migrateVPlanToSharedPref() {
+        if (mAuth.getCurrentUser() != null) {
+            DatabaseReference vplanRef = mRootRef.child("Users")
+                    .child(mAuth.getCurrentUser().getUid())
+                    .child("vPlan");
+            vplanRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("pref_vplan_etpref_user", dataSnapshot.child("uname").getValue(String.class));
+                    editor.putString("pref_vplan_etpref_pwd", dataSnapshot.child("pwd").getValue(String.class));
+                    editor.commit();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     @Override
@@ -668,9 +700,20 @@ public class MainActivity extends AppCompatActivity
 
             return;
         } else if (savedVersionCode == DOESNT_EXIST) {
-            Intent signIntent = new Intent(this, SignUpActivity.class);
-            signIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(signIntent);
+//            AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+//            try {
+//                builder1.setMessage("Es kann sein, dass deine Vertretungsplan Daten und dein Jahrgang gelöscht wurden\nUm diese zu aktualisieren gehe zu Einstellungen --> Vertretungsplan")
+//                        .setTitle("Update " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName)
+//                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//
+//                            }
+//                        });
+//                builder1.show();
+//            } catch (PackageManager.NameNotFoundException e) {
+//                e.printStackTrace();
+//            }
 
         }else if(savedVersionCode==23){
             final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -691,7 +734,7 @@ public class MainActivity extends AppCompatActivity
             // TODO This is an upgrade
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
                     try {
-                        builder1.setMessage("Neuerungen:\n\n- Im Gegensatz zur Ceci-Hompage werden 99,26% weniger mobiler Daten beansprucht\n\n- Android O wird unterstützt")
+                        builder1.setMessage("Es kann sein, dass deine Vertretungsplan Daten und dein Jahrgang gelöscht wurden\nUm diese zu aktualisieren gehe zu Einstellungen --> Vertretungsplan")
                                 .setTitle("Update " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName)
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override

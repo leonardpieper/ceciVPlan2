@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -404,7 +405,7 @@ public class MainFragment extends Fragment {
                 widthIv,
                 height
         );
-        ivParams.gravity=Gravity.CENTER_HORIZONTAL;
+        ivParams.gravity = Gravity.CENTER_HORIZONTAL;
         LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
                 width,
                 ViewGroup.LayoutParams.MATCH_PARENT
