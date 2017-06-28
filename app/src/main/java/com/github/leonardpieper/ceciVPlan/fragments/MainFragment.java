@@ -142,7 +142,7 @@ public class MainFragment extends Fragment {
             if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
                 DatabaseReference conditionRef = mRootRef.child("vPlan");
 
-                String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("jahrgang", "EF");
+                String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("pref_vplan_lpref_year", "EF");
                 DatabaseReference stufenRef = conditionRef.child(stufe);
 
                 Log.d("FirebaseAuth", "onAuthStateChanged:signed_in:" + user.getUid());

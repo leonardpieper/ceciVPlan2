@@ -564,7 +564,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(kIntent);
                 break;
             case R.id.nav_settings:
-                Intent sIntent = new Intent(this, SettingsActivity.class);
+                Intent sIntent = new Intent(this, SettingsActivity2.class);
                 startActivity(sIntent);
                 break;
             case R.id.nav_devSettings:

@@ -12,7 +12,7 @@
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
-    <string name="pref_header_general">General</string>
+    <string name="pref_header_general">Allgemein</string>
 
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact
@@ -35,7 +35,7 @@
     </string-array>
 
     <!-- Example settings for Data & Sync -->
-    <string name="pref_header_data_sync">Data &amp; sync</string>
+    <string name="pref_header_data_sync">Profil</string>
 
     <string name="pref_title_sync_frequency">Sync frequency</string>
     <string-array name="pref_sync_frequency_titles">
@@ -58,7 +58,7 @@
     <string name="pref_title_system_sync_settings">System sync settings</string>
 
     <!-- Example settings for Notifications -->
-    <string name="pref_header_notifications">Notifications</string>
+    <string name="pref_header_notifications">Vertretungsplan</string>
 
     <string name="pref_title_new_message_notifications">New message notifications</string>
 
@@ -77,4 +77,19 @@
     <string name="datenschutzhinweis">Mit Klick auf Anmelden besätigst du, dass du die <a href='http://leonardpieper.github.io/ceciplan/content/datenschutz.html'>Datenschutzhinweise</a> gelesen und akzeptiert hast</string>
     <string name="datenschutz_in_about">Die aktuellen Datenschutzbestimmungen finden Sie unter <a href='http://leonardpieper.github.io/ceciplan/content/datenschutz.html'>http://leonardpieper.github.io/ceciplan/content/datenschutz.html</a></string>
     <string name="title_activity_tabbed">TabbedActivity</string>
+    <string name="title_activity_settings2">Settings</string>
+
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value" />
 </resources>

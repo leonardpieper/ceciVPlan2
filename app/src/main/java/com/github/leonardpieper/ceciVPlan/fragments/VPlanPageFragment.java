@@ -51,6 +51,7 @@ public class VPlanPageFragment extends Fragment {
      * fragment.
      */
     private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final String ARG_SECTION_NAME = "section_name";
 
     public VPlanPageFragment() {
     }
@@ -63,6 +64,7 @@ public class VPlanPageFragment extends Fragment {
         VPlanPageFragment fragment = new VPlanPageFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+        args.putString(ARG_SECTION_NAME, convertNumberToName(sectionNumber));
         fragment.setArguments(args);
         return fragment;
     }
@@ -104,13 +106,6 @@ public class VPlanPageFragment extends Fragment {
             view.setBackgroundResource(R.drawable.vplan_tutorial_background);
         }
 
-        if (mAuth.getCurrentUser() != null) {
-            if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
-                String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("jahrgang", "EF");
-                getFBData(stufe);
-            }
-        }
-
 
         return view;
     }
@@ -119,6 +114,12 @@ public class VPlanPageFragment extends Fragment {
     public void onStart() {
         super.onStart();
         isInForeground=true;
+
+        if (mAuth.getCurrentUser() != null) {
+            if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
+                getFBData(getArguments().getString(ARG_SECTION_NAME));
+            }
+        }
     }
 
     @Override
@@ -313,5 +314,17 @@ public class VPlanPageFragment extends Fragment {
 
     private boolean checkTutorialStatus(){
         return PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("kursTutorialNeedful", true);
+    }
+
+    private static String convertNumberToName(int sectionNumer){
+        switch (sectionNumer) {
+            case 0:
+                return "EF";
+            case 1:
+                return "Q1";
+            case 2:
+                return "Q2";
+        }
+        return null;
     }
 }

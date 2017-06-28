@@ -1,10 +1,6 @@
 package com.github.leonardpieper.ceciVPlan.fragments;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -13,31 +9,18 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
-import android.text.Html;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 
 import com.github.leonardpieper.ceciVPlan.CrawlerFinishListener;
 import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.VPlanCrawler;
-import com.github.leonardpieper.ceciVPlan.tools.EasterEgg;
-import com.github.leonardpieper.ceciVPlan.tools.Kurse;
 import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.json.JSONArray;
@@ -85,8 +68,10 @@ public class VPlanFragment extends Fragment {
         mSectionsPagerAdapter = new VPlanFragment.SectionsPagerAdapter(((AppCompatActivity) getActivity()).getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) view.findViewById(R.id.container);
+        mViewPager = (ViewPager) view.findViewById(R.id.vplan_container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        String stufe = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("pref_vplan_lpref_year", "EF");
+        mViewPager.setCurrentItem(convertStufeToPos(stufe), false);
 
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -113,6 +98,18 @@ public class VPlanFragment extends Fragment {
     public void onStop() {
         super.onStop();
         isInForeground=false;
+    }
+
+    private int convertStufeToPos(String stufe){
+            switch (stufe) {
+                case "EF":
+                    return 0;
+                case "Q1":
+                    return 1;
+                case "Q2":
+                    return 2;
+            }
+            return -1;
     }
 
 //    private void isConnectedToFirebaseDatabase() {
@@ -466,7 +463,7 @@ public class VPlanFragment extends Fragment {
         public android.support.v4.app.Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return VPlanPageFragment.newInstance(position + 1);
+            return VPlanPageFragment.newInstance(position);
         }
 
         @Override

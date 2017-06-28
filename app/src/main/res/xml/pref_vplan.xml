@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Vertretungsplan">
+        <EditTextPreference
+            android:key="pref_vplan_etpref_user"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Vertretungsplan Benutzername" />
+        <EditTextPreference
+            android:key="pref_vplan_etpref_pwd"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Vertretungsplan Passwort"
+            android:summary="*******"
+            android:inputType="textPassword"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Jahrgang">
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/stufen"
+            android:entryValues="@array/stufen"
+            android:key="pref_vplan_lpref_year"
+            android:title="Jahrgang" />
+    </PreferenceCategory>
+</PreferenceScreen>
