@@ -39,6 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class KurseFragment extends Fragment {
     private final String TAG = "KurseFragment";
@@ -117,40 +118,38 @@ public class KurseFragment extends Fragment {
      * -->Wenn Nein: Die Kurse werden aus dem Cache abgerufen
      */
     private void getKurse() {
-        final KursCache kursCache = new KursCache(getActivity());
-
-        long cachedTime = kursCache.getCacheTime();
-        long currMill = System.currentTimeMillis();
-
-        if (cachedTime == -1 || cachedTime + 604800000 < currMill) {
-            if (mAuth.getCurrentUser() != null) {
-                reloadKurse();
-            }
-        } else {
-            JSONObject root = kursCache.getCache();
-            JSONArray kurse = null;
-
-            try {
-                kurse = root.getJSONArray("kurse");
-
-                if (kurse == null || kurse.length() == 0) {
-                    RelativeLayout rlNoKurse = (RelativeLayout) view.findViewById(R.id.kurse_rl_noKurse);
-                    rlNoKurse.setVisibility(View.VISIBLE);
+        final Kurse kurse = new Kurse(getActivity());
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Kurs> kursListe = new ArrayList<>();
+                for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
+                    kursListe.add(childSnapshot.getValue(Kurs.class));
                 }
-
-                for (int i = 0; i < kurse.length(); i++) {
-                    String title = (!kurse.getJSONObject(i).isNull("name")) ? kurse.getJSONObject(i).getString("name") : null;
-                    String type = (!kurse.getJSONObject(i).isNull("type")) ? kurse.getJSONObject(i).getString("type") : null;
-
-                    CardView cv = createKursCard(title, type);
-                    llKurse.addView(cv);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
+                java.util.Collections.reverse(kursListe);
+                displayKurse(kursListe);
             }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
+            }
+        };
+
+        List<Kurs> kurses = kurse.getKurse(valueEventListener);
+        if(kurses!=null){
+            displayKurse(kurses);
+        }
+
+    }
+
+    private void displayKurse(List<Kurs> kursListe){
+        for(Kurs kurs: kursListe){
+            String title = kurs.name;
+            String type = kurs.type;
+
+            CardView cv = createKursCard(title, type);
+            llKurse.addView(cv);
         }
     }
 
@@ -158,6 +157,23 @@ public class KurseFragment extends Fragment {
      * Lädt die Kurse aus der Firebase Database in den Cache
      */
     private void reloadKurse() {
+//        Kurse kurse = new Kurse(getActivity());
+//        List<Kurs> kurses;
+//        ValueEventListener valueEventListener = new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        };
+//
+//        kurses = kurse.getKurse(valueEventListener);
+
+
         final KursCache kursCache = new KursCache(getActivity());
         DatabaseReference kurseRef = mRootRef
                 .child("Users")

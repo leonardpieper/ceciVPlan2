@@ -75,6 +75,11 @@ public class KursCache extends Application{
         }
     }
 
+    public void editCache(String name, String type){
+        removeFromCache(name);
+        addCache(name, type);
+    }
+
     public void removeFromCache(String kursName){
         FileInputStream inputStream;
         FileOutputStream outputStream;

@@ -29,7 +29,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/dialog_kurse_add_chkbx_offline"
             android:checked="true"
-            android:enabled="false"
             android:textSize="18sp"
             android:textColor="@android:color/tertiary_text_light"
             android:text="Offline Kurs"/>
