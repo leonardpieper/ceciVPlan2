@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -20,7 +21,7 @@
         android:id="@+id/dialog_add_pwd"
         android:hint="Passwort" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <CheckBox
@@ -32,11 +33,13 @@
             android:textSize="18sp"
             android:textColor="@android:color/tertiary_text_light"
             android:text="Offline Kurs"/>
-        <TextView
-            android:layout_width="match_parent"
+        <ImageView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableEnd="@drawable/ic_info_outline_black_24dp"
-            android:gravity="center"
-            android:drawableRight="@drawable/ic_info_outline_black_24dp" />
-    </LinearLayout>
+            android:layout_gravity="right"
+            android:foregroundGravity="right"
+            android:layout_alignParentRight="true"
+            app:srcCompat="@drawable/ic_info_outline_black_24dp"
+            android:gravity="center" />
+    </RelativeLayout>
 </LinearLayout>

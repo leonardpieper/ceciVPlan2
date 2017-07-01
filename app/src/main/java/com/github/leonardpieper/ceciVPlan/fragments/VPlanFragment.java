@@ -44,9 +44,6 @@ public class VPlanFragment extends Fragment {
     private View view;
 
     private FirebaseAuth mAuth;
-
-    private DatabaseReference mRootRef;
-
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     private TableLayout tableStufe;
@@ -63,6 +60,10 @@ public class VPlanFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.app_bar_vplan, container, false);
         getActivity().setTitle("Vertretungsplan");
+
+        mAuth = FirebaseAuth.getInstance();
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -177,9 +178,9 @@ public class VPlanFragment extends Fragment {
                 }
             }
         });
-//        if (mFirebaseRemoteConfig.getBoolean("load_vplan_enabled")) {
-//            vPlanCrawler.execute("");
-//        }
+        if (mFirebaseRemoteConfig.getBoolean("load_vplan_enabled")) {
+            vPlanCrawler.execute("");
+        }
     }
 
 //    private void getFBData(String stufe) {

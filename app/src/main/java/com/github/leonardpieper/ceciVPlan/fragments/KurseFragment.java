@@ -188,6 +188,7 @@ public class KurseFragment extends Fragment {
                     for (DataSnapshot childSnapshot : kurseList) {
                         Kurs kurs = childSnapshot.getValue(Kurs.class);
 
+
                         String displayName = kurs.name.replace("%2E", ".");
                         CardView cardView = createKursCard(displayName, kurs.type);
                         llKurse.addView(cardView);

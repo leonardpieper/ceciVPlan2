@@ -203,15 +203,13 @@ public class VPlanPageFragment extends Fragment {
     private TableRow addTableRow(String stufe, final String fach, String stunde, String lehrer, String raum, String text) {
         TableRow row = new TableRow(getActivity());
         row.setClickable(true);
-        if(false) {
-            row.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    showContextMenu(fach);
-                    return true;
-                }
-            });
-        }
+        row.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showContextMenu(fach);
+                return true;
+            }
+        });
 
         TypedValue outValue = new TypedValue();
         getActivity().getTheme().resolveAttribute(R.attr.selectableItemBackground, outValue, true);

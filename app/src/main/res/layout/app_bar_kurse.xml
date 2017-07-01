@@ -31,7 +31,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:visibility="gone"
-        android:src="@drawable/ic_add_white_24dp" />
+        app:srcCompat="@drawable/ic_add_white_24dp" />
 
     <com.github.clans.fab.FloatingActionMenu
         xmlns:fab="http://schemas.android.com/apk/res-auto"
@@ -44,7 +44,7 @@
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_school_white_24px"
+            app:srcCompat="@drawable/ic_school_white_24px"
             android:id="@+id/kurse_join_fab"
             fab:fab_label="Kurs beitreten"
             fab:fab_colorNormal="@color/colorAccent"
@@ -53,7 +53,7 @@
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_kurs_add_white_24px"
+            app:srcCompat="@drawable/ic_kurs_add_white_24px"
             android:id="@+id/kurse_create_fab"
             android:visibility="gone"
             fab:fab_label="Kurs erstellen"
@@ -63,7 +63,7 @@
         <com.github.clans.fab.FloatingActionButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_kurs_edit_white_24px"
+            app:srcCompat="@drawable/ic_kurs_edit_white_24px"
             android:id="@+id/kurse_edit_fab"
             fab:fab_label="Kurs bearbeiten"
             fab:fab_colorNormal="@color/colorAccent"
