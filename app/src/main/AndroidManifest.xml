@@ -54,11 +54,6 @@
         </activity>
         <activity android:name=".SettingsActivity" />
         <activity android:name=".SignUpActivity" />
-
-        <receiver android:name=".AlarmReceiver" />
-
-        <service android:name=".NotifyService" />
-
         <activity
             android:name=".KlausurenActivity"
             android:label="@string/title_activity_klausuren"
@@ -96,7 +91,7 @@
 
         <activity
             android:name=".SettingsActivity2"
-            android:label="@string/title_activity_settings2"></activity>
+            android:label="@string/title_activity_settings2" />
     </application>
 
 </manifest>

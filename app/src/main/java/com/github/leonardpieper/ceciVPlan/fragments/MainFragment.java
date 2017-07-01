@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -368,24 +369,6 @@ public class MainFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-//            try {
-//                kurse = root.getJSONArray("kurse");
-//                if(kurse==null || kurse.length()==0) {
-//                    TextView tvNoKurse = (TextView)view.findViewById(R.id.noKurse);
-//                    tvNoKurse.setVisibility(View.VISIBLE);
-//                }
-//                for(int i = 0; i<kurse.length(); i++){
-//                    String title = kurse.getString(i);
-//
-//                    LinearLayout column = makeKursIcon(title);
-//                    ll.addView(column);
-//                    ll.setPadding(0, 0, 0, 0);
-//                }
-//
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
         }
     }
 
@@ -437,6 +420,7 @@ public class MainFragment extends Fragment {
         tv.setText(title);
         tv.setGravity(Gravity.CENTER);
         tv.setLayoutParams(tvParams);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
 
         if (kursType != null && kursType.equals("online")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

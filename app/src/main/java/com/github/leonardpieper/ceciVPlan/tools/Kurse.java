@@ -77,32 +77,42 @@ public class Kurse {
         }
     }
 
-    public void editKurs(String name, String secret, String type){
-        if(mAuth.getCurrentUser()!=null){
-            HashMap<String, Object> user = new HashMap<String, Object>();
+//    /**
+//     *
+//     * @param name
+//     * @param secret
+//     * @param type
+//     */
+//    public void editKurs(String name, String secret, String type){
+//        if(mAuth.getCurrentUser()!=null){
+//            HashMap<String, Object> user = new HashMap<String, Object>();
+//
+//            if (type.equals("offline")) {
+//                user.put("name", name);
+//                user.put("type", type);
+//            } else {
+//                user.put("name", name);
+//                user.put("secret", secret);
+//                user.put("type", type);
+//            }
+//
+//            String refName = name.replace(".", "%2E");
+//            refName = refName.toLowerCase();
+//            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
+//
+//
+//            String fcmTopic = refName.replace(" ", "%20");
+//            FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
+//
+//            KursCache kursCache = new KursCache(context);
+//            kursCache.editCache(name, type);
+//        }
+//    }
 
-            if (type.equals("offline")) {
-                user.put("name", name);
-                user.put("type", type);
-            } else {
-                user.put("name", name);
-                user.put("secret", secret);
-                user.put("type", type);
-            }
-
-            String refName = name.replace(".", "%2E");
-            refName = refName.toLowerCase();
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
-
-
-            String fcmTopic = refName.replace(" ", "%20");
-            FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
-
-            KursCache kursCache = new KursCache(context);
-            kursCache.editCache(name, type);
-        }
-    }
-
+    /**
+     * Lässt den Nutzer einen Kurs verlassen
+     * @param name Name des zu verlassenden Kurses
+     */
     public void leaveKurs(String name){
         String refName = name.replace(".", "%2E");
         refName = refName.toLowerCase();
@@ -112,6 +122,13 @@ public class Kurse {
         cache.removeFromCache(name);
     }
 
+    /**
+     * Gibt alle aktuellen Kurse zurück.
+     * Entweder von der Firebase Database oder aus dem Cache
+     * @param valueEventListener Der Listener, der gecalled wird, wenn die die Kurse
+     *                           aus der Firebase Database kommen
+     * @return Gibt eine Liste an Kursen zurück
+     */
     public List<Kurs> getKurse(ValueEventListener valueEventListener) {
         final KursCache kursCache = new KursCache(context);
 
@@ -122,7 +139,7 @@ public class Kurse {
 
         if (cachedTime == -1 || cachedTime + 604800000 < currMill) {
             if (mAuth.getCurrentUser() != null) {
-                reloadKurse(valueEventListener);
+                getKurseOnline(valueEventListener);
             }
         } else {
             JSONObject root = kursCache.getCache();
@@ -154,9 +171,12 @@ public class Kurse {
     }
 
     /**
-     * Lädt die Kurse aus der Firebase Database in den Cache
+     * Lädt die die Kurse aus der Firebase Database
+     * @param valueEventListener Der Listener, der gecalled wird, wenn die die Kurse
+     *                           aus der Firebase Database kommen
+     * @return Gibt die Requestquery zurück
      */
-    private Query reloadKurse(ValueEventListener valueEventListener) {
+    private Query getKurseOnline(ValueEventListener valueEventListener) {
         DatabaseReference kurseRef = mRootRef
                 .child("Users")
                 .child(mAuth.getCurrentUser().getUid())

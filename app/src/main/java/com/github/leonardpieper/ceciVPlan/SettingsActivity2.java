@@ -475,7 +475,8 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
                     kurse.leaveKurs(name);
                 }
             });
-            builder.show();
+            AlertDialog dialog = builder.show();
+            dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(getResources().getColor(android.R.color.holo_red_dark));
         }
 
         @Override

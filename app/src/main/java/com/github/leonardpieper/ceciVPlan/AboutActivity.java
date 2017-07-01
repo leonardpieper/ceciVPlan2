@@ -69,6 +69,9 @@ public class AboutActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             tvLicenses.setText(Html.fromHtml(licenses, Html.FROM_HTML_MODE_COMPACT));
             tvLicenses.setMovementMethod(LinkMovementMethod.getInstance());
+        }else{
+            tvLicenses.setText(Html.fromHtml(licenses));
+            tvLicenses.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
     }
