@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'com.google.firebase.firebase-perf'
+apply plugin: 'com.google.firebase.firebase-perf'
 
 android {
     compileSdkVersion 25
@@ -9,8 +9,8 @@ android {
         applicationId "com.github.leonardpieper.ceciVPlan"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 40
-        versionName "17w26d"
+        versionCode 41
+        versionName "RC1"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
