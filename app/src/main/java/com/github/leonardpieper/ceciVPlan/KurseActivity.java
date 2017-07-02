@@ -48,37 +48,37 @@ public class KurseActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
 
 
-        com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
-        kursCreateFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createDialog(1);
-            }
-        });
-
-        com.github.clans.fab.FloatingActionButton kursJoinFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_join_fab);
-        kursJoinFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createDialog(2);
-            }
-        });
-
-        com.github.clans.fab.FloatingActionButton kursLeaveFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_edit_fab);
-        kursLeaveFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LinearLayout kursell = (LinearLayout)findViewById(R.id.kurse_ll);
-                for(int i = 0; i<kursell.getChildCount(); i++){
-//                    View childView = kursell.getChildAt(i);
-                    ViewGroup cvChildViews = (ViewGroup) kursell.getChildAt(i);
-                    ViewGroup llChildViews = (ViewGroup) cvChildViews.getChildAt(0);
-                    ViewGroup rlChildViews = (ViewGroup) llChildViews.getChildAt(2) ;
-                    View leaveBtn = rlChildViews.getChildAt(0);
-                    leaveBtn.setVisibility(View.VISIBLE);
-                }
-            }
-        });
+//        com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
+//        kursCreateFab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                createDialog(1);
+//            }
+//        });
+//
+//        com.github.clans.fab.FloatingActionButton kursJoinFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_join_fab);
+//        kursJoinFab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                createDialog(2);
+//            }
+//        });
+//
+//        com.github.clans.fab.FloatingActionButton kursLeaveFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_edit_fab);
+//        kursLeaveFab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                LinearLayout kursell = (LinearLayout)findViewById(R.id.kurse_ll);
+//                for(int i = 0; i<kursell.getChildCount(); i++){
+////                    View childView = kursell.getChildAt(i);
+//                    ViewGroup cvChildViews = (ViewGroup) kursell.getChildAt(i);
+//                    ViewGroup llChildViews = (ViewGroup) cvChildViews.getChildAt(0);
+//                    ViewGroup rlChildViews = (ViewGroup) llChildViews.getChildAt(2) ;
+//                    View leaveBtn = rlChildViews.getChildAt(0);
+//                    leaveBtn.setVisibility(View.VISIBLE);
+//                }
+//            }
+//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -88,18 +88,18 @@ public class KurseActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        getPermissionStatus();
+//        getPermissionStatus();
 //        getKurse();
     }
 
-    private void getPermissionStatus(){
-        LocalUser user = new LocalUser(this);
-        if(user.getTeacherStatus()==true) {
-            com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
-            kursCreateFab.setVisibility(View.VISIBLE);
-        }
-
-    }
+//    private void getPermissionStatus(){
+//        LocalUser user = new LocalUser(this);
+//        if(user.getTeacherStatus()==true) {
+//            com.github.clans.fab.FloatingActionButton kursCreateFab = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.kurse_create_fab);
+//            kursCreateFab.setVisibility(View.VISIBLE);
+//        }
+//
+//    }
 
 //    private void getKurse(){
 //        final LinearLayout llroot = (LinearLayout)findViewById(R.id.kurse_ll);

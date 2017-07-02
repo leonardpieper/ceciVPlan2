@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
@@ -25,6 +26,7 @@ import com.github.leonardpieper.ceciVPlan.KursActivity;
 import com.github.leonardpieper.ceciVPlan.R;
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
+import com.github.leonardpieper.ceciVPlan.tools.KursIcon;
 import com.github.leonardpieper.ceciVPlan.tools.Kurse;
 import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.firebase.auth.FirebaseAuth;
@@ -65,28 +67,15 @@ public class KurseFragment extends Fragment {
 
         llKurse = (LinearLayout) view.findViewById(R.id.kurse_ll);
 
-        com.github.clans.fab.FloatingActionButton kursJoinFab = (com.github.clans.fab.FloatingActionButton) view.findViewById(R.id.kurse_join_fab);
-        kursJoinFab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.kurse_fab_add);
+        fab.setClickable(true);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 createDialog(2);
             }
         });
 
-        com.github.clans.fab.FloatingActionButton kursLeaveFab = (com.github.clans.fab.FloatingActionButton) view.findViewById(R.id.kurse_edit_fab);
-        kursLeaveFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LinearLayout kursell = (LinearLayout) view.findViewById(R.id.kurse_ll);
-                for (int i = 0; i < kursell.getChildCount(); i++) {
-                    ViewGroup cvChildViews = (ViewGroup) kursell.getChildAt(i);
-                    ViewGroup llChildViews = (ViewGroup) cvChildViews.getChildAt(0);
-                    ViewGroup rlChildViews = (ViewGroup) llChildViews.getChildAt(2);
-                    View leaveBtn = rlChildViews.getChildAt(0);
-                    leaveBtn.setVisibility(View.VISIBLE);
-                }
-            }
-        });
 
         swrReload = (SwipeRefreshLayout) view.findViewById(R.id.kurse_srl_reloadKurse);
         swrReload.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -123,7 +112,7 @@ public class KurseFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<Kurs> kursListe = new ArrayList<>();
-                for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                     kursListe.add(childSnapshot.getValue(Kurs.class));
                 }
                 java.util.Collections.reverse(kursListe);
@@ -137,14 +126,17 @@ public class KurseFragment extends Fragment {
         };
 
         List<Kurs> kurses = kurse.getKurse(valueEventListener);
-        if(kurses!=null){
+        if (kurses != null) {
             displayKurse(kurses);
+        } else {
+            RelativeLayout rlNoKurse = (RelativeLayout) view.findViewById(R.id.kurse_rl_noKurse);
+            rlNoKurse.setVisibility(View.VISIBLE);
         }
 
     }
 
-    private void displayKurse(List<Kurs> kursListe){
-        for(Kurs kurs: kursListe){
+    private void displayKurse(List<Kurs> kursListe) {
+        for (Kurs kurs : kursListe) {
             String title = kurs.name;
             String type = kurs.type;
 
@@ -332,7 +324,7 @@ public class KurseFragment extends Fragment {
         });
 
         ImageView iv = new ImageView(getActivity());
-        iv.setBackgroundResource(getResourceIdByName(title));
+        iv.setBackgroundResource(KursIcon.getResourceIdByName(title));
         iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
         iv.setAdjustViewBounds(true);
 //        iv.setPadding(0,12,0,0);
@@ -368,57 +360,7 @@ public class KurseFragment extends Fragment {
         }
     }
 
-    /**
-     * Gibt das zum Kurs gehörige Icon aus
-     *
-     * @param name Der Kursname zu dem das Icon gehören soll
-     * @return Gibt eine RessourceID zurück, unter des das Icon gefunden werden kann
-     */
-    private int getResourceIdByName(String name) {
-        String arr[] = name.split(" ", 2);
-        String fach = arr[0];
-        fach = fach.toLowerCase();
-        switch (fach) {
-            case "bi":
-                return R.drawable.ic_biologie_bug;
-            case "ch":
-                return R.drawable.ic_chemie_poppet;
-            case "d":
-                return R.drawable.ic_deutsch;
-            case "e":
-                return R.drawable.ic_englisch;
-            case "ek":
-                return R.drawable.ic_erdkunde_landscape;
-            case "el":
-                return R.drawable.ic_ernahrungslehre_dining;
-            case "ew":
-                return R.drawable.ic_erziehungswissenschaften_child;
-            case "f":
-                return R.drawable.ic_franzosisch;
-            case "ge":
-                return R.drawable.ic_geschichte_buste;
-            case "if":
-                return R.drawable.ic_informatik_computer;
-            case "ku":
-                return R.drawable.ic_kunst_art;
-            case "m":
-                return R.drawable.ic_mathe_calc;
-            case "mu":
-                return R.drawable.ic_musik_note;
-            case "pl":
-                return R.drawable.ic_philosophie_scroll;
-            case "ph":
-                return R.drawable.ic_physik_lightbulb;
-            case "sw":
-                return R.drawable.ic_sozialwissenschaften_group;
-            case "s":
-                return R.drawable.ic_spanisch;
-            case "sp":
-                return R.drawable.ic_sport_run;
-            default:
-                return R.drawable.ic_school_black_24dp;
-        }
-    }
+
 
     /**
      * Erstellt einen Dialog um einen neuen Kurs zu erstellen, oder einem beizutreten.
@@ -435,6 +377,16 @@ public class KurseFragment extends Fragment {
         final EditText kursName = (EditText) textEntryView.findViewById(R.id.dialog_add_abk);
         final EditText kursSecret = (EditText) textEntryView.findViewById(R.id.dialog_add_pwd);
         final CheckBox checkBox = (CheckBox) textEntryView.findViewById(R.id.dialog_kurse_add_chkbx_offline);
+        checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(checkBox.isChecked()){
+                    kursSecret.setVisibility(View.GONE);
+                }else {
+                    kursSecret.setVisibility(View.VISIBLE);
+                }
+            }
+        });
         builder.setView(textEntryView);
         switch (type) {
             case 1:
