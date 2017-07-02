@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:background="#F2607D8B"
-                android:text="Anmelden"
+                android:text="Anmelden / Registrieren"
                 android:textColor="@color/white"
                 android:textSize="28dp" />
 
@@ -117,6 +117,13 @@
 
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/signUp_tv_Erklarung"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Erste Anmeldung? Einfach eigenes Passwort vergeben und los gehts."
+                    android:visibility="gone" />
+
                 <EditText
                     android:id="@+id/signUp_et_smsCode"
                     android:layout_width="match_parent"
@@ -137,7 +144,7 @@
                     android:id="@+id/signUp_et_pwd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Passwort"
+                    android:hint="Eigenes Passwort"
                     android:inputType="textPassword"
                     android:visibility="gone" />
 

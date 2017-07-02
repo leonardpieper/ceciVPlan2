@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <Preference
-        android:icon="@drawable/ic_info_outline_black_24dp"
-        android:title="Allgemein"
-        android:key="pref_main_pref_general"/>
+    <!--<Preference-->
+        <!--android:icon="@drawable/ic_info_outline_black_24dp"-->
+        <!--android:title="Allgemein"-->
+        <!--android:key="pref_main_pref_general" />-->
     <Preference
         android:icon="@drawable/ic_account_circle_black_24dp"
         android:title="Profil"

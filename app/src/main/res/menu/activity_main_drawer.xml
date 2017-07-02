@@ -15,7 +15,7 @@
             android:id="@+id/nav_kurse"
             app:actionViewClass="android.widget.LinearLayout"
             android:icon="@drawable/ic_school_black_24dp"
-            android:title="Kurse"
+            android:title="Meine Kurse"
             android:visible="true"/>
         <item
             android:id="@+id/nav_klausuren"

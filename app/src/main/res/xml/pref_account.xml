@@ -1,35 +1,41 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Preference
+    <PreferenceCategory
+        android:title="Anmeldedaten"
+        android:key="pref_account_cat_data">
+
+        <Preference
+            android:inputType="phone"
+            android:key="pref_account_etpref_phone"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Telephonnummer" />
+
+        <Preference
+            android:inputType="textEmailAddress"
+            android:key="pref_account_etpref_email"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="E-Mail-Adresse" />
+        <Preference
+            android:inputType="textPassword"
+            android:key="pref_account_etpref_pwd"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Passwort" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="Anmelden">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:targetPackage="com.github.leonardpieper.ceciVPlan"
-            android:targetClass="com.github.leonardpieper.ceciVPlan.SignUpActivity" />
-    </Preference>
 
-    <EditTextPreference
-        android:key="pref_account_etpref_phone"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:inputType="phone"
-        android:title="Telephonnummer"/>
-
-    <EditTextPreference
-        android:key="pref_account_etpref_email"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:inputType="textEmailAddress"
-        android:title="E-Mail-Adresse" />
-    <EditTextPreference
-        android:key="pref_account_etpref_pwd"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:inputType="textPassword"
-        android:title="Passwort" />
-
-    <Preference
-        android:title="Abmelden"
-        android:key="pref_account_pref_signout">
-    </Preference>
+        <Preference android:title="Anmelden">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetClass="com.github.leonardpieper.ceciVPlan.SignUpActivity"
+                android:targetPackage="com.github.leonardpieper.ceciVPlan" />
+        </Preference>
+        <Preference
+            android:key="pref_account_pref_signout"
+            android:title="Abmelden"></Preference>
+    </PreferenceCategory>
 </PreferenceScreen>

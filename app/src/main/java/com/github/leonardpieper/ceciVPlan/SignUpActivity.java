@@ -68,6 +68,7 @@ public class SignUpActivity extends AppCompatActivity {
     private CountryCodePicker ccpCode;
 
     private TextView tvDatenschutz;
+    private TextView tvErklarung;
 
     private Button phoneSignUp;
     private Button emailSignUp;
@@ -108,6 +109,8 @@ public class SignUpActivity extends AppCompatActivity {
         tvDatenschutz = (TextView) findViewById(R.id.signUp_tv_dataProt);
         tvDatenschutz.setMovementMethod(LinkMovementMethod.getInstance());
 
+        tvErklarung = (TextView) findViewById(R.id.signUp_tv_Erklarung);
+
         phoneSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,6 +132,7 @@ public class SignUpActivity extends AppCompatActivity {
                 etPhone.setVisibility(View.GONE);
                 ccpCode.setVisibility(View.GONE);
                 signUpBtn.setVisibility(View.VISIBLE);
+                tvErklarung.setVisibility(View.VISIBLE);
                 tvDatenschutz.setVisibility(View.VISIBLE);
                 etEmail.setVisibility(View.VISIBLE);
                 etPwd.setVisibility(View.VISIBLE);
@@ -362,6 +366,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         signUpBtn.setVisibility(View.GONE);
         tvDatenschutz.setVisibility(View.GONE);
+        tvErklarung.setVisibility(View.GONE);
         etEmail.setVisibility(View.GONE);
         etPwd.setVisibility(View.GONE);
         etSMSCode.setVisibility(View.GONE);
@@ -429,6 +434,7 @@ public class SignUpActivity extends AppCompatActivity {
             ccpCode.setVisibility(View.GONE);
             signUpBtn.setVisibility(View.GONE);
             tvDatenschutz.setVisibility(View.GONE);
+            tvErklarung.setVisibility(View.GONE);
             etEmail.setVisibility(View.GONE);
             etPwd.setVisibility(View.GONE);
 

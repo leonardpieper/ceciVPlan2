@@ -43,7 +43,7 @@ public class KurseActivity extends AppCompatActivity
         setContentView(R.layout.activity_kurse);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        setTitle("Kurse");
+        setTitle("Meine Kurse");
 
         mAuth = FirebaseAuth.getInstance();
 

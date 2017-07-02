@@ -15,6 +15,7 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
@@ -320,12 +321,25 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
             final FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
             if (mAuth.getCurrentUser() != null) {
-                EditTextPreference etEmail = (EditTextPreference) findPreference("pref_account_etpref_email");
-                EditTextPreference etPhone = (EditTextPreference) findPreference("pref_account_etpref_phone");
+                Preference etEmail =  findPreference("pref_account_etpref_email");
+                Preference etPhone =  findPreference("pref_account_etpref_phone");
                 Preference pSignOut = findPreference("pref_account_pref_signout");
 
-                etEmail.setSummary(mAuth.getCurrentUser().getEmail());
-                etPhone.setSummary(mAuth.getCurrentUser().getPhoneNumber());
+                if(mAuth.getCurrentUser().getEmail()!=null&&!mAuth.getCurrentUser().getEmail().isEmpty()){
+                    etEmail.setSummary(mAuth.getCurrentUser().getEmail());
+                }else {
+                    PreferenceCategory category = (PreferenceCategory)findPreference("pref_account_cat_data");
+                    category.removePreference(etPhone);
+                }
+
+                if(mAuth.getCurrentUser().getPhoneNumber()!=null&&!mAuth.getCurrentUser().getPhoneNumber().isEmpty()){
+                    etPhone.setSummary(mAuth.getCurrentUser().getPhoneNumber());
+                }else {
+                    PreferenceCategory category = (PreferenceCategory)findPreference("pref_account_cat_data");
+                    category.removePreference(etPhone);
+                }
+
+
 
                 pSignOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
