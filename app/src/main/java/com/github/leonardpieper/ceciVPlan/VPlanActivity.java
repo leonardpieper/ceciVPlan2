@@ -23,21 +23,12 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-//import com.google.android.gms.appindexing.Action;
-//import com.google.android.gms.appindexing.AppIndex;
-
 public class VPlanActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "VPlanActivity";
 
     private TableLayout tableLayout;
-
-    private com.github.clans.fab.FloatingActionMenu fabyear;
-    private com.github.clans.fab.FloatingActionButton fabEF;
-    private com.github.clans.fab.FloatingActionButton fabQ1;
-    private com.github.clans.fab.FloatingActionButton fabQ2;
-    private com.github.clans.fab.FloatingActionButton fabMe;
 
     private LinearLayout tablePlaceholder;
     private TableLayout tableEF;
