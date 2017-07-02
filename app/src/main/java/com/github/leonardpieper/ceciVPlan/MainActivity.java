@@ -70,8 +70,12 @@ public class MainActivity extends AppCompatActivity
         MainFragment mainFragment = new MainFragment();
         this.getFragmentManager().beginTransaction()
                 .replace(R.id.fragmentContainer, mainFragment)
-                .addToBackStack(null)
                 .commit();
+
+        if(mAuth.getCurrentUser()==null){
+            Intent signIntent = new Intent(this, SignUpActivity.class);
+            startActivity(signIntent);
+        }
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -155,7 +159,6 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-
                         } else {
                             Toast.makeText(MainActivity.this, "Fetch Failed",
                                     Toast.LENGTH_SHORT).show();

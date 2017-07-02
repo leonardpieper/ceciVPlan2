@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.Kurse;
@@ -316,13 +317,25 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_account);
             setHasOptionsMenu(true);
 
-            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+            final FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
             if (mAuth.getCurrentUser() != null) {
                 EditTextPreference etEmail = (EditTextPreference) findPreference("pref_account_etpref_email");
                 EditTextPreference etPhone = (EditTextPreference) findPreference("pref_account_etpref_phone");
+                Preference pSignOut = findPreference("pref_account_pref_signout");
+
                 etEmail.setSummary(mAuth.getCurrentUser().getEmail());
                 etPhone.setSummary(mAuth.getCurrentUser().getPhoneNumber());
+
+                pSignOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        mAuth.signOut();
+                        Toast.makeText(getActivity(), "Abgemeldet",
+                                Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                });
             }
         }
 

@@ -1,7 +1,9 @@
 package com.github.leonardpieper.ceciVPlan;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -175,7 +177,10 @@ public class SignUpActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                             }
                         });
-                builder.show();
+                AlertDialog alertDialog = builder.show();
+                TextView msgTxt = (TextView) alertDialog.findViewById(android.R.id.message);
+                msgTxt.setMovementMethod(LinkMovementMethod.getInstance());
+
             }
         });
 
@@ -377,6 +382,11 @@ public class SignUpActivity extends AppCompatActivity {
                         yearBtn.setText(item.getTitle());
                         LocalUser user = new LocalUser(SignUpActivity.this);
                         user.setJahrgangText(item.getTitle().toString());
+
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignUpActivity.this);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putString("jahrgang", item.getTitle().toString());
+                        editor.commit();
                         return true;
                     }
                 });
@@ -395,6 +405,12 @@ public class SignUpActivity extends AppCompatActivity {
                     hm.put("uname", uname);
                     hm.put("pwd", pwd);
                     mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("vPlan").setValue(hm);
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignUpActivity.this);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("pref_vplan_etpref_user",uname);
+                    editor.putString("pref_vplan_etpref_pwd", pwd);
+                    editor.commit();
 
                     SignUpActivity.this.finish();
                 }
@@ -425,8 +441,6 @@ public class SignUpActivity extends AppCompatActivity {
             etSMSCode.setVisibility(View.GONE);
             btnVerify.setVisibility(View.GONE);
             signUpBtn.setVisibility(View.VISIBLE);
-        }else{
-            super.onBackPressed();
         }
 
     }

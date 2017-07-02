@@ -27,4 +27,9 @@
         android:singleLine="true"
         android:inputType="textPassword"
         android:title="Passwort" />
+
+    <Preference
+        android:title="Abmelden"
+        android:key="pref_account_pref_signout">
+    </Preference>
 </PreferenceScreen>
