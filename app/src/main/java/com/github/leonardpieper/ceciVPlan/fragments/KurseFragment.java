@@ -24,6 +24,8 @@ import android.widget.Toast;
 
 import com.github.leonardpieper.ceciVPlan.KursActivity;
 import com.github.leonardpieper.ceciVPlan.R;
+import com.github.leonardpieper.ceciVPlan.SignUpActivity;
+import com.github.leonardpieper.ceciVPlan.SignUpAnonActivity;
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
 import com.github.leonardpieper.ceciVPlan.tools.KursIcon;
@@ -368,58 +370,83 @@ public class KurseFragment extends Fragment {
      * @param type
      */
     private void createDialog(int type) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        LayoutInflater factory = LayoutInflater.from(getActivity());
-        final View textEntryView = factory.inflate(R.layout.dialog_kurse_add, null);
-
-
-        final EditText kursName = (EditText) textEntryView.findViewById(R.id.dialog_add_abk);
-        final EditText kursSecret = (EditText) textEntryView.findViewById(R.id.dialog_add_pwd);
-        final CheckBox checkBox = (CheckBox) textEntryView.findViewById(R.id.dialog_kurse_add_chkbx_offline);
-        checkBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(checkBox.isChecked()){
-                    kursSecret.setVisibility(View.GONE);
-                }else {
-                    kursSecret.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-        builder.setView(textEntryView);
-        switch (type) {
-            case 1:
-                builder.setTitle("Neuen Kurs erstellen");
-                builder.setPositiveButton("Hinzufügen", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-//                        createKurs(kursName.getText().toString(), kursSecret.getText().toString());
-                    }
-                });
-                break;
-            case 2:
-                builder.setTitle("Kurs beitreten");
-                builder.setPositiveButton("Beitreten", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Kurse kurse = new Kurse(getActivity());
-                        if (checkBox.isChecked()) {
-                            kurse.joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "offline");
-                        } else {
-                            kurse.joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "online");
+        if(mAuth.getCurrentUser()!=null&&mAuth.getCurrentUser().isAnonymous()){
+            AlertDialog.Builder signBuilder = new AlertDialog.Builder(getActivity());
+            signBuilder.setTitle("Anmeldung erforderlich")
+                    .setMessage("Um Kurse hinzuzufügen ist eine Anmeldung mittels E-Mail-Adresse oder Telefonnummer erforderlich.")
+                    .setPositiveButton("Anmelden", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent signIntent = new Intent(getActivity(), SignUpActivity.class);
+                            signIntent.putExtra("kursJoin", true);
+                            startActivity(signIntent);
                         }
+                    })
+                    .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+            android.support.v7.app.AlertDialog dialog = signBuilder.show();
+            dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(getResources().getColor(android.R.color.secondary_text_light));
+
+
+        }else {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+            LayoutInflater factory = LayoutInflater.from(getActivity());
+            final View textEntryView = factory.inflate(R.layout.dialog_kurse_add, null);
+
+
+            final EditText kursName = (EditText) textEntryView.findViewById(R.id.dialog_add_abk);
+            final EditText kursSecret = (EditText) textEntryView.findViewById(R.id.dialog_add_pwd);
+            final CheckBox checkBox = (CheckBox) textEntryView.findViewById(R.id.dialog_kurse_add_chkbx_offline);
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (checkBox.isChecked()) {
+                        kursSecret.setVisibility(View.GONE);
+                    } else {
+                        kursSecret.setVisibility(View.VISIBLE);
                     }
-                });
-                break;
-        }
-
-        builder.setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
+                }
+            });
+            builder.setView(textEntryView);
+            switch (type) {
+                case 1:
+                    builder.setTitle("Neuen Kurs erstellen");
+                    builder.setPositiveButton("Hinzufügen", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+//                        createKurs(kursName.getText().toString(), kursSecret.getText().toString());
+                        }
+                    });
+                    break;
+                case 2:
+                    builder.setTitle("Kurs beitreten");
+                    builder.setPositiveButton("Beitreten", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Kurse kurse = new Kurse(getActivity());
+                            if (checkBox.isChecked()) {
+                                kurse.joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "offline");
+                            } else {
+                                kurse.joinKurs(kursName.getText().toString(), kursSecret.getText().toString(), "online");
+                            }
+                        }
+                    });
+                    break;
             }
-        });
-        builder.show();
+
+            builder.setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+            builder.show();
+        }
     }
 }

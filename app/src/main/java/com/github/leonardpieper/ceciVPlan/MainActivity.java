@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity
                 .commit();
 
         if(mAuth.getCurrentUser()==null){
-            Intent signIntent = new Intent(this, SignUpActivity.class);
+            Intent signIntent = new Intent(this, SignUpAnonActivity.class);
             startActivity(signIntent);
         }
 

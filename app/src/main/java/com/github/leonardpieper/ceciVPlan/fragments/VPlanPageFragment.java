@@ -2,6 +2,7 @@ package com.github.leonardpieper.ceciVPlan.fragments;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.github.leonardpieper.ceciVPlan.R;
+import com.github.leonardpieper.ceciVPlan.SignUpActivity;
 import com.github.leonardpieper.ceciVPlan.tools.Kurse;
 import com.github.leonardpieper.ceciVPlan.tools.MyDatabaseUtil;
 import com.google.firebase.auth.FirebaseAuth;
@@ -100,7 +102,7 @@ public class VPlanPageFragment extends Fragment {
             }
         });
 
-        if(isTutorialNeedful){
+        if (isTutorialNeedful) {
             CardView cvTut = (CardView) view.findViewById(R.id.vplan_cv_tutorial);
             cvTut.setVisibility(View.VISIBLE);
             view.setBackgroundResource(R.drawable.vplan_tutorial_background);
@@ -118,7 +120,7 @@ public class VPlanPageFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        isInForeground=true;
+        isInForeground = true;
 
         if (mAuth.getCurrentUser() != null) {
             if (mFirebaseRemoteConfig.getBoolean("vplan_enabled")) {
@@ -130,7 +132,7 @@ public class VPlanPageFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        isInForeground=false;
+        isInForeground = false;
     }
 
     private void isConnectedToFirebaseDatabase() {
@@ -193,7 +195,7 @@ public class VPlanPageFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, "Cancelled");
-                if(isInForeground){
+                if (isInForeground) {
                     tableStufe.removeAllViews();
                 }
             }
@@ -307,22 +309,47 @@ public class VPlanPageFragment extends Fragment {
     }
 
     private void showContextMenu(final String kursName) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(kursName)
-                .setItems(R.array.context_kursAdd, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Kurse kurse = new Kurse(getActivity());
-                        kurse.joinKurs(kursName, "", "offline");
-                    }
-                });
-        builder.show();
+
+        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous()) {
+            android.support.v7.app.AlertDialog.Builder signBuilder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+            signBuilder.setTitle("Anmeldung erforderlich")
+                    .setMessage("Um Kurse hinzuzufügen ist eine Anmeldung mittels E-Mail-Adresse oder Telefonnummer erforderlich.")
+                    .setPositiveButton("Anmelden", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent signIntent = new Intent(getActivity(), SignUpActivity.class);
+                            signIntent.putExtra("kursJoin", true);
+                            startActivity(signIntent);
+                        }
+                    })
+                    .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+            android.support.v7.app.AlertDialog dialog = signBuilder.show();
+            dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(getResources().getColor(android.R.color.secondary_text_light));
+
+
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle(kursName)
+                    .setItems(R.array.context_kursAdd, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Kurse kurse = new Kurse(getActivity());
+                            kurse.joinKurs(kursName, "", "offline");
+                        }
+                    });
+            builder.show();
+        }
     }
 
-    private boolean checkTutorialStatus(){
+    private boolean checkTutorialStatus() {
         return PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("kursTutorialNeedful", true);
     }
 
-    private static String convertNumberToName(int sectionNumer){
+    private static String convertNumberToName(int sectionNumer) {
         switch (sectionNumer) {
             case 0:
                 return "EF";

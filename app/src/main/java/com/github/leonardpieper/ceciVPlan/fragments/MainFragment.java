@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.github.leonardpieper.ceciVPlan.KursActivity;
 import com.github.leonardpieper.ceciVPlan.MainActivity;
 import com.github.leonardpieper.ceciVPlan.R;
+import com.github.leonardpieper.ceciVPlan.SignUpActivity;
 import com.github.leonardpieper.ceciVPlan.Vertretungsplan;
 import com.github.leonardpieper.ceciVPlan.models.Kurs;
 import com.github.leonardpieper.ceciVPlan.tools.KursCache;
@@ -288,15 +289,39 @@ public class MainFragment extends Fragment {
     }
 
     private void showContextMenu(final String kursName) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(kursName)
-                .setItems(R.array.context_kursAdd, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Kurse kurse = new Kurse(getActivity());
-                        kurse.joinKurs(kursName, "", "offline");
-                    }
-                });
-        builder.show();
+        if(mAuth.getCurrentUser()!=null&&mAuth.getCurrentUser().isAnonymous()){
+            android.support.v7.app.AlertDialog.Builder signBuilder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+            signBuilder.setTitle("Anmeldung erforderlich")
+                    .setMessage("Um Kurse hinzuzufügen ist eine Anmeldung mittels E-Mail-Adresse oder Telefonnummer erforderlich.")
+                    .setPositiveButton("Anmelden", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent signIntent = new Intent(getActivity(), SignUpActivity.class);
+                            signIntent.putExtra("kursJoin", true);
+                            startActivity(signIntent);
+                        }
+                    })
+                    .setNegativeButton("Abbrechen", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+            android.support.v7.app.AlertDialog dialog = signBuilder.show();
+            dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(getResources().getColor(android.R.color.secondary_text_light));
+
+
+        }else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle(kursName)
+                    .setItems(R.array.context_kursAdd, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Kurse kurse = new Kurse(getActivity());
+                            kurse.joinKurs(kursName, "", "offline");
+                        }
+                    });
+            builder.show();
+        }
     }
 
     private void displayKurse() {

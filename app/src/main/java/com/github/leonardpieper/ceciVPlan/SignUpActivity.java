@@ -172,8 +172,8 @@ public class SignUpActivity extends AppCompatActivity {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
                 builder.setTitle("Informationen zur Anmeldung")
                         .setMessage(Html.fromHtml(new StringBuilder()
-                                .append("Ceciplan benötigt Ihre Anmeldedaten in Form von Telefonnummer oder E-Mail-Adresse um Missbrauch des Service zu vermindern.<br /><br />")
-                                .append("Da es möglich ist nutzergenerierte Inhalte innerhalb der App zu erstellen, wird zum Schutz aller Benutzer eine Kontaktmöglichkeit vorausgesetzt. Die App soll <b>keine Möglichkeit für anonymes Mobbing</b> geben. Ferner soll sichergestellt werden, dass gesetzeswidrige Medien oder Schriften nicht über diese Plattform verbreitet werden.<br /><br />")
+                                .append("Ceciplan benötigt Ihre Anmeldedaten in Form von Telefonnummer oder E-Mail-Adresse um Missbrauch des Services zu vermindern.<br /><br />")
+//                                .append("Da es möglich ist nutzergenerierte Inhalte innerhalb der App zu erstellen, wird zum Schutz aller Benutzer eine Kontaktmöglichkeit vorausgesetzt. Die App soll <b>keine Möglichkeit für anonymes Mobbing</b> geben. Ferner soll sichergestellt werden, dass gesetzeswidrige Medien oder Schriften nicht über diese Plattform verbreitet werden.<br /><br />")
                                 .append("Sollten Sie Datenschutzbedenken haben lesen Sie sich bitte die <a href=“http://leonardpieper.github.io/ceciplan/content/datenschutz.html“>Datenschutzbestimmungen</a> durch")
                                 .toString()))
                         .setPositiveButton("Verstanden", new DialogInterface.OnClickListener() {
@@ -447,6 +447,8 @@ public class SignUpActivity extends AppCompatActivity {
             etSMSCode.setVisibility(View.GONE);
             btnVerify.setVisibility(View.GONE);
             signUpBtn.setVisibility(View.VISIBLE);
+        }else {
+            super.onBackPressed();
         }
 
     }

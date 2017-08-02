@@ -76,6 +76,7 @@
     <string name="no_kurse"><b>Benachrichtigungen über deine Vertretungen.</b>\nFüge deine Kurse durch langes halten auf eine Vertretung hinzu.</string>
     <string name="datenschutzhinweis">Mit Klick auf Anmelden besätigst du, dass du die <a href='http://leonardpieper.github.io/ceciplan/content/datenschutz.html'>Datenschutzhinweise</a> gelesen und akzeptiert hast</string>
     <string name="datenschutz_in_about">Die aktuellen Datenschutzbestimmungen finden Sie unter <a href='http://leonardpieper.github.io/ceciplan/content/datenschutz.html'>http://leonardpieper.github.io/ceciplan/content/datenschutz.html</a></string>
+    <string name="kurse_login_info">Um deine Kurse hinzuzufügen musst du mit deiner E-Mail-Adresse oder Telefonnummer bestätigen, dass du ein Mensch bist.</string>
     <string name="title_activity_tabbed">TabbedActivity</string>
     <string name="title_activity_settings2">Settings</string>
 
