@@ -3,6 +3,7 @@ package com.github.leonardpieper.ceciVPlan;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
@@ -24,6 +25,8 @@ public class AboutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_about);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         tvLicenses = (TextView)findViewById(R.id.tv_licenses);
         showLicenses();

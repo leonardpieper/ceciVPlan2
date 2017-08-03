@@ -61,7 +61,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:drawableRight="@drawable/ic_arrow_forward_accent_24dp"
+            android:drawableRight="@drawable/ic_arrow_forward_accent_24dp_wrapped"
             android:text="Weiter"
             android:textColor="@color/colorAccent" />
 
