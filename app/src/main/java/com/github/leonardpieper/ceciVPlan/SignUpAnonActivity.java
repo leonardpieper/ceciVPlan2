@@ -1,5 +1,6 @@
 package com.github.leonardpieper.ceciVPlan;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -39,7 +40,9 @@ public class SignUpAnonActivity extends AppCompatActivity {
     private EditText etVPlanPwd;
     private Button yearBtn;
     private ProgressBar progressBarProgress;
+
     private Button btnSignUp;
+    private Button btnLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,7 @@ public class SignUpAnonActivity extends AppCompatActivity {
         yearBtn = (Button) findViewById(R.id.signUpAnon_btn_year);
         progressBarProgress = (ProgressBar) findViewById(R.id.signUpAnon_progress_progBar);
         btnSignUp = (Button) findViewById(R.id.signUpAnon_btn_signUp);
+        btnLogin = (Button) findViewById(R.id.signUpAnon_btn_login);
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,6 +65,15 @@ public class SignUpAnonActivity extends AppCompatActivity {
                     progressBarProgress.setVisibility(View.VISIBLE);
                     signUpAnon(etVPlanUname.getText().toString(), etVPlanPwd.getText().toString());
                 }
+            }
+        });
+
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SignUpAnonActivity.this, SignUpActivity.class);
+                startActivity(intent);
+                SignUpAnonActivity.this.finish();
             }
         });
 

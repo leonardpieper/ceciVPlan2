@@ -99,6 +99,16 @@
                     android:textColor="@color/colorAccent"
                     android:visibility="visible" />
             </LinearLayout>
+            <Button
+                android:id="@+id/signUpAnon_btn_login"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:gravity="center"
+                android:text="Mit Account anmelden"
+                android:textColor="@color/colorAccent"
+                android:visibility="visible" />
         </RelativeLayout>
     </LinearLayout>
 

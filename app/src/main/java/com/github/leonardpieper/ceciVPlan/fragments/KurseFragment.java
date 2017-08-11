@@ -37,11 +37,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -151,23 +154,6 @@ public class KurseFragment extends Fragment {
      * Lädt die Kurse aus der Firebase Database in den Cache
      */
     private void reloadKurse() {
-//        Kurse kurse = new Kurse(getActivity());
-//        List<Kurs> kurses;
-//        ValueEventListener valueEventListener = new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        };
-//
-//        kurses = kurse.getKurse(valueEventListener);
-
-
         final KursCache kursCache = new KursCache(getActivity());
         DatabaseReference kurseRef = mRootRef
                 .child("Users")
@@ -203,6 +189,12 @@ public class KurseFragment extends Fragment {
                         CardView cardView = createKursCard(displayName, kurs.type);
                         llKurse.addView(cardView);
                         kursCache.addCache(kurs.name, kurs.type);
+                        try {
+                            String fcmTopic = URLEncoder.encode(kurs.name, "UTF-8").replace("+", "%20").toLowerCase();
+                            FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 

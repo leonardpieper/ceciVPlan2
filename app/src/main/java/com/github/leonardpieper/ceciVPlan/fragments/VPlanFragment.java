@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,6 +113,10 @@ public class VPlanFragment extends Fragment {
                     return 2;
             }
             return -1;
+    }
+
+    private boolean checkTutorialStatus() {
+        return PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("kursTutorialNeedful", true);
     }
 
 //    private void isConnectedToFirebaseDatabase() {
@@ -344,9 +349,6 @@ public class VPlanFragment extends Fragment {
 //        builder.show();
 //    }
 
-    private boolean checkTutorialStatus(){
-        return PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("kursTutorialNeedful", true);
-    }
 
     private JSONArray dataToJSON(List data) {
         JSONArray root = new JSONArray();

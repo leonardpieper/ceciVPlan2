@@ -91,7 +91,7 @@
                         android:layout_alignParentRight="true"
                         android:id="@+id/signUp_btn_help"
                         android:gravity="center"
-                        android:background="@drawable/ic_help_outline_black_24dp"/>
+                        android:background="@drawable/ic_help_outline_black_24dp_wrapped"/>
                 </RelativeLayout>
 
                 <LinearLayout

@@ -46,7 +46,8 @@ public class VPlanPageFragment extends Fragment {
     private TableLayout tableStufe;
 
     private String oldDatum;
-    private boolean isTutorialNeedful;
+
+    private static int instacescount;
 
     /**
      * The fragment argument representing the section number for this
@@ -86,7 +87,6 @@ public class VPlanPageFragment extends Fragment {
 
         isConnectedToFirebaseDatabase();
 
-        isTutorialNeedful = checkTutorialStatus();
         Button tutorialFinishBtn = (Button) view.findViewById(R.id.vplan_btn_tutorialFinish);
         tutorialFinishBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,7 +102,7 @@ public class VPlanPageFragment extends Fragment {
             }
         });
 
-        if (isTutorialNeedful) {
+        if (checkTutorialStatus()) {
             CardView cvTut = (CardView) view.findViewById(R.id.vplan_cv_tutorial);
             cvTut.setVisibility(View.VISIBLE);
             view.setBackgroundResource(R.drawable.vplan_tutorial_background);
@@ -110,6 +110,14 @@ public class VPlanPageFragment extends Fragment {
 
 
         return view;
+    }
+
+    private boolean checkTutorialStatus() {
+        if(instacescount>=1){
+            return false;
+        }
+        instacescount = instacescount +1;
+        return PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("kursTutorialNeedful", true);
     }
 
     @Override
@@ -345,9 +353,7 @@ public class VPlanPageFragment extends Fragment {
         }
     }
 
-    private boolean checkTutorialStatus() {
-        return PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("kursTutorialNeedful", true);
-    }
+
 
     private static String convertNumberToName(int sectionNumer) {
         switch (sectionNumer) {
