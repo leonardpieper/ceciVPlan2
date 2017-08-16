@@ -151,6 +151,19 @@ public class KursCache extends Application{
         return null;
     }
 
+    public  JSONObject getCacheKurs(String kursName) throws JSONException {
+        JSONObject root = getCache();
+        if(root!=null && root.has("kurse")){
+            JSONArray kurse = root.getJSONArray("kurse");
+            for(int i = 0; i<kurse.length(); i++){
+                if(kurse.getJSONObject(i).getString("name").equals(kursName)) {
+                    return kurse.getJSONObject(i);
+                }
+            }
+        }
+        return null;
+    }
+
     public long getCacheTime(){
         FileInputStream inputStream;
         StringBuffer strContent = new StringBuffer("");
@@ -174,10 +187,10 @@ public class KursCache extends Application{
         return -1;
     }
 
-    public boolean isCacheUpToDate(int days){
+    public boolean isCacheUpToDate(){
         long cachedTime = getCacheTime();
         long currMill = System.currentTimeMillis();
-        if(cachedTime!=-1 || cachedTime + (days * 8.64e+7) > currMill){
+        if(cachedTime == -1 || cachedTime + 604800000 < currMill){
             return true;
         }
         return false;

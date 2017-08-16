@@ -236,9 +236,11 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
-    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
+    private void signInWithPhoneAuthCredential(final PhoneAuthCredential credential) {
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.signUp_progress_progBar);
         progressBar.setVisibility(View.VISIBLE);
+
+
         if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous()) {
             //Der Nutzer hat bereits ein Konto und möchte nun seine Telefonnummer hinzufügen
             mAuth.getCurrentUser().linkWithCredential(credential)
@@ -257,6 +259,23 @@ public class SignUpActivity extends AppCompatActivity {
                                     Toast t = Toast.makeText(SignUpActivity.this, "Ungültiger Code", Toast.LENGTH_SHORT);
                                     t.show();
                                     progressBar.setVisibility(View.GONE);
+                                } catch (FirebaseAuthUserCollisionException e){
+                                    mAuth.signInWithCredential(credential).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<AuthResult> task) {
+                                            if (task.isSuccessful()) {
+                                                // Sign in success, update UI with the signed-in user's information
+                                                Log.d(TAG, "signInWithPhone:success");
+                                                FirebaseUser user = task.getResult().getUser();
+
+                                                vpCredentialsExist(user, progressBar);
+
+                                            }else{
+                                                Toast t = Toast.makeText(SignUpActivity.this, "Ups, etwas ist schief gelaufen", Toast.LENGTH_SHORT);
+                                                t.show();
+                                            }
+                                        }
+                                    });
                                 } catch (Exception e) {
                                     Toast t = Toast.makeText(SignUpActivity.this, "Ups, etwas ist schief gelaufen", Toast.LENGTH_SHORT);
                                     t.show();
@@ -266,7 +285,7 @@ public class SignUpActivity extends AppCompatActivity {
                             }
                         }
                     });
-        }else {
+        } else {
             //Der Nutzer ist gar nicht angemeldet
             mAuth.signInWithCredential(credential)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -305,71 +324,76 @@ public class SignUpActivity extends AppCompatActivity {
             final ProgressBar progressBar = (ProgressBar) findViewById(R.id.signUp_progress_progBar);
             progressBar.setVisibility(View.VISIBLE);
 
-            if(mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous()){
-                //Der Nutzer hat bereits ein Konto und möchte nun seine E-Mail-Adresse hinzufügen
-                AuthCredential credential = EmailAuthProvider.getCredential(email, password);
-                mAuth.getCurrentUser().linkWithCredential(credential)
-                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    Log.d(TAG, "linkWithCredential:success");
-                                    FirebaseUser user = task.getResult().getUser();
-                                    vpCredentialsExist(user, progressBar);
-                                } else {
-                                    Log.w(TAG, "linkWithCredential:failure", task.getException());
-                                    try {
-                                        throw task.getException();
-                                    } catch (FirebaseAuthWeakPasswordException e) {
-                                        etPwd.setError("Passwort zu schwach (mind. 6 Zeichen)");
-                                        etPwd.requestFocus();
-                                    } catch (FirebaseAuthInvalidCredentialsException e) {
-                                        etEmail.setError("Ungültige E-Mail Adresse");
-                                        etEmail.requestFocus();
-                                    } catch (FirebaseAuthUserCollisionException e) {
-                                        etEmail.setError("Dieser Nutzer existiert bereits");
-                                        etEmail.requestFocus();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        });
 
-            }else {
-                mAuth.fetchProvidersForEmail(email).addOnCompleteListener(this, new OnCompleteListener<ProviderQueryResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<ProviderQueryResult> task) {
-                        if (task.isSuccessful()) {
-                            //Überprüft, ob ein Nutzer mit der Email bereits existiert.
-                            if (task.getResult().getProviders() != null && task.getResult().getProviders().size() >= 1) {
-                                //Es gibt bereits einen Nutzer mit der E-Mail-Adresse. --> Es wird versucht sich anzumelden
-                                mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        progressBar.setVisibility(View.GONE);
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "signInWithEmail:success");
-                                            FirebaseUser user = task.getResult().getUser();
+            mAuth.fetchProvidersForEmail(email).addOnCompleteListener(this, new OnCompleteListener<ProviderQueryResult>() {
+                @Override
+                public void onComplete(@NonNull Task<ProviderQueryResult> task) {
+                    if (task.isSuccessful()) {
+                        //Überprüft, ob ein Nutzer mit der Email bereits existiert.
 
-                                            vpCredentialsExist(user, progressBar);
-                                        } else {
-                                            try {
-                                                throw task.getException();
-                                            } catch (FirebaseAuthInvalidUserException e) {
-                                                etEmail.setError("Ungültige E-Mail Adresse");
-                                                etEmail.requestFocus();
-                                            } catch (FirebaseAuthInvalidCredentialsException e) {
-                                                etPwd.setError("Falsches Passwort");
-                                                etPwd.requestFocus();
-                                            } catch (Exception e) {
-                                                Log.e(TAG, e.getMessage());
-                                            }
+                        if (task.getResult().getProviders() != null && task.getResult().getProviders().size() >= 1) {
+                            //Es gibt bereits einen Nutzer mit der E-Mail-Adresse. --> Es wird versucht sich anzumelden
+                            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    progressBar.setVisibility(View.GONE);
+                                    if (task.isSuccessful()) {
+                                        Log.d(TAG, "signInWithEmail:success");
+                                        FirebaseUser user = task.getResult().getUser();
+
+                                        vpCredentialsExist(user, progressBar);
+                                    } else {
+                                        try {
+                                            throw task.getException();
+                                        } catch (FirebaseAuthInvalidUserException e) {
+                                            etEmail.setError("Ungültige E-Mail Adresse");
+                                            etEmail.requestFocus();
+                                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                                            etPwd.setError("Falsches Passwort");
+                                            etPwd.requestFocus();
+                                        } catch (Exception e) {
+                                            Log.e(TAG, e.getMessage());
                                         }
                                     }
-                                });
+                                }
+                            });
+                        } else {
+                            //Es existiert kein Nutzer mit der E-Mail-Adresse --> Ein neuer Account wird erstellt
+
+                            if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous()) {
+                                //Der Nutzer hat bereits ein anonymes Konto und möchte nun seine E-Mail-Adresse hinzufügen
+
+                                AuthCredential credential = EmailAuthProvider.getCredential(email, password);
+                                mAuth.getCurrentUser().linkWithCredential(credential)
+                                        .addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                                if (task.isSuccessful()) {
+                                                    Log.d(TAG, "linkWithCredential:success");
+                                                    FirebaseUser user = task.getResult().getUser();
+                                                    vpCredentialsExist(user, progressBar);
+                                                } else {
+                                                    Log.w(TAG, "linkWithCredential:failure", task.getException());
+                                                    try {
+                                                        throw task.getException();
+                                                    } catch (FirebaseAuthWeakPasswordException e) {
+                                                        etPwd.setError("Passwort zu schwach (mind. 6 Zeichen)");
+                                                        etPwd.requestFocus();
+                                                    } catch (FirebaseAuthInvalidCredentialsException e) {
+                                                        etEmail.setError("Ungültige E-Mail Adresse");
+                                                        etEmail.requestFocus();
+                                                    } catch (FirebaseAuthUserCollisionException e) {
+                                                        etEmail.setError("Dieser Nutzer existiert bereits");
+                                                        etEmail.requestFocus();
+                                                    } catch (Exception e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                            }
+                                        });
+
                             } else {
-                                //Es existiert kein Nutzer mit der E-Mail-Adresse --> Ein neuer Account wird erstellt
+                                //Der Nutzer ist komplett neu.
                                 mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
                                     @Override
                                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -396,21 +420,22 @@ public class SignUpActivity extends AppCompatActivity {
                                     }
                                 });
                             }
-                        } else {
-                            progressBar.setVisibility(View.GONE);
-                            try {
-                                throw task.getException();
-                            } catch (FirebaseAuthInvalidCredentialsException e) {
-                                etEmail.setError("Ungültige E-Mail Adresse");
-                                etEmail.requestFocus();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
                         }
-
+                    } else {
+                        progressBar.setVisibility(View.GONE);
+                        try {
+                            throw task.getException();
+                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                            etEmail.setError("Ungültige E-Mail Adresse");
+                            etEmail.requestFocus();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                });
-            }
+
+                }
+            });
+
         }
     }
 

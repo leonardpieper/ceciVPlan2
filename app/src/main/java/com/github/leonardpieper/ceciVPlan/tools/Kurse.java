@@ -50,27 +50,35 @@ public class Kurse {
      */
     public void joinKurs(String name, String secret, String type) {
         if (mAuth.getCurrentUser() != null) {
-            HashMap<String, Object> user = new HashMap<String, Object>();
+            HashMap<String, Object> kurs = new HashMap<String, Object>();
 
             if (type.equals("offline")) {
-                user.put("name", name);
-                user.put("type", type);
+                kurs.put("name", name);
+                kurs.put("type", type);
             } else {
-                user.put("name", name);
-                user.put("secret", secret);
-                user.put("type", type);
+                kurs.put("name", name);
+                kurs.put("secret", secret);
+                kurs.put("type", type);
             }
 
             String refName = name.replace(".", "%2E");
             refName = refName.toLowerCase();
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(user);
+            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(kurs);
 
 
             String fcmTopic = refName.replace(" ", "%20");
             FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
 
             KursCache kursCache = new KursCache(context);
-            kursCache.addCache(name, type);
+            try {
+                if(kursCache.getCacheKurs(name)==null){
+                    kursCache.addCache(name, type);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
         } else {
             Toast t = Toast.makeText(context, "Für diese Aktion musst du angemeldet sein", Toast.LENGTH_LONG);
             t.show();

@@ -41,11 +41,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class MainFragment extends Fragment {
     private final String TAG = "MainFragment";
@@ -333,7 +337,7 @@ public class MainFragment extends Fragment {
         Wenn kursCache.isCacheUpToDate(7)==false, dann wurde der Cache seit 7 Tagen nicht mehr aktualisiert
         und wird neu aus der Firebase Database heruntergeladen
          */
-        if (!kursCache.isCacheUpToDate(7)) {
+        if (kursCache.isCacheUpToDate()) {
             if (mAuth.getCurrentUser() != null) {
                 mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -351,6 +355,12 @@ public class MainFragment extends Fragment {
                                 String displayName = kurs.name.replace("%2E", ".");
 
                                 kursCache.addCache(kurs.name, kurs.type);
+                                try {
+                                    String fcmTopic = URLEncoder.encode(kurs.name, "UTF-8").replace("+", "%20").toLowerCase();
+                                    FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
+                                } catch (UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
 
                                 LinearLayout column = makeKursIcon(displayName, kurs.type);
                                 ll.addView(column);

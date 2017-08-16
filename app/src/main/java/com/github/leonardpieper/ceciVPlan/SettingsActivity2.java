@@ -325,6 +325,7 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
 
             if (mAuth.getCurrentUser() != null) {
                 Preference etEmail =  findPreference("pref_account_etpref_email");
+                Preference etPwd = findPreference("pref_account_etpref_pwd");
                 Preference etPhone =  findPreference("pref_account_etpref_phone");
                 Preference pSignOut = findPreference("pref_account_pref_signout");
 
@@ -332,7 +333,8 @@ public class SettingsActivity2 extends AppCompatPreferenceActivity {
                     etEmail.setSummary(mAuth.getCurrentUser().getEmail());
                 }else {
                     PreferenceCategory category = (PreferenceCategory)findPreference("pref_account_cat_data");
-                    category.removePreference(etPhone);
+                    category.removePreference(etEmail);
+                    category.removePreference(etPwd);
                 }
 
                 if(mAuth.getCurrentUser().getPhoneNumber()!=null&&!mAuth.getCurrentUser().getPhoneNumber().isEmpty()){
