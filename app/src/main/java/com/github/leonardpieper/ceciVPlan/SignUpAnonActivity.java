@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.PopupMenu;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.leonardpieper.ceciVPlan.tools.LocalUser;
@@ -57,6 +59,9 @@ public class SignUpAnonActivity extends AppCompatActivity {
         progressBarProgress = (ProgressBar) findViewById(R.id.signUpAnon_progress_progBar);
         btnSignUp = (Button) findViewById(R.id.signUpAnon_btn_signUp);
         btnLogin = (Button) findViewById(R.id.signUpAnon_btn_login);
+
+        TextView tvDataProt = (TextView)findViewById(R.id.signUpAnon_tv_dataProt);
+        tvDataProt.setMovementMethod(LinkMovementMethod.getInstance());
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override

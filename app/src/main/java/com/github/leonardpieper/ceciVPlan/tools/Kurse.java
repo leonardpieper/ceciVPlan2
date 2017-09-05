@@ -22,9 +22,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Kurse {
     private Context context;
@@ -49,38 +51,47 @@ public class Kurse {
      * @param type   Der Kurstyp: "online" oder "offline"
      */
     public void joinKurs(String name, String secret, String type) {
-        if (mAuth.getCurrentUser() != null) {
-            HashMap<String, Object> kurs = new HashMap<String, Object>();
+        String refName = name.replace(".", "%2E");
+        refName = refName.toLowerCase();
+        String fcmTopic = refName.replace(" ", "%20");
 
-            if (type.equals("offline")) {
-                kurs.put("name", name);
-                kurs.put("type", type);
-            } else {
-                kurs.put("name", name);
-                kurs.put("secret", secret);
-                kurs.put("type", type);
-            }
+        Pattern p = Pattern.compile("^[a-zA-Z0-9-_.~%]{1,900}$");
+        if(p.matcher(fcmTopic).matches()) {
+            //Nur Kursnamen, die aus den Zeichen [a-zA-Z0-9-_.~%]{1,900} bestehen, werden angelegt.
+            if (mAuth.getCurrentUser() != null) {
+                HashMap<String, Object> kurs = new HashMap<String, Object>();
 
-            String refName = name.replace(".", "%2E");
-            refName = refName.toLowerCase();
-            mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(kurs);
-
-
-            String fcmTopic = refName.replace(" ", "%20");
-            FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
-
-            KursCache kursCache = new KursCache(context);
-            try {
-                if(kursCache.getCacheKurs(name)==null){
-                    kursCache.addCache(name, type);
+                if (type.equals("offline")) {
+                    kurs.put("name", name);
+                    kurs.put("type", type);
+                } else {
+                    kurs.put("name", name);
+                    kurs.put("secret", secret);
+                    kurs.put("type", type);
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
+
+
+                mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).setValue(kurs);
+
+
+                FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
+
+                KursCache kursCache = new KursCache(context);
+                try {
+                    if (kursCache.getCacheKurs(name) == null) {
+                        kursCache.addCache(name, type);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+            } else {
+                Toast t = Toast.makeText(context, "Für diese Aktion musst du angemeldet sein", Toast.LENGTH_LONG);
+                t.show();
             }
-
-
-        } else {
-            Toast t = Toast.makeText(context, "Für diese Aktion musst du angemeldet sein", Toast.LENGTH_LONG);
+        }else {
+            Toast t = Toast.makeText(context, "Es ist ein ungültiges Zeichen im Kursnamen. Elaubt sind: a-zA-Z0-9-_.~%", Toast.LENGTH_LONG);
             t.show();
         }
     }
@@ -125,6 +136,9 @@ public class Kurse {
         String refName = name.replace(".", "%2E");
         refName = refName.toLowerCase();
         mRootRef.child("Users").child(mAuth.getCurrentUser().getUid()).child("Kurse").child(refName).removeValue();
+
+        String fcmTopic = refName.replace(" ", "%20");
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(fcmTopic);
 
         KursCache cache = new KursCache(context);
         cache.removeFromCache(name);

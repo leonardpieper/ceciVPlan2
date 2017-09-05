@@ -11,7 +11,7 @@
         android:inputType="textPersonName"
         android:ems="10"
         android:id="@+id/dialog_add_abk"
-        android:hint="Kursabkürzung" />
+        android:hint="Kursabkürzung (z.B.: D Q1.2)" />
 
     <EditText
         android:layout_width="match_parent"
@@ -24,7 +24,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

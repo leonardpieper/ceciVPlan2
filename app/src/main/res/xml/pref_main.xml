@@ -5,15 +5,15 @@
         <!--android:title="Allgemein"-->
         <!--android:key="pref_main_pref_general" />-->
     <Preference
-        android:icon="@drawable/ic_account_circle_black_24dp"
+        android:icon="@drawable/ic_account_circle_black_24dp_wrapped"
         android:title="Profil"
         android:key="pref_main_pref_account"/>
     <Preference
-        android:icon="@drawable/vertretungsplan_black"
+        android:icon="@drawable/vertretungsplan_black_wrapped"
         android:title="Vertretungsplan"
         android:key="pref_main_pref_vplan"/>
     <Preference
-        android:icon="@drawable/ic_school_black_24dp"
+        android:icon="@drawable/ic_school_black_24dp_wrapped"
         android:title="Kurse"
         android:key="pref_main_pref_kurse"/>
 </PreferenceScreen>

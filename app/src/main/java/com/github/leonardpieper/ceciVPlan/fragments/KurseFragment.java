@@ -188,13 +188,8 @@ public class KurseFragment extends Fragment {
                         String displayName = kurs.name.replace("%2E", ".");
                         CardView cardView = createKursCard(displayName, kurs.type);
                         llKurse.addView(cardView);
-                        kursCache.addCache(kurs.name, kurs.type);
-                        try {
-                            String fcmTopic = URLEncoder.encode(kurs.name, "UTF-8").replace("+", "%20").toLowerCase();
-                            FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic);
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
+                        Kurse kurse = new Kurse(getActivity());
+                        kurse.joinKurs(kurs.name, kurs.secret, kurs.type);
                     }
                 }
 
